@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar;
+package com.ebarapp.ebar;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

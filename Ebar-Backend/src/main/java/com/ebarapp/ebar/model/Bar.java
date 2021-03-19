@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -31,18 +31,19 @@ public class Bar {
 	@Column(name = "ubicacion")
 	private String ubicacion;
 
-	@NotNull
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "bar")
+	//@NotNull
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "bar", fetch = FetchType.LAZY)
 	private Set<Imagen> imagenes;
 
-	@NotNull
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "bar")
+	//@NotNull
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "bar", fetch = FetchType.LAZY)
 	private Set<ItemCarta> itemsCarta;
 
 	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "empresa_id")
 	private Empresa empresa;
+	
 
 }
 

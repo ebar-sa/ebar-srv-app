@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,4 +24,9 @@ public class Mesa {
     @ManyToOne
     @JoinColumn(name = "bar_id")
     private Bar bar;
+    
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="trabajador_id")
+    private Trabajador trabajador;
 }

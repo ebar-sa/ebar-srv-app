@@ -1,4 +1,6 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
+
+import java.util.List;
 
 import javax.persistence.*;
 
@@ -9,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Setter
 @Entity
-@Table(name="item_carta")
+@Table(name="itemCarta")
 public class ItemCarta {
 
     @Id
@@ -37,8 +39,16 @@ public class ItemCarta {
     private Double precio;
 
     @NotNull
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "item_carta")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "itemCarta")
     private Imagen imagen;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="bar_id",referencedColumnName = "id")
+    private Bar bar; 
+    
+    @ManyToMany(mappedBy = "itemCartas")
+    private List<Cuenta> cuentas;
+    
 
 }
 

@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;

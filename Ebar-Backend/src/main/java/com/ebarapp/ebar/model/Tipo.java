@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 public enum Tipo {
     TAPA("Tapa"), MEDIA("Media"), RACION("Racion"), UNIDAD("Unidad");

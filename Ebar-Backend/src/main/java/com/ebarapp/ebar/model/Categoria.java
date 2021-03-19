@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 public enum Categoria {
     ENTRANTE("Entrante"), BRASA("Brasa"), BEBIDA("Bebida"), POSTRE("Postre");

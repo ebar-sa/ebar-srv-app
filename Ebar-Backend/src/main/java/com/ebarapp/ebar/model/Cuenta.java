@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 import javax.persistence.*;
 
@@ -27,7 +27,7 @@ public class Cuenta {
     private Mesa mesa;
 
     @NotNull
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinTable(name = "cuenta_item_carta", joinColumns = @JoinColumn(name = "cuenta_id"), inverseJoinColumns = @JoinColumn(name = "item_carta_id"))
     private Set<ItemCarta> itemCartas;
 }

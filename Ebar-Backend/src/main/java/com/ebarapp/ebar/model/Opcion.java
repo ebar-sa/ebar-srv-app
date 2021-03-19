@@ -1,4 +1,4 @@
-package main.java.com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,5 +19,9 @@ public class Opcion {
     @NotNull
     @Column(name = "nombre")
     private String nombre;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="votacion_id", referencedColumnName = "id")
+    private Votacion votacion;
 
 }
