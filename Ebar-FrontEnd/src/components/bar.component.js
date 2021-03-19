@@ -9,8 +9,8 @@ export default class Bar extends Component{
          currentBar: {
              id: null,
              nombre:"",
-             ubicacion: "",
-             estado: false
+             descripcion: "",
+             ubicacion: ""
          },
         message: ""
       };

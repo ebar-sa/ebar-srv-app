@@ -50,16 +50,16 @@ export default class BarList extends Component {
                 <thead>
                     <tr>
                         <th scope="col">Nombre</th>
+                        <th scope="col">Descripcion</th>
                         <th scope="col">Ubicacion</th>
-                        <th scope="col">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                 {bares  && bares.map((bar, idx) => (
                     <tr>
                         <td>{bar.nombre}</td>
+                        <td>{bar.descripcion}</td>
                         <td>{bar.ubicacion}</td>
-                        <td>{bar.estado ? (<p>Abierto</p>) : (<p>Cerrrado</p>)}</td>
                     </tr>
                 ))}
                 </tbody>
