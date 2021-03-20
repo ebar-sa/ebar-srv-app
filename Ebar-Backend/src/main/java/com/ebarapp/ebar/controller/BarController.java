@@ -21,8 +21,6 @@ public class BarController {
 	@Autowired
 	private BarRepository barRepository;
 	
-	
-	
 	@GetMapping("/bares")
 	public ResponseEntity<List<Bar>> getAllTutorials() {	
 	try {

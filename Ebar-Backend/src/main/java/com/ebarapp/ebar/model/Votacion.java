@@ -1,5 +1,6 @@
 package com.ebarapp.ebar.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -27,13 +28,15 @@ public class Votacion {
     private String descripcion;
 
     @NotNull
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "inicio")
     private LocalDateTime inicio;
 
     @Column(name = "fin")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime fin;
 
-    @NotNull
+//    @NotNull
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "votacion")
     private Set<Opcion> opciones;
 
