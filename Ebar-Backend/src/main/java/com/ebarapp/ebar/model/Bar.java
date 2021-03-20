@@ -2,11 +2,13 @@ package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
 
 import javax.persistence.*;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name="bar")
 public class Bar {

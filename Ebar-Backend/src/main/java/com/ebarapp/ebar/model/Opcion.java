@@ -2,7 +2,7 @@ package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
 
 import javax.persistence.*;
 
@@ -19,9 +19,5 @@ public class Opcion {
     @NotNull
     @Column(name = "nombre")
     private String nombre;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="votacion_id", referencedColumnName = "id")
-    private Votacion votacion;
 
 }

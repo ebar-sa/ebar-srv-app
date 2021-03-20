@@ -2,7 +2,7 @@ package com.ebarapp.ebar.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -34,7 +34,12 @@ public class Votacion {
     private LocalDateTime fin;
 
     @NotNull
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "votacion")
+    @ManyToOne
+    @JoinColumn(name = "bar_id")
+    private Bar bar;
+
+    @NotNull
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Opcion> opciones;
 
 }
