@@ -2,14 +2,15 @@ package com.ebarapp.ebar.configuration.security.payload.response;
 
 import java.util.List;
 
-public class JwtResponse {
+public class LoginResponse {
+	
 	private String token;
 	private String type = "Bearer";
 	private String username;
 	private String email;
 	private List<String> roles;
 
-	public JwtResponse(String accessToken, String username, String email, List<String> roles) {
+	public LoginResponse(String accessToken, String username, String email, List<String> roles) {
 		this.token = accessToken;
 		this.username = username;
 		this.email = email;

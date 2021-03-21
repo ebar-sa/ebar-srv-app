@@ -5,12 +5,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.ebarapp.ebar.model.UsuarioLogin;
+import com.ebarapp.ebar.model.User;
 
 @Repository
-public interface UsuarioLoginRepository extends JpaRepository<UsuarioLogin, String>{
+public interface UserRepository extends JpaRepository<User, String>{
 
-	Optional<UsuarioLogin> findByUsername(String username);
+	Optional<User> findByUsername(String username);
 
 	Boolean existsByUsername(String username);
 

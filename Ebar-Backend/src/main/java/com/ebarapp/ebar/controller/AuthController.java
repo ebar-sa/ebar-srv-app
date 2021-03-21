@@ -20,15 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ebarapp.ebar.configuration.security.JwtUtils;
+import com.ebarapp.ebar.configuration.security.jwtConfiguration.JwtUtils;
 import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
 import com.ebarapp.ebar.configuration.security.payload.request.SignupRequest;
-import com.ebarapp.ebar.configuration.security.payload.response.JwtResponse;
+import com.ebarapp.ebar.configuration.security.payload.response.LoginResponse;
 import com.ebarapp.ebar.configuration.security.payload.response.MessageResponse;
-import com.ebarapp.ebar.model.Rol;
-import com.ebarapp.ebar.model.RolType;
-import com.ebarapp.ebar.model.UsuarioLogin;
-import com.ebarapp.ebar.repository.UsuarioLoginRepository;
+import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.type.RoleType;
+import com.ebarapp.ebar.service.UserService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -38,8 +37,7 @@ public class AuthController {
 	AuthenticationManager authenticationManager;
 
 	@Autowired
-	UsuarioLoginRepository userRepository;
-
+	UserService userService;
 
 	@Autowired
 	PasswordEncoder encoder;
@@ -56,12 +54,12 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		
-		UsuarioLogin userDetails = (UsuarioLogin) authentication.getPrincipal();		
+		User userDetails = (User) authentication.getPrincipal();		
 		List<String> roles = userDetails.getAuthorities().stream()
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-		return ResponseEntity.ok(new JwtResponse(jwt, 
+		return ResponseEntity.ok(new LoginResponse(jwt, 
 												 userDetails.getUsername(), 
 												 userDetails.getEmail(), 
 												 roles));
@@ -69,28 +67,28 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+		if (userService.existsUserByUsername(signUpRequest.getUsername())) {
 			return ResponseEntity
 					.badRequest()
 					.body(new MessageResponse("Error: Username is already taken!"));
 		}
 
-		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+		if (userService.existsUserByEmail(signUpRequest.getEmail())) {
 			return ResponseEntity
 					.badRequest()
 					.body(new MessageResponse("Error: Email is already in use!"));
 		}
 
-		UsuarioLogin user = new UsuarioLogin(signUpRequest.getUsername(), 
+		User user = new User(signUpRequest.getUsername(), 
 							 signUpRequest.getEmail(),
 							 encoder.encode(signUpRequest.getPassword()));
 
-		Set<String> strRoles = signUpRequest.getRole();
+		Set<String> strRoles = signUpRequest.getRoles();
 		
-		Set<Rol> roles = new HashSet<>();
-		strRoles.forEach(rol -> roles.add(new Rol(RolType.valueOf(rol))));
+		Set<RoleType> roles = new HashSet<>();
+		strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
 		user.setRoles(roles);
-		userRepository.save(user);
+		userService.saveUser(user);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}

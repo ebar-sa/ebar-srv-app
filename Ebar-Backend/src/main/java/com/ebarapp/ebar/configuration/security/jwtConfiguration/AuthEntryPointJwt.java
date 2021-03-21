@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.configuration.security;
+package com.ebarapp.ebar.configuration.security.jwtConfiguration;
 
 import java.io.IOException;
 
@@ -20,6 +20,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
+		
 		logger.error("Unauthorized error: {}", authException);
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized");
 	}

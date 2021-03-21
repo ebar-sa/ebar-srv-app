@@ -1,16 +1,17 @@
-package com.ebarapp.ebar.model;
+package com.ebarapp.ebar.model.type;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
-public enum RolType {
-	ROLE_CLIENTE(new SimpleGrantedAuthority("ROLE_CLIENTE")),
-	ROLE_TRABAJADOR(new SimpleGrantedAuthority("ROLE_TRABAJADOR"));
+public enum RoleType {
+	ROLE_CLIENT(new SimpleGrantedAuthority("ROLE_CLIENT")),
+	ROLE_OWNER(new SimpleGrantedAuthority("ROLE_OWNER")),
+	ROLE_EMPLOYEE(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
 	
 	private final String name;
 	private final SimpleGrantedAuthority authority;
 	
-	RolType(SimpleGrantedAuthority authority) {
+	RoleType(SimpleGrantedAuthority authority) {
 		this.authority = authority;
 		this.name = authority.getAuthority();
 	}

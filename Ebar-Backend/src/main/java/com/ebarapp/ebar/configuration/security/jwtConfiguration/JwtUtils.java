@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.configuration.security;
+package com.ebarapp.ebar.configuration.security.jwtConfiguration;
 
 import java.util.Date;
 
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import com.ebarapp.ebar.model.UsuarioLogin;
+import com.ebarapp.ebar.model.User;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,7 +29,7 @@ public class JwtUtils {
 
 	public String generateJwtToken(Authentication authentication) {
 
-		UsuarioLogin userPrincipal = (UsuarioLogin) authentication.getPrincipal();
+		User userPrincipal = (User) authentication.getPrincipal();
 
 		return Jwts.builder()
 				.setSubject((userPrincipal.getUsername()))

@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.configuration.security;
+package com.ebarapp.ebar.configuration.security.jwtConfiguration;
 
 import java.io.IOException;
 
@@ -17,14 +17,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.ebarapp.ebar.service.UsuarioLoginService;
+import com.ebarapp.ebar.service.UserService;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtUtils jwtUtils;
 
 	@Autowired
-	private UsuarioLoginService usuarioLoginService;
+	private UserService usuarioLoginService;
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 

@@ -14,14 +14,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.ebarapp.ebar.service.UsuarioLoginService;
+import com.ebarapp.ebar.configuration.security.jwtConfiguration.AuthEntryPointJwt;
+import com.ebarapp.ebar.configuration.security.jwtConfiguration.AuthTokenFilter;
+import com.ebarapp.ebar.service.UserService;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
-	UsuarioLoginService usuarioLoginService;
+	UserService usuarioLoginService;
 
 	@Autowired
 	private AuthEntryPointJwt unauthorizedHandler;
