@@ -28,7 +28,12 @@ public class Cuenta {
 
     @NotNull
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    @JoinTable(name = "cuenta_item_carta", joinColumns = @JoinColumn(name = "cuenta_id"), inverseJoinColumns = @JoinColumn(name = "item_carta_id"))
-    private Set<ItemCarta> itemCartas;
+    @JoinTable(name = "cuenta_item_cuenta", joinColumns = @JoinColumn(name = "cuenta_id"), inverseJoinColumns = @JoinColumn(name = "item_cuenta_id"))
+    private Set<ItemCarta> itemCuenta;
+    
+    @NotNull
+    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @JoinTable(name = "cuenta_item_pedido", joinColumns = @JoinColumn(name = "cuenta_id"), inverseJoinColumns = @JoinColumn(name = "item_pedido_id"))
+    private Set<ItemCarta> itemPedido;
 }
 
