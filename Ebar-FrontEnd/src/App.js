@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import logo from "./img/ebarIcon.png"
 import BarList from "./components/bar-list.component";
+import Votations from "./components/votation-list.component";
 
 class App extends Component {
 
@@ -24,12 +25,18 @@ class App extends Component {
                 Bares
               </Link>
             </li>
+            <li className="nav-item active">
+              <Link to="/votations" className="nav-link">
+                Votations
+              </Link>
+            </li>
           </div>
         </nav>
 
         <div className="container mt-3">
           <Switch>
             <Route exact path={"/bares"} component={BarList}/>
+            <Route exact path={"/votations"} component={Votations} />
           </Switch>
         </div>
       </div>
