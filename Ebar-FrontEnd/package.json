@@ -43,8 +43,5 @@
             "last 1 safari version"
         ]
     },
-    "devDependencies": {
-        "webpack-cli": "^4.5.0",
-        "workbox-webpack-plugin": "^6.0.0-rc.0"
-    }
+    "devDependencies": {}
 }
