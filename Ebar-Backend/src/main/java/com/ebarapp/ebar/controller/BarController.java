@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.repository.BarRepository;
+import com.ebarapp.ebar.service.BarService;
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
@@ -19,14 +19,12 @@ import com.ebarapp.ebar.repository.BarRepository;
 public class BarController {
 	
 	@Autowired
-	private BarRepository barRepository;
-	
-	
+	private BarService barService;
 	
 	@GetMapping("/bares")
-	public ResponseEntity<List<Bar>> getAllTutorials() {	
+	public ResponseEntity<List<Bar>> getAllBars() {	
 	try {
-		List<Bar> bares = barRepository.findAll();
+		List<Bar> bares = barService.findAllBar();
 		
 		if(!bares.isEmpty()) { 
 			return new ResponseEntity<List<Bar>>(bares, HttpStatus.OK);
