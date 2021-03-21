@@ -10,30 +10,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ebarapp.ebar.model.Mesa;
-import com.ebarapp.ebar.repository.MesaRepository;
+import com.ebarapp.ebar.model.BarTable;
+import com.ebarapp.ebar.repository.BarTableRepository;
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api")
-public class MesaController {
+public class BarTableController {
 
 		
 	@Autowired
-	private MesaRepository mesaRepository;
+	private BarTableRepository barTableRepo;
 	
 	
 	@GetMapping("/detallesMesa/{id}")
-	public ResponseEntity<Mesa> getDetallesMesa(@PathVariable(value = "id") Long id) {
+	public ResponseEntity<BarTable> getDetallesMesa(@PathVariable(value = "id") Long id) {
 		try {
-			Mesa mesa = mesaRepository.getOne(id);
-			if (mesa != null) {
-				return new ResponseEntity<Mesa>(mesa, HttpStatus.OK);
+			BarTable barTable = barTableRepo.getOne(id);
+			if (barTable != null) {
+				return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
 			}else { 
-				return new ResponseEntity<Mesa>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
 			}
 		}catch(Exception e) {
-			return new ResponseEntity<Mesa>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<BarTable>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

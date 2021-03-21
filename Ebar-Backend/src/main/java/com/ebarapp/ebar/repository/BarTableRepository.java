@@ -2,8 +2,8 @@ package com.ebarapp.ebar.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ebarapp.ebar.model.Mesa;
+import com.ebarapp.ebar.model.BarTable;
 
-public interface MesaRepository  extends JpaRepository<Mesa, Long>{
+public interface BarTableRepository  extends JpaRepository<BarTable, Long>{
 
 }
