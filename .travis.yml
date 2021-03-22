@@ -1,0 +1,17 @@
+dist: trusty
+language: java
+jdk: oraclejdk8
+services:
+- mysql
+addons: 
+apt:
+  sources:
+    - mysql-5.7-trusty
+  packages:
+    - mysql-server-5.6
+    - mysql-client-5.6
+before_install:
+- chmod +x mvnw 
+- mysql -u root -e 'CREATE DATABASE ebarbbdd;'
+- mysql -u root -e "CREATE USER 'ebar'@'localhost' IDENTIFIED BY '@Q1R2s3u4';"
+- mysql -u root -e "GRANT ALL ON ebarbbdd.* TO 'ebar'@'localhost';"
