@@ -15,6 +15,13 @@
     <name>Ebar</name>
     <description>Se procede a utilizar este proyecto para desarrollar el backend de la aplicacion Ebar</description>
 
+    <repositories>
+        <repository>
+            <id>projectlombok.org</id>
+            <url>https://projectlombok.org/edge-releases</url>
+        </repository>
+    </repositories>
+
     <properties>
         <java.version>11</java.version>
     </properties>
