@@ -21,13 +21,16 @@ public class BarTableController {
 	
 	@Autowired
 	private BarTableService barTableService;
+
 	
 	@GetMapping("")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<List<BarTable>> getAllBars() {
 	try {
+
+
 		List<BarTable> tables = barTableService.findAllBarTable();
-		
+
 		if(!tables.isEmpty()) {
 			return new ResponseEntity<List<BarTable>>(tables, HttpStatus.OK);
 		}else {
