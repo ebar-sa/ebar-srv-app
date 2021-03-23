@@ -21,5 +21,9 @@ public class Bill extends BaseEntity {
     @NotNull
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<ItemMenu> itemMenu;
+    
+    @NotNull
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<ItemMenu> itemOrder;
 }
 
