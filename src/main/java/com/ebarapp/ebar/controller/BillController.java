@@ -23,7 +23,7 @@ public class BillController {
 	@Autowired
 	private BillService billService;
 
-	@PostMapping("")
+	@PostMapping("/create")
 	public ResponseEntity<? extends Object> createBill(@RequestBody Bill newBill) {
 		try {
 			Bill bill = billService.createBill(newBill);

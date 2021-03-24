@@ -18,11 +18,10 @@ public class Bill extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private BarTable table;
 
-    @NotNull
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<ItemMenu> itemMenu;
     
-    @NotNull
+    @Transient
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<ItemMenu> itemOrder;
 }
