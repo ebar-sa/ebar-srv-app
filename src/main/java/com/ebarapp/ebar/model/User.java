@@ -55,7 +55,7 @@ public class User implements UserDetails {
 	protected String	password;
 	
 	@NotNull
-	@ElementCollection(targetClass=RoleType.class)
+	@ElementCollection(targetClass=RoleType.class, fetch=FetchType.EAGER)
 	@Column(name = "role")
 	private Set<RoleType> roles;
 	

@@ -1,9 +1,10 @@
 package com.ebarapp.ebar.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ebarapp.ebar.model.BarTable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BarTableRepository  extends JpaRepository<BarTable, Long>{
+public interface BarTableRepository extends JpaRepository<BarTable, Long> {
 
 }
+
