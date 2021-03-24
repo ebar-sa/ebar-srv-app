@@ -35,4 +35,9 @@ public class BarTable extends BaseEntity {
     
 	@OneToOne(fetch = FetchType.LAZY)
     private Client client;
+
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

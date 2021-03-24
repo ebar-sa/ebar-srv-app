@@ -16,4 +16,10 @@ public class BarTableService {
 	public List<BarTable> findAllBarTable(){
 		return this.barTableRepository.findAll();
 	}
+
+	public BarTable findbyId(Long id) {
+		
+		return  this.barTableRepository.getOne(id);
+	}
+
 }
