@@ -27,10 +27,10 @@ public class Bill extends BaseEntity {
 	private BarTable		table;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	private Set<ItemMenu>	itemMenu;
+	private Set<ItemBill>	itemBill;
 
 	@Transient
 	@ManyToMany(fetch = FetchType.EAGER)
-	private Set<ItemMenu>	itemOrder;
+	private Set<ItemBill>	itemOrder;
 
 }

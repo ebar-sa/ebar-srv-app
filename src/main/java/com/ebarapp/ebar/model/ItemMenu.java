@@ -41,10 +41,6 @@ public class ItemMenu extends BaseEntity {
 	private Double		price;
 
 	@NotNull
-	@Column(name = "amount")
-	private Integer		amount;
-
-	@NotNull
 	@ManyToOne
 	private Category	category;
 
