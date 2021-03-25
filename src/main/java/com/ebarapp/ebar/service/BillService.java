@@ -1,6 +1,8 @@
+
 package com.ebarapp.ebar.service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,33 +17,39 @@ import com.ebarapp.ebar.repository.ItemMenuRepository;
 public class BillService {
 
 	@Autowired
-	private BillRepository billRepository;
-	private ItemMenuRepository itemMenuRepository;
+	private BillRepository		billRepository;
+	private ItemMenuRepository	itemMenuRepository;
 
-	public Bill createBill(Bill newBill) {
-		return billRepository.save(newBill);
+
+	public Bill createBill(final Bill newBill) {
+		return this.billRepository.save(newBill);
 	}
 
-	public Bill getBillById(Long id) {
-		return billRepository.findById(id).get();
+	public Bill getBillById(final Integer id) {
+		Optional<Bill> bill = this.billRepository.findById(id);
+		Bill res = null;
+		if (bill.isPresent()) {
+			res = bill.get();
+		}
+		return res;
 	}
 
-	public void removeBill(Long id) {
-		billRepository.deleteById(id);
+	public void removeBill(final Integer id) {
+		this.billRepository.deleteById(id);
 	}
 
-	public void addOrder(Long idItem, Long idBill) {
-		Bill c = getBillById(idBill);
-		ItemMenu item = itemMenuRepository.findById(idItem).get();
+	public void addOrder(final Integer idItem, final Integer idBill) {
+		Bill c = this.getBillById(idBill);
+		ItemMenu item = this.itemMenuRepository.findById(idItem).get();
 		Set<ItemMenu> itemsOrder = new HashSet<ItemMenu>();
 		itemsOrder.addAll(c.getItemOrder());
 		itemsOrder.add(item);
 
 	}
 
-	public void updateBill(Long idItem, Long idBill) {
-		Bill c = getBillById(idBill);
-		ItemMenu item = itemMenuRepository.findById(idItem).get();
+	public void updateBill(final Integer idItem, final Integer idBill) {
+		Bill c = this.getBillById(idBill);
+		ItemMenu item = this.itemMenuRepository.findById(idItem).get();
 		Set<ItemMenu> itemsMenu = new HashSet<ItemMenu>();
 		itemsMenu.addAll(c.getItemMenu());
 		itemsMenu.add(item);
