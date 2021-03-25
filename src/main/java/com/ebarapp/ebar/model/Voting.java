@@ -1,6 +1,8 @@
 package com.ebarapp.ebar.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -47,6 +49,14 @@ public class Voting extends BaseEntity {
     
     @ElementCollection(targetClass=String.class)
     private Set<String> votersUsernames;
+
+    public void addVoter(String username){ getVotersUsernames().add(username);}
+
+    public void addOption(Option newOption) {
+        getOptions().add(newOption);
+    }
+
+    public void deleteOption(Option option) { getOptions().remove(option); }
 
 }
 

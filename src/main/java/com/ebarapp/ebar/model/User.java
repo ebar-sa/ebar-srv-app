@@ -4,14 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -55,7 +48,7 @@ public class User implements UserDetails {
 	protected String	password;
 	
 	@NotNull
-	@ElementCollection(targetClass=RoleType.class)
+	@ElementCollection(targetClass=RoleType.class, fetch = FetchType.EAGER)
 	@Column(name = "role")
 	private Set<RoleType> roles;
 	
