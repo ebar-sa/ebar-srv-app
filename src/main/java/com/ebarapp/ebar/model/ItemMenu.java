@@ -24,10 +24,6 @@ import lombok.Setter;
 public class ItemMenu extends BaseEntity {
 
 	@NotNull
-	@ManyToOne
-	private Category	category;
-
-	@NotNull
 	@Column(name = "name")
 	private String		name;
 
@@ -43,6 +39,14 @@ public class ItemMenu extends BaseEntity {
 	@NotNull
 	@Column(name = "price")
 	private Double		price;
+
+	@NotNull
+	@Column(name = "amount")
+	private Integer		amount;
+
+	@NotNull
+	@ManyToOne
+	private Category	category;
 
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)
