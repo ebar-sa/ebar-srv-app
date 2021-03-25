@@ -1,10 +1,12 @@
 package com.ebarapp.ebar.controller;
 
-import java.util.List;
+import java.util.*;
 
+import com.ebarapp.ebar.model.BarTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,27 +17,30 @@ import com.ebarapp.ebar.service.BarService;
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/bar")
 public class BarController {
-	
+
 	@Autowired
 	private BarService barService;
-	
-	@GetMapping("/bares")
-	public ResponseEntity<List<Bar>> getAllBars() {	
-	try {
+
+	@GetMapping("/bares-aforo")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
+	public ResponseEntity<Map<Bar, Integer>> getAllTablesAndCapacity() {
 		List<Bar> bares = barService.findAllBar();
-		
-		if(!bares.isEmpty()) { 
-			return new ResponseEntity<List<Bar>>(bares, HttpStatus.OK);
-		}else {
-			return new ResponseEntity<List<Bar>>(HttpStatus.NO_CONTENT);
+		Map<Bar, Integer> res = new HashMap<>();
+
+		for(Bar b : bares) {
+			Set<BarTable> mesasPorBar = new HashSet<>();
+			mesasPorBar = b.getBarTables();
+			Integer numeroMesasLibres = 0;
+			for(BarTable bt : mesasPorBar) {
+				if (bt.isFree() == true) {
+					numeroMesasLibres += 1;
+				}
+			}
+			res.put(b, numeroMesasLibres);
 		}
-		
-	}catch (Exception e) {
-		return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
-		 
-	}
-		
+
 }
