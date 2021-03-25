@@ -1,14 +1,18 @@
 package com.ebarapp.ebar.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +35,11 @@ public class Voting extends BaseEntity {
 
     @NotNull
     @Column(name = "opening_hour")
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     private LocalDateTime openingHour;
 
     @Column(name = "closing_hour")
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     private LocalDateTime closingHour;
     
     @Column(name = "timer")
@@ -44,6 +50,14 @@ public class Voting extends BaseEntity {
     
     @ElementCollection(targetClass=String.class)
     private Set<String> votersUsernames;
+
+    public void addVoter(String username){ getVotersUsernames().add(username);}
+
+    public void addOption(Option newOption) {
+        getOptions().add(newOption);
+    }
+
+    public void deleteOption(Option option) { getOptions().remove(option); }
 
 }
 
