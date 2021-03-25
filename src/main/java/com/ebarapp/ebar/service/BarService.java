@@ -1,6 +1,7 @@
 package com.ebarapp.ebar.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -14,5 +15,14 @@ public class BarService {
 	
 	public List<Bar> findAllBar(){
 		return this.barRepository.findAll();
+	}
+
+	public Bar findBarById(Integer id) {
+		Optional<Bar> bar = barRepository.findById(id);
+		Bar res = null;
+		if(bar.isPresent()) {
+			res = bar.get();
+		}
+		return res;
 	}
 }

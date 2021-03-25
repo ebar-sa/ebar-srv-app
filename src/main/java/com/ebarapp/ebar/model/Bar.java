@@ -63,4 +63,9 @@ public class Bar extends BaseEntity {
 	
 	@OneToMany(fetch = FetchType.LAZY)
 	private Set<Employee> employees;
+
+	public void addVoting(Voting newVoting) { getVotings().add(newVoting); }
+
+	public void deleteVoting(Voting oldVoting) { getVotings().remove(oldVoting); }
+
 }

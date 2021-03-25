@@ -4,13 +4,17 @@ import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
+import com.ebarapp.ebar.validators.OptionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api")
@@ -21,6 +25,9 @@ public class OptionController {
 
     @Autowired
     private VotingService votingService;
+
+    @InitBinder("option")
+    public void initOptionBider(final WebDataBinder dataBinder) { dataBinder.setValidator(new OptionValidator());}
 
     @PostMapping("/voting/{votingId}/option")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
@@ -50,6 +57,10 @@ public class OptionController {
             Option option = optionService.getOptionById(optionId);
             if (option == null) {
                 return ResponseEntity.notFound().build();
+            }
+            //Can't delete an option if the voting has started
+            if (voting.getOpeningHour().isBefore(LocalDateTime.now())){
+                return ResponseEntity.badRequest().build();
             }
             voting.deleteOption(option);
             votingService.createOrUpadteVoting(voting);
@@ -91,6 +102,12 @@ public class OptionController {
             if(voting == null) {
                 return ResponseEntity.notFound().build();
             }
+            //Clients can vote only when the voting is active
+            if (voting.getOpeningHour().isAfter(LocalDateTime.now()) ||
+            voting.getClosingHour() != null && voting.getClosingHour().isBefore(LocalDateTime.now())){
+                return ResponseEntity.badRequest().build();
+            }
+
             Integer totalVotes = option.getVotes() + 1;
             option.setVotes(totalVotes);
             optionService.createOption(votingId, option);
