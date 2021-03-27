@@ -37,7 +37,6 @@ public class BarTable extends BaseEntity {
     private Client client;
 
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }
