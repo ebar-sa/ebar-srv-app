@@ -62,4 +62,41 @@ public class BarTableController {
 
 	}
 
+	@GetMapping("/busyTable/{id}")
+	@PreAuthorize("hasRole('ROLE_OWNER')")
+	public ResponseEntity<BarTable> busyTable(@PathVariable("barTableID") Long id) {
+		try {
+
+			BarTable barTable = barTableService.findbyId(id);
+			if (barTable != null && barTable.isFree()) {
+				barTable.setFree(false);
+				return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+			}
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/freeTable/{id}")
+	@PreAuthorize("hasRole('ROLE_OWNER')")
+	public ResponseEntity<BarTable> freeTable(@PathVariable("barTableID") Long id) {
+		try {
+
+			BarTable barTable = barTableService.findbyId(id);
+			if (barTable != null && !barTable.isFree()) {
+				barTable.setFree(true);
+				return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+			}
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
 }
