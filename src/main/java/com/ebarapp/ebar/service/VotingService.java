@@ -4,7 +4,9 @@ import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.repository.VotingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,5 +30,10 @@ public class VotingService {
 
     public void removeVoting(Integer id) {
         votingRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Voting> getVotingsByBarId(Long barId) {
+        return votingRepository.getVotingsByBarId(barId.intValue());
     }
 }
