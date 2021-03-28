@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -122,5 +123,12 @@ public class VotingController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/bar/{barId}/voting")
+    @PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
+    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Long barId) {
+        List<Voting> votaciones = votingService.getVotingsByBarId(barId);
+        return new ResponseEntity<>(votaciones, HttpStatus.OK);
     }
 }
