@@ -25,7 +25,11 @@ public class BarTable extends BaseEntity {
     @NotNull
     @Column(name = "free")
     private boolean free;
-
+    
+    @NotNull
+    @Column(name="seats")
+    private Integer seats;
+    
     @NotNull
     @ManyToOne
     private Bar bar;
@@ -35,4 +39,5 @@ public class BarTable extends BaseEntity {
     
 	@OneToOne(fetch = FetchType.LAZY)
     private Client client;
+
 }
