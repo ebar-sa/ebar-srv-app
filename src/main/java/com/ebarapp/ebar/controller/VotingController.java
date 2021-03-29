@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api")
 public class VotingController {
@@ -38,17 +39,17 @@ public class VotingController {
     @PostMapping("bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
-//        Bar bar = barService.findBarById(barId);
-//        if (bar == null) {
-//            return ResponseEntity.notFound().build();
-//        }
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
         try {
             //Can't restrict the vote of a client
             if (!newVoting.getVotersUsernames().isEmpty()){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             Voting voting = votingService.createOrUpadteVoting(newVoting);
-//            bar.addVoting(voting);
+            bar.addVoting(voting);
             return new ResponseEntity<>(voting, HttpStatus.CREATED);
 
         } catch (Exception e) {
