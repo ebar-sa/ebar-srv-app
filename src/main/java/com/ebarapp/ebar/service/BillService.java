@@ -31,8 +31,16 @@ public class BillService {
 		return res;
 	}
 
+	public Optional<Bill> findbyId(final Integer id) {
+		return this.billRepository.findById(id);
+	}
+
 	public void removeBill(final Integer id) {
 		this.billRepository.deleteById(id);
+	}
+
+	public Bill saveBill(final Bill bill) {
+		return this.billRepository.save(bill);
 	}
 
 	//	public void addOrder(final Integer idItem, final Integer idBill) {
