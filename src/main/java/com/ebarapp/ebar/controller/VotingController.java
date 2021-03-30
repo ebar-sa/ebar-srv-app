@@ -45,12 +45,13 @@ public class VotingController {
         }
         try {
             //Can't restrict the vote of a client
-            if (!newVoting.getVotersUsernames().isEmpty()){
+            if (!newVoting.getVotersUsernames().isEmpty() || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else {                    
+                Voting voting = votingService.createOrUpadteVoting(newVoting);
+                bar.addVoting(voting);
+                return new ResponseEntity<>(voting, HttpStatus.CREATED);
             }
-            Voting voting = votingService.createOrUpadteVoting(newVoting);
-            bar.addVoting(voting);
-            return new ResponseEntity<>(voting, HttpStatus.CREATED);
 
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
