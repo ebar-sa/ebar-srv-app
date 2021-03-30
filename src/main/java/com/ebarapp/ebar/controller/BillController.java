@@ -43,7 +43,16 @@ public class BillController {
 		try {
 			Bill bill = this.billService.getBillById(id);
 			Set<ItemBill> order = new HashSet<ItemBill>();
-			bill.setItemOrder(order);
+			Set<ItemBill> itemBill = new HashSet<ItemBill>();
+			if (!bill.getItemOrder().isEmpty() && bill.getItemOrder() != null) {
+			} else {
+				bill.setItemOrder(order);
+			}
+			if (!bill.getItemBill().isEmpty() && bill.getItemBill() != null) {
+			} else {
+				bill.setItemBill(itemBill);
+			}
+
 			return new ResponseEntity<>(bill, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,10 +78,24 @@ public class BillController {
 			if (billOpt.isPresent()) {
 				Bill bill = billOpt.get();
 
+				Set<ItemBill> order = new HashSet<ItemBill>();
+				bill.setItemOrder(order);
 				Optional<ItemMenu> item = this.itemMenuService.findbyId(idItem);
+				Set<ItemBill> itemBill = new HashSet<ItemBill>();
+				if (bill.getItemOrder().isEmpty() || bill.getItemOrder() == null) {
+					bill.setItemOrder(order);
+					ItemBill b = new ItemBill();
+					b.setItemMenu(item.get());
+					b.setAmount(1);
+					bill.getItemOrder().add(b);
+				}
+				if (!bill.getItemBill().isEmpty() && bill.getItemBill() != null) {
+				} else {
+					bill.setItemBill(itemBill);
+				}
 
 				for (ItemBill ib : bill.getItemOrder()) {
-					if (ib.getItemMenu().equals(item.get())) {
+					if (ib.getItemMenu().getId() == item.get().getId()) {
 						Integer i = ib.getAmount();
 						i = i++;
 						ib.setAmount(i);
