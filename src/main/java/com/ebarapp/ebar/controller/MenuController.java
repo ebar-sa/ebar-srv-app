@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Menu;
+import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.MenuService;
 
 @CrossOrigin(origins = "http://localhost:8081")
@@ -20,13 +22,19 @@ import com.ebarapp.ebar.service.MenuService;
 public class MenuController {
 
 	@Autowired
-	private MenuService menuService;
+	private MenuService	menuService;
+
+	@Autowired
+	private BarService	barService;
 
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Menu> getMenuById(@PathVariable("id") final Integer id) {
 		try {
-			Menu menu = this.menuService.getMenuById(id);
+
+			Bar bar = this.barService.getBarById(id);
+			Menu menu = bar.getMenu();
+
 			return new ResponseEntity<>(menu, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
