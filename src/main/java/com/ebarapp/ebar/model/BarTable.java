@@ -35,9 +35,11 @@ public class BarTable extends BaseEntity {
     private Bar bar;
     
 	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="bill_id")
     private Bill bill;
     
 	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="client_username")
     private Client client;
 
 }

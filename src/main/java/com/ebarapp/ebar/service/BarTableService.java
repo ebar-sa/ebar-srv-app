@@ -1,6 +1,7 @@
 package com.ebarapp.ebar.service;
 
 import com.ebarapp.ebar.model.BarTable;
+import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.repository.BarTableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,10 @@ public class BarTableService {
 
 	public BarTable saveTable(BarTable barTable) {
 		return this.barTableRepository.save(barTable);
+	}
+	
+	public Bill getBillByTableId(Integer id) {
+		return this.barTableRepository.getBillByTableId(id);
 	}
 
 }
