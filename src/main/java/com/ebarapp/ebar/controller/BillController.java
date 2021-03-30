@@ -1,7 +1,9 @@
 
 package com.ebarapp.ebar.controller;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,8 @@ public class BillController {
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
 		try {
 			Bill bill = this.billService.getBillById(id);
+			Set<ItemBill> order = new HashSet<ItemBill>();
+			bill.setItemOrder(order);
 			return new ResponseEntity<>(bill, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
