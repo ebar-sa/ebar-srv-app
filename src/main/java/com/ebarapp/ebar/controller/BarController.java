@@ -2,6 +2,7 @@ package com.ebarapp.ebar.controller;
 
 import java.util.*;
 
+import com.ebarapp.ebar.model.BarAforo;
 import com.ebarapp.ebar.model.BarTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,11 @@ public class BarController {
 	@Autowired
 	private BarService barService;
 
-	@GetMapping("/bares-aforo")
+	@GetMapping("/capacity")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
-	public ResponseEntity<Map<Bar, Integer>> getAllTablesAndCapacity() {
+	public ResponseEntity<List<BarAforo>> getAllTablesAndCapacity() {
 		List<Bar> bares = barService.findAllBar();
-		Map<Bar, Integer> res = new HashMap<>();
+		List<BarAforo> res = new ArrayList<>();
 
 		for(Bar b : bares) {
 			Set<BarTable> mesasPorBar = new HashSet<>();
@@ -38,7 +39,15 @@ public class BarController {
 					numeroMesasLibres += 1;
 				}
 			}
-			res.put(b, numeroMesasLibres);
+
+			String capacity = numeroMesasLibres + "/" + mesasPorBar.size();
+
+			BarAforo ba = new BarAforo();
+
+			ba.setName(b.getName());
+			ba.setCapacity(capacity);
+
+			res.add(ba);
 		}
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
