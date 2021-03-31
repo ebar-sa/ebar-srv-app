@@ -2,11 +2,13 @@
 package com.ebarapp.ebar.service;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ebarapp.ebar.model.Bill;
+import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.repository.BillRepository;
 import com.ebarapp.ebar.repository.ItemMenuRepository;
 
@@ -41,6 +43,14 @@ public class BillService {
 
 	public Bill saveBill(final Bill bill) {
 		return this.billRepository.save(bill);
+	}
+
+	public Set<ItemMenu> getItemOrderByBillId(final Integer id) {
+		return this.billRepository.getItemOrderByBillId(id);
+	}
+
+	public Set<ItemMenu> getItemMenuByBillId(final Integer id) {
+		return this.billRepository.getItemMenuByBillId(id);
 	}
 
 	//	public void addOrder(final Integer idItem, final Integer idBill) {

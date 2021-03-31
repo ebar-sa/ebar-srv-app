@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +20,6 @@ public class Bill extends BaseEntity {
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<ItemBill>	itemBill;
 
-	@Transient
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<ItemBill>	itemOrder;
 
