@@ -27,4 +27,8 @@ public class BarService {
 		}
 		return res;
 	}
+	
+	public void saveBar(Bar bar) {
+		this.barRepository.save(bar);
+	}
 }

@@ -38,18 +38,19 @@ public class VotingController {
 
     @PostMapping("bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
+    public ResponseEntity<Voting> createVoting(@Valid @PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
         Bar bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
         try {
             //Can't restrict the vote of a client
-            if (!newVoting.getVotersUsernames().isEmpty() || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if (!newVoting.getVotersUsernames().isEmpty()) {
+            	return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             } else {                    
-                Voting voting = votingService.createOrUpadteVoting(newVoting);
+                Voting voting = votingService.createOrUpdateVoting(newVoting);
                 bar.addVoting(voting);
+                barService.saveBar(bar);
                 return new ResponseEntity<>(voting, HttpStatus.CREATED);
             }
 
@@ -104,7 +105,7 @@ public class VotingController {
             }
 
             updatedVoting.setId(voting.getId());
-            votingService.createOrUpadteVoting(updatedVoting);
+            votingService.createOrUpdateVoting(updatedVoting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -120,7 +121,7 @@ public class VotingController {
                 return ResponseEntity.notFound().build();
             }
             voting.setClosingHour(LocalDateTime.now());
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
