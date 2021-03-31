@@ -49,7 +49,7 @@ public class Bar extends BaseEntity {
 	private Set<DBImage> images;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Menu menu;
+	private Menu menu = new Menu();
 	
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<BarTable> barTables;

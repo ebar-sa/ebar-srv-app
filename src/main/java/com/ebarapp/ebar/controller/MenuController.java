@@ -21,17 +21,15 @@ import com.ebarapp.ebar.service.MenuService;
 public class MenuController {
 
 	private BarService barService;
-	private MenuService menuService;
 	
 	@Autowired
-	public MenuController(final BarService barService, final MenuService menuService) {
+	public MenuController(final BarService barService) {
 		this.barService = barService;
-		this.menuService = menuService;
 	}
 	
 	
 	@GetMapping("/{idBar}/menu")
-//	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('ROLE_OWNER')")
 	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar) {
 		try {
 			Bar b = barService.getBarById(idBar);
