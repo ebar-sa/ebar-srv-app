@@ -1,3 +1,4 @@
+
 package com.ebarapp.ebar.model;
 
 import javax.persistence.CascadeType;
@@ -19,31 +20,30 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="item_menu")
+@Table(name = "item_menu")
 public class ItemMenu extends BaseEntity {
 
-    @NotNull
-    @ManyToOne
-    private Category category;
+	@NotNull
+	@Column(name = "name")
+	private String		name;
 
-    @NotNull
-    @Column(name = "name")
-    private String name;
+	@Column(name = "description")
+	private String		description;
 
-    @Column(name = "description")
-    private String description;
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	@Column(name = "ration_type")
+	private RationType	rationType;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ration_type")
-    private RationType rationType;
+	@NotNull
+	@Column(name = "price")
+	private Double		price;
 
-    @NotNull
-    @Column(name = "price")
-    private Double price;
+	@NotNull
+	@ManyToOne
+	private Category	category;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private DBImage image;  
+	@OneToOne(cascade = CascadeType.ALL)
+	private DBImage		image;
 
 }
-
