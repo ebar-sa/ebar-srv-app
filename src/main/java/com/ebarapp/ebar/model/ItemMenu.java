@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -31,7 +30,6 @@ public class ItemMenu extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @NotNull
     @Column(name = "description")
     private String description;
 
@@ -44,7 +42,6 @@ public class ItemMenu extends BaseEntity {
     @Column(name = "price")
     private Double price;
 
-    @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     private DBImage image;  
 
