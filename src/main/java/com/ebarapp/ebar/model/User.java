@@ -7,10 +7,8 @@ import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -69,7 +67,7 @@ public class User implements UserDetails {
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities(){
-		return roles.stream().map(x->x.getAuthority()).collect(Collectors.toSet());
+		return roles.stream().map(RoleType::getAuthority).collect(Collectors.toSet());
 	}
 
 	@Override
