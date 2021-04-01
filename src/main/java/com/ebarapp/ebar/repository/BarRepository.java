@@ -15,6 +15,8 @@ public interface BarRepository extends JpaRepository<Bar, Integer> {
 	@Query("select b from Bar b where b.owner=:username")
 	Set<Bar> findBarByUsername(String username);
 
+    Bar getBarById(Integer id);
+
 	@Query("select o from Owner o where o.username=:username")
 	Owner getOwnerByUsername(String username);
 
