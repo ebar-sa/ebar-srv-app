@@ -33,14 +33,14 @@ public class OptionController {
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @RequestBody Option newOption) {
         try {
-            Option option = optionService.createOption(votingId, newOption);
+            Option option = optionService.createOption(newOption);
             Voting voting = votingService.getVotingById(votingId);
             if(voting == null) {
                 return ResponseEntity.notFound().build();
             }
             voting.addOption(option);
             votingService.createOrUpadteVoting(voting);
-            return new ResponseEntity<>(option, HttpStatus.OK);
+            return new ResponseEntity<>(option, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -107,10 +107,14 @@ public class OptionController {
             voting.getClosingHour() != null && voting.getClosingHour().isBefore(LocalDateTime.now())){
                 return ResponseEntity.badRequest().build();
             }
+            //A client can't vote twice
+            if (voting.getVotersUsernames().contains(username)){
+                return ResponseEntity.badRequest().build();
+            }
 
             Integer totalVotes = option.getVotes() + 1;
             option.setVotes(totalVotes);
-            optionService.createOption(votingId, option);
+            optionService.createOption(option);
 
             voting.addVoter(username);
             votingService.createOrUpadteVoting(voting);
