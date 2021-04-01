@@ -6,7 +6,6 @@ import com.ebarapp.ebar.model.dtos.BarCapacity;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.dtos.BarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,7 @@ public class BarController {
 		for(Bar b : bares) {
 			Integer numeroMesasLibres = 0;
 			for(BarTable bt : b.getBarTables()) {
-				if (bt.isFree() == true) {
+				if (bt.isFree()) {
 					numeroMesasLibres += 1;
 				}
 			}
@@ -46,7 +45,7 @@ public class BarController {
 
 			res.add(ba);
 		}
-		return new ResponseEntity<>(res, HttpStatus.OK);
+		return ResponseEntity.ok(res);
 	}
 
 	@GetMapping("/{id}")
@@ -56,11 +55,20 @@ public class BarController {
 		Bar bar = barService.findBarById(id);
 
 		if (bar != null) {
+
+			Integer freeTables = 0;
+			for(BarTable bt : bar.getBarTables()) {
+				if (bt.isFree()) {
+					freeTables += 1;
+				}
+			}
+
 			BarDTO barDTO = new BarDTO(bar.getId(), bar.getName(), bar.getDescription(), bar.getContact(),
-					bar.getLocation(), bar.getOpeningTime(), bar.getClosingTime(), bar.getImages());
-			return new ResponseEntity<>(barDTO, HttpStatus.OK);
+					bar.getLocation(), bar.getOpeningTime(), bar.getClosingTime(), bar.getImages(),
+					bar.getBarTables().size(), freeTables);
+			return ResponseEntity.ok(barDTO);
 		}else {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
 		}
 	}
 }

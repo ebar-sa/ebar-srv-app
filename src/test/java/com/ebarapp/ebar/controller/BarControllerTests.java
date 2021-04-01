@@ -71,7 +71,7 @@ class BarControllerTests {
 
     @Test
     void testGetBarById() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/10").contentType(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("name", hasToString("Pizza by Alfredo")));
     }

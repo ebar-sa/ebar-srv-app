@@ -1,7 +1,6 @@
 package com.ebarapp.ebar.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +19,7 @@ public class BarService {
 	}
 
 	public Bar findBarById(Integer id) {
-		Bar bar = this.barRepository.getBarById(id);
-		return bar;
+		return this.barRepository.getBarById(id);
 
 	}
 }

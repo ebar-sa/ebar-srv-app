@@ -19,12 +19,15 @@ public class BarDTO {
     private Date openingTime;
     private Date closingTime;
     private Set<DBImage> images;
+    private Integer tables;
+    private Integer freeTables;
 
     public BarDTO() {
         //Empty
     }
 
-    public BarDTO(Integer id, String name, String description, String contact, String location, Date openingTime, Date closingTime, Set<DBImage> images) {
+    public BarDTO(Integer id, String name, String description, String contact, String location, Date openingTime, Date closingTime, Set<DBImage> images,
+                  Integer tables, Integer freeTables) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -33,5 +36,7 @@ public class BarDTO {
         this.openingTime = openingTime;
         this.closingTime = closingTime;
         this.images = images;
+        this.tables = tables;
+        this.freeTables = freeTables;
     }
 }
