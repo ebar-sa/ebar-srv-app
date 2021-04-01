@@ -42,15 +42,16 @@ public class MenuController {
 		}
 	}
 
-	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
-	public ResponseEntity<Menu> deleteMenu(@PathVariable("id") final Integer id) {
-		try {
-			this.menuService.removeMenu(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+//	comentado porque no se usa
+//	@DeleteMapping("/{id}")
+//	@PreAuthorize("hasRole('ROLE_OWNER')")
+//	public ResponseEntity<Menu> deleteMenu(@PathVariable("id") final Integer id) {
+//		try {
+//			this.menuService.removeMenu(id);
+//			return new ResponseEntity<>(HttpStatus.OK);
+//		} catch (Exception e) {
+//			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
 
 }

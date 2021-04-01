@@ -59,17 +59,17 @@ public class BillController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<Bill> deleteBill(@PathVariable("id") final Integer id) {
-		try {
-			this.billService.removeBill(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+//comentado porque no se usa
+//	@DeleteMapping("/{id}")
+//	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+//	public ResponseEntity<Bill> deleteBill(@PathVariable("id") final Integer id) {
+//		try {
+//			this.billService.removeBill(id);
+//			return new ResponseEntity<>(HttpStatus.OK);
+//		} catch (Exception e) {
+//			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
 
 	@GetMapping("/addToOrder/{idBill}/{idItem}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
