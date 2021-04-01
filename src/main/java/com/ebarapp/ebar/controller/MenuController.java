@@ -1,6 +1,11 @@
 
 package com.ebarapp.ebar.controller;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Menu;
+import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.MenuService;
+
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
@@ -27,8 +34,6 @@ public class MenuController {
 
 	@Autowired
 	private BarService	barService;
-
-
 	
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Menu> getMenuById(@PathVariable("id") final Integer id) {
@@ -53,13 +58,16 @@ public class MenuController {
 		}
 	}
 
-}
-
-	@GetMapping("/{idBar}/menu")
+//	@GetMapping("/{idBar}/menu")
+	@GetMapping("/menuAdmin")
 	@PreAuthorize("hasRole('ROLE_OWNER')")
-	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar) {
+	public ResponseEntity<Menu> getMenu(/*@PathVariable("idBar") final Integer idBar,*/ Principal p) {
 		try {
-			Bar b = barService.getBarById(idBar);
+			String username = p.getName();
+			Owner o = barService.getOwner(username);
+			Set<Bar> s = barService.getBarByOwner(o);
+			List<Bar> l = s.stream().collect(Collectors.toList());
+			Bar b = l.get(0);
 			Menu m = b.getMenu();
 			
 			if(m != null) 
@@ -70,3 +78,4 @@ public class MenuController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+}
