@@ -36,7 +36,7 @@ public class VotingController {
         dataBinder.setValidator(new VotingValidator());
     }
 
-    @PostMapping("bar/{barId}/voting")
+    @PostMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
         Bar bar = barService.findBarById(barId);
@@ -72,7 +72,7 @@ public class VotingController {
         }
     }
 
-    @DeleteMapping("bar/{barId}/voting/{id}")
+    @DeleteMapping("/bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> deleteVoting(@PathVariable("barId") Integer barId, @PathVariable("id") Integer id) {
         try {
@@ -91,7 +91,7 @@ public class VotingController {
         }
     }
 
-    @PutMapping("/voting/{id}")
+    @PutMapping("voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> updateVoting(@Valid @RequestBody Voting updatedVoting,@PathVariable("id") Integer id) {
         try {
