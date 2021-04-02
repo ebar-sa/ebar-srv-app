@@ -5,6 +5,7 @@ import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.VotingService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
@@ -151,6 +152,7 @@ class VotingControllerTest {
     }
 
     @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Disabled
     @Test
     void successUpdateVoting() throws Exception {
         LocalDateTime now = LocalDateTime.now().plusHours(1L);
