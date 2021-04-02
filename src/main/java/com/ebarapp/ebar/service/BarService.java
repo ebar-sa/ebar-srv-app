@@ -3,13 +3,11 @@ package com.ebarapp.ebar.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.repository.BarRepository;
 
 @Service
@@ -29,14 +27,6 @@ public class BarService {
 			res = bar.get();
 		}
 		return res;
-	}
-
-	public Owner getOwner(String username) {
-		return this.barRepository.getOwnerByUsername(username);
-	}
-
-	public Set<Bar> getBarByOwner(Owner o) {
-		return this.barRepository.getBarByOwner(o);
 	}
 
 }

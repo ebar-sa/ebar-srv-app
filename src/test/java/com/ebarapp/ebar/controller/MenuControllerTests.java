@@ -16,14 +16,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Category;
 import com.ebarapp.ebar.model.ItemMenu;
@@ -34,13 +33,15 @@ import com.ebarapp.ebar.model.type.RationType;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.MenuService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers=MenuController.class, 
 excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 classes = WebSecurityConfigurer.class),
 excludeAutoConfiguration = SecurityAutoConfiguration.class)
 public class MenuControllerTests {
+	
+	private static final int TEST_BAR_ID = 7;
+	private static final int TEST_MENU_ID = 5;
 	
 	@Autowired
 	private MockMvc mockMvc;
@@ -51,6 +52,8 @@ public class MenuControllerTests {
 	@MockBean
 	private BarService barService;
 	
+	
+	
 	@BeforeEach
 	void setUp() {
 		Set<RoleType> roles = new HashSet<>();
@@ -59,15 +62,13 @@ public class MenuControllerTests {
 		User u = new User();
 		u.setRoles(roles);
 		u.setUsername("prueba");
-		u.setPassword("1234567890");
 		
 		Owner o = new Owner();
 		o.setUsername("prueba");
-		o.setPassword("1234567890");
 		o.setRoles(roles);
 		
 		Bar b = new Bar();
-		b.setId(7);
+		b.setId(TEST_BAR_ID);
 		b.setName("Bar de prueba");
 		b.setDescription("Descripción");
 		b.setLocation("Sevilla");
@@ -78,7 +79,7 @@ public class MenuControllerTests {
 		o.setBar(bares);
 		
 		Menu m = new Menu();
-		m.setId(7);
+		m.setId(TEST_MENU_ID);
 		b.setMenu(m);
 		
 		Category c1 = new Category();
@@ -159,25 +160,17 @@ public class MenuControllerTests {
 		s.add(i10);
 		m.setItems(s);
 		
-		given(this.barService.getOwner("prueba")).willReturn(o);
-		given(this.barService.getBarByOwner(o)).willReturn(bares);
-		
+		given(this.barService.getBarById(TEST_BAR_ID)).willReturn(b);
 		
 	}
 	
 	@Test
+	@WithMockUser(username = "prueba",  roles = {"OWNER"})
 	void testGetMenuByOwner() throws Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
-        LoginRequest request = new LoginRequest();
-        request.setUsername("prueba");
-        request.setPassword("1234567890");
-        String requestJson = objectMapper.writeValueAsString(request);
-		
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signin").contentType(MediaType.APPLICATION_JSON).content(requestJson));
-        
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/menuAdmin").contentType(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/bares/" + TEST_BAR_ID + "/menu")
+				.contentType(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
-		.andExpect(MockMvcResultMatchers.jsonPath("id", hasToString("7")));
+		.andExpect(MockMvcResultMatchers.jsonPath("id", hasToString(String.valueOf(TEST_MENU_ID))));
 	
 	}
 
