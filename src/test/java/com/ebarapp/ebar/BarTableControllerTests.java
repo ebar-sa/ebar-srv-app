@@ -9,6 +9,7 @@ import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -86,8 +87,8 @@ public class BarTableControllerTests {
 	    }
 
 	 
-
-//	    @Test
+	    @Disabled
+	    @Test
 	    void testGetTableById() throws Exception {
 	        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE_ID).contentType(MediaType.APPLICATION_JSON))
 	                .andExpect(status().isOk())
