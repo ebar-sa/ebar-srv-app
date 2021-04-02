@@ -60,9 +60,8 @@ public class BarTableController {
 		try {
 			Map<Integer, Object> res = new HashMap<Integer, Object>();
 			String token = BarTableService.generarToken();
-			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
-			if (barTableOpt.isPresent()) {
-				BarTable barTable = barTableOpt.get();
+			BarTable barTable = this.barTableService.findbyId(id);
+			if (barTable != null) {
 				Menu menu = barTable.getBar().getMenu();
 				Bill bill = this.barTableService.getBillByTableId(id);
 				barTable.setToken(token);
@@ -86,18 +85,17 @@ public class BarTableController {
 	public ResponseEntity<BarTable> busyTable(@PathVariable("id") final Integer id) {
 		try {
 
-			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
-			if (barTableOpt.isPresent()) {
-				BarTable barTable = barTableOpt.get();
+			BarTable barTable = this.barTableService.findbyId(id);
+			if (barTable != null) {
 				if (barTable.isFree()) {
 					barTable.setFree(false);
 					this.barTableService.saveTable(barTable);
-					return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
+					return new ResponseEntity<>(barTable, HttpStatus.OK);
 				} else {
 					return new ResponseEntity<>(null, HttpStatus.CONFLICT);
 				}
 			} else {
-				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -109,20 +107,19 @@ public class BarTableController {
 	public ResponseEntity<BarTable> freeTable(@PathVariable("id") final Integer id) {
 		try {
 
-			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
+			BarTable barTable = this.barTableService.findbyId(id);
 			String token = BarTableService.generarToken();
-			if (barTableOpt.isPresent()) {
-				BarTable barTable = barTableOpt.get();
+			if (barTable != null) {
 				if (!barTable.isFree()) {
 					barTable.setFree(true);
 					barTable.setToken(token);
 					this.barTableService.saveTable(barTable);
-					return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
+					return new ResponseEntity<>(barTable, HttpStatus.OK);
 				} else {
 					return new ResponseEntity<>(null, HttpStatus.CONFLICT);
 				}
 			} else {
-				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

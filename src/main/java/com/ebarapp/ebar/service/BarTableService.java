@@ -25,8 +25,13 @@ public class BarTableService {
 		return this.barTableRepository.findAll();
 	}
 
-	public Optional<BarTable> findbyId(Integer id) {
-		return  this.barTableRepository.findById(id);
+	public BarTable findbyId(Integer id) {
+		Optional<BarTable> barTableOpt =  this.barTableRepository.findById(id);
+		if(barTableOpt.isPresent()) {
+			return barTableOpt.get();
+		}else { 
+			return null;
+		}
 	}
 	
 	
