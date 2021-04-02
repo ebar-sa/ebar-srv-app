@@ -3,12 +3,14 @@ package com.ebarapp.ebar.unit;
 import com.ebarapp.ebar.model.Bar;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Path;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +32,7 @@ class BarValidatorTests {
 
     @Test
     void shouldNotValidateWhenNameNull() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
         bar.setName(null);
 
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
@@ -39,11 +42,12 @@ class BarValidatorTests {
         assertThat(constraintViolations.size()).isEqualTo(1);
         ConstraintViolation<Bar> violation = constraintViolations.stream().findFirst().orElse(null);
         assertThat(violation).extracting(ConstraintViolation::getPropertyPath).extracting(Path::toString).isEqualTo("name");
-        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("no debe estar vacío");
+        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("must not be empty");
     }
 
     @Test
     void shouldNotValidateWhenDescriptionEmpty() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
         bar.setDescription("");
 
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
@@ -53,11 +57,12 @@ class BarValidatorTests {
         assertThat(constraintViolations.size()).isEqualTo(1);
         ConstraintViolation<Bar> violation = constraintViolations.stream().findFirst().orElse(null);
         assertThat(violation).extracting(ConstraintViolation::getPropertyPath).extracting(Path::toString).isEqualTo("description");
-        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("no debe estar vacío");
+        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("must not be empty");
     }
 
     @Test
     void shouldNotValidateWhenContactNull() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
         bar.setContact(null);
 
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
@@ -67,11 +72,12 @@ class BarValidatorTests {
         assertThat(constraintViolations.size()).isEqualTo(1);
         ConstraintViolation<Bar> violation = constraintViolations.stream().findFirst().orElse(null);
         assertThat(violation).extracting(ConstraintViolation::getPropertyPath).extracting(Path::toString).isEqualTo("contact");
-        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("no debe estar vacío");
+        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("must not be empty");
     }
 
     @Test
     void shouldNotValidateWhenLocationEmpty() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
         bar.setLocation("");
 
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
@@ -81,11 +87,12 @@ class BarValidatorTests {
         assertThat(constraintViolations.size()).isEqualTo(1);
         ConstraintViolation<Bar> violation = constraintViolations.stream().findFirst().orElse(null);
         assertThat(violation).extracting(ConstraintViolation::getPropertyPath).extracting(Path::toString).isEqualTo("location");
-        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("no debe estar vacío");
+        assertThat(violation).extracting(ConstraintViolation::getMessage).isEqualTo("must not be empty");
     }
 
     @Test
     void shouldValidate() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
         Set<ConstraintViolation<Bar>> constraintViolations = validator.validate(bar);
