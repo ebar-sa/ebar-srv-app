@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -23,19 +23,19 @@ import lombok.Setter;
 @Table(name="bar")
 public class Bar extends BaseEntity {
 	
-	@NotNull
+	@NotEmpty
 	@Column(name = "name")
 	private String name;
 
-	@NotNull
+	@NotEmpty
 	@Column(name = "description")
 	private String description;
 
-	@NotNull
+	@NotEmpty
 	@Column(name="contact")
 	private String contact;
 
-	@NotNull
+	@NotEmpty
 	@Column(name = "location")
 	private String location;
 	

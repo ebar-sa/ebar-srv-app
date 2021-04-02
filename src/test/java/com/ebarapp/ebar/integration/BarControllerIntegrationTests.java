@@ -1,59 +1,65 @@
-package com.ebarapp.ebar.controller;
+package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.repository.BarRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasToString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers=BarController.class,
-        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
-class BarControllerTests {
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
+@ActiveProfiles(profiles = "dev")
+class BarControllerIntegrationTests {
 
     private static final int TEST_BAR_ID = 10;
+    private static final String TEST_BAR_NAME = "Burger Food Porn";
+    private static final String TEST_BAR_DESCRIPTION = "El templo de la hamburguesa.";
+    private static final String TEST_BAR_CONTACT = "burgerfoodsevilla@gmail.com";
+    private static final String TEST_BAR_LOCATION = "Avenida de Finlandia, 24, Sevilla";
+    private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
+    private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private BarService barService;
-
-    private Bar bar;
+    private BarRepository barRepository;
 
     @BeforeEach
     void setUp() {
-        List<Bar> allBares = new ArrayList<>();
-
-        bar = new Bar();
-        bar.setId(10);
-        bar.setName("Pizza by Alfredo");
-        bar.setDescription("Restaurant");
-        bar.setContact("alfredo@gmail.com");
-        bar.setLocation("Pennsylvania");
+        Bar bar = new Bar();
+        bar.setName(TEST_BAR_NAME);
+        bar.setDescription(TEST_BAR_DESCRIPTION);
+        bar.setContact(TEST_BAR_CONTACT);
+        bar.setLocation(TEST_BAR_LOCATION);
+        bar.setOpeningTime(TEST_BAR_OPENING_TIME);
+        bar.setClosingTime(TEST_BAR_CLOSING_TIME);
         bar.setBarTables(new HashSet<>());
 
-        allBares.add(bar);
+        List<Bar> bars = Collections.singletonList(bar);
 
-        given(this.barService.findBarById(TEST_BAR_ID)).willReturn(bar);
-        given(this.barService.findAllBar()).willReturn(allBares);
+        given(this.barRepository.getBarById(TEST_BAR_ID)).willReturn(bar);
+        given(this.barRepository.findAll()).willReturn(bars);
     }
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
@@ -69,7 +75,7 @@ class BarControllerTests {
     void testGetBarById() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("name", hasToString(bar.getName())));
+                .andExpect(MockMvcResultMatchers.jsonPath("name", hasToString(TEST_BAR_NAME)));
     }
 
     @Test
@@ -83,5 +89,4 @@ class BarControllerTests {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
-
 }
