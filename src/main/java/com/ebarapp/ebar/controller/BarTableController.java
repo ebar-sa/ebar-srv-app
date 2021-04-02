@@ -32,13 +32,13 @@ public class BarTableController {
 		List<BarTable> tables = barTableService.findAllBarTable();
 
 		if(!tables.isEmpty()) {
-			return new ResponseEntity<List<BarTable>>(tables, HttpStatus.OK);
+			return ResponseEntity.ok(tables);
 		}else {
-			return new ResponseEntity<List<BarTable>>(HttpStatus.NO_CONTENT);
+			return ResponseEntity.noContent().build();
 		}
 		
 	}catch (Exception e) {
-		return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 		 
 	}

@@ -15,17 +15,12 @@ public class BarService {
 	@Autowired
 	private BarRepository barRepository;
 	
-	public List<Bar> findAllBar(){
+	public List<Bar> findAllBar() {
 		return this.barRepository.findAll();
 	}
 
 	public Bar findBarById(Integer id) {
-		Optional<Bar> bar = barRepository.findById(id);
-		Bar res = null;
-		if(bar.isPresent()) {
-			res = bar.get();
-		}
-		return res;
+		return this.barRepository.getBarById(id);
 	}
 
 	public Bar createBar (Bar newBar) { return barRepository.save(newBar);}

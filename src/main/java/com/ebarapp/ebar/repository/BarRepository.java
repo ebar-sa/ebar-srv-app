@@ -7,5 +7,7 @@ import com.ebarapp.ebar.model.Bar;
 
 public interface BarRepository extends JpaRepository<Bar, Integer> {
 
+    Bar getBarById(Integer id);
+
 }
 
