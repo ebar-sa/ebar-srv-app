@@ -1,14 +1,14 @@
+
 package com.ebarapp.ebar.controller.test;
 
-import static org.hamcrest.Matchers.hasToString;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,62 +20,46 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 import com.ebarapp.ebar.controller.BillController;
-import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Bill;
-import com.ebarapp.ebar.model.Category;
-import com.ebarapp.ebar.model.DBImage;
 import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.model.Menu;
-import com.ebarapp.ebar.model.type.RationType;
-import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemBillService;
 import com.ebarapp.ebar.service.ItemMenuService;
-import com.ebarapp.ebar.service.MenuService;
-
-import static org.hamcrest.Matchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = BillController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
 public class BillControllerTests {
 
-	private static final int TEST_MENU_ID = 1;
-	private static final int TEST_BAR_ID = 1;
-	private static final int TEST_BILL_ID = 1;
-	private static final int TEST_ITEM_ID = 3;
-	private static final int TEST_ITEMBILL_ID = 4;
+	private static final int	TEST_MENU_ID		= 1;
+	private static final int	TEST_BAR_ID			= 1;
+	private static final int	TEST_BILL_ID		= 1;
+	private static final int	TEST_ITEM_ID		= 3;
+	private static final int	TEST_ITEMBILL_ID	= 4;
 
 	@Autowired
-	private MockMvc mockMvc;
+	private MockMvc				mockMvc;
 
 	@MockBean
-	private BillService billService;
+	private BillService			billService;
 
 	@MockBean
-	private ItemMenuService itemMenuService;
+	private ItemMenuService		itemMenuService;
 
 	@MockBean
-	private ItemBillService itemBillService;
+	private ItemBillService		itemBillService;
 
-	private Bill bill;
-	private ItemMenu itemMenu;
-	private ItemBill itembill;
-	private Optional<Bill> billOpt;
+	private Bill				bill;
+	private ItemBill			itembill;
+	private Optional<Bill>		billOpt;
+
 
 	@BeforeEach
 	void setUp() {
 
-		Optional<Bill> billOpt = this.billService.findbyId(TEST_BILL_ID);
-//		billOpt = Optional.of(bill);
-		billOpt.get();
-		billOpt.isPresent();
-		
-		bill = new Bill();
-		bill = billOpt.get();
-		bill.setId(1);
+		this.bill = new Bill();
+		this.bill.setId(BillControllerTests.TEST_BILL_ID);
 
 		Set<ItemBill> itemsOrder = new HashSet<ItemBill>();
 		ItemBill itemOrder = new ItemBill();
@@ -87,7 +71,7 @@ public class BillControllerTests {
 		itemOrder.setItemMenu(itemMenuOrder);
 		itemsOrder.add(itemOrder);
 
-		bill.setItemOrder(itemsOrder);
+		this.bill.setItemOrder(itemsOrder);
 
 		Set<ItemBill> itemsBill = new HashSet<ItemBill>();
 		ItemBill itemBill = new ItemBill();
@@ -99,76 +83,76 @@ public class BillControllerTests {
 		itemBill.setItemMenu(itemMenu);
 		itemsBill.add(itemBill);
 
-		bill.setItemBill(itemsBill);
+		this.bill.setItemBill(itemsBill);
+
+		Optional<Bill> billOpt = this.billService.findbyId(BillControllerTests.TEST_BILL_ID);
+		//		billOpt = Optional.of(bill);
 
 		// item para meterlo en Order
-//		ItemBill item = new ItemBill();
-//		item.setId(3);
-//		item.setAmount(1);
-//		ItemMenu itemMenuForOrder = new ItemMenu();
-//		itemMenuForOrder.setId(2);
-//		itemMenuForOrder.setName("Queso");
-//		item.setItemMenu(itemMenuForOrder);
+		//		ItemBill item = new ItemBill();
+		//		item.setId(3);
+		//		item.setAmount(1);
+		//		ItemMenu itemMenuForOrder = new ItemMenu();
+		//		itemMenuForOrder.setId(2);
+		//		itemMenuForOrder.setName("Queso");
+		//		item.setItemMenu(itemMenuForOrder);
 
 		// itemOrder para meterlo en la bill
-//		ItemBill itemOrder2 = new ItemBill();
-//		itemOrder2.setId(4);
-//		itemOrder2.setAmount(10);
-//		ItemMenu itemMenuOrderForBill = new ItemMenu();
-//		itemMenuOrderForBill.setId(2);
-//		itemMenuOrderForBill.setName("Puré de calabaza");
-//		itemOrder.setItemMenu(itemMenuOrderForBill);
+		//		ItemBill itemOrder2 = new ItemBill();
+		//		itemOrder2.setId(4);
+		//		itemOrder2.setAmount(10);
+		//		ItemMenu itemMenuOrderForBill = new ItemMenu();
+		//		itemMenuOrderForBill.setId(2);
+		//		itemMenuOrderForBill.setName("Puré de calabaza");
+		//		itemOrder.setItemMenu(itemMenuOrderForBill);
 
-		given(this.billService.getBillById(TEST_BILL_ID)).willReturn(bill);
+		BDDMockito.given(this.billService.getBillById(BillControllerTests.TEST_BILL_ID)).willReturn(this.bill);
 
-//		Optional<Bill> billOpt = this.billService.findbyId(idBill);
-		given(this.billService.findbyId(TEST_BILL_ID)).willReturn(billOpt);
+		//		Optional<Bill> billOpt = this.billService.findbyId(idBill);
+		BDDMockito.given(this.billService.findbyId(BillControllerTests.TEST_BILL_ID)).willReturn(billOpt);
 
-		given(this.itemMenuService.findbyId(TEST_ITEM_ID).get()).willReturn(itemMenu);
+		BDDMockito.given(this.itemMenuService.findbyId(1).get()).willReturn(itemMenu);
 
-//		given(this.itemBillService.findbyId(TEST_BILL_ID).get()).willReturn(itemBill);
+		//		given(this.itemBillService.findbyId(TEST_BILL_ID).get()).willReturn(itemBill);
 
 	}
 
 	// test para ver que se obtiene el order
 
-//	@Test
-//	void testBillOrderById() throws Exception {
-//		this.mockMvc
-//				.perform(
-//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
-//						"[{\"id\":2,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-//	}
+	//	@Test
+	//	void testBillOrderById() throws Exception {
+	//		this.mockMvc
+	//				.perform(
+	//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
+	//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
+	//						"[{\"id\":2,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+	//	}
 
 	// test para ver que se obtiene la bill
-//	@Test
-//	void testBillById() throws Exception {
-//		this.mockMvc
-//				.perform(
-//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemBill", hasToString(
-//						"[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-//	}
+	//	@Test
+	//	void testBillById() throws Exception {
+	//		this.mockMvc
+	//				.perform(
+	//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
+	//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemBill", hasToString(
+	//						"[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+	//	}
 
 	// test para ver que se añade al order
 	@Test
 	void testAddToOrder() throws Exception {
-		this.mockMvc
-				.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + TEST_BILL_ID + "/" + TEST_ITEM_ID)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
-						"\"[{\\\"id\\\":3,\\\"amount\\\":3,\\\"itemMenu\\\":{\\\"id\\\":2,\\\"name\\\":\\\"Queso\\\",\\\"description\\\":null,\\\"rationType\\\":null,\\\"price\\\":null,\\\"category\\\":null,\\\"image\\\":null,\\\"new\\\":false},\\\"new\\\":false}]\"")));
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/" + BillControllerTests.TEST_ITEM_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasToString(
+				"\"[{\\\"id\\\":3,\\\"amount\\\":3,\\\"itemMenu\\\":{\\\"id\\\":2,\\\"name\\\":\\\"Queso\\\",\\\"description\\\":null,\\\"rationType\\\":null,\\\"price\\\":null,\\\"category\\\":null,\\\"image\\\":null,\\\"new\\\":false},\\\"new\\\":false}]\"")));
 	}
 
-
 	// test para ver que se añade al bill
-//	@Test
-//	void testAddToBill() throws Exception {
-//		this.mockMvc
-//				.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + TEST_BILL_ID + "/" + TEST_ITEMBILL_ID)
-//						.contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("", hasToString("")));
-//	}
+	//	@Test
+	//	void testAddToBill() throws Exception {
+	//		this.mockMvc
+	//				.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + TEST_BILL_ID + "/" + TEST_ITEMBILL_ID)
+	//						.contentType(MediaType.APPLICATION_JSON))
+	//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("", hasToString("")));
+	//	}
 
 }
