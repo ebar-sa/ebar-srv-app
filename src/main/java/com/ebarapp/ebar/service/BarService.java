@@ -20,6 +20,7 @@ public class BarService {
 		return this.barRepository.findAll();
 	}
 
+  // Unificar con el de findBarById. Quitar este finalmente
 	public Bar getBarById(Integer id) {
 		Optional<Bar> bar = this.barRepository.findById(id);
 		Bar res = null;
@@ -28,5 +29,13 @@ public class BarService {
 		}
 		return res;
 	}
+
+	public Bar findBarById(Integer id) {
+		return this.barRepository.getBarById(id);
+	}
+
+	public Bar createBar (Bar newBar) { return barRepository.save(newBar);}
+
+	public void removeBar(Integer id) { barRepository.deleteById(id);}
 
 }
