@@ -34,7 +34,7 @@ public class MenuController {
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Menu> getMenuById(@PathVariable("id") final Integer id) {
 		try {
-			Bar bar = this.barService.getBarById(id);
+			Bar bar = this.barService.findBarById(id);
 			Menu menu = bar.getMenu();
 
 			return new ResponseEntity<>(menu, HttpStatus.OK);
@@ -59,7 +59,7 @@ public class MenuController {
 	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar, Principal p) {
 		try {
 			String username = p.getName();
-			Bar b = barService.getBarById(idBar);
+			Bar b = barService.findBarById(idBar);
 			if(b.getOwner().getUsername().equals(username)) {
 				Menu m = b.getMenu();
 				if(m != null) 

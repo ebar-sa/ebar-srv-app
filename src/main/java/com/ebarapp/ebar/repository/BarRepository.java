@@ -12,7 +12,7 @@ import com.ebarapp.ebar.model.User;
 
 public interface BarRepository extends JpaRepository<Bar, Integer> {
 
-  Bar getBarById(Integer id);
+	Bar getBarById(Integer id);
 
 	@Query("select o from Owner o where o.username=:username")
 	Owner getOwnerByUsername(String username);

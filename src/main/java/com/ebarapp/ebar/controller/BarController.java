@@ -52,7 +52,7 @@ public class BarController {
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
 	public ResponseEntity<BarDTO> getBarById(@PathVariable("id") Integer id) {
 
-		Bar bar = barService.getBarById(id);
+		Bar bar = barService.findBarById(id);
 
 		if (bar != null) {
 

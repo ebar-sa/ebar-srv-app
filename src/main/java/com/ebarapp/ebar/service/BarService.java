@@ -2,7 +2,6 @@
 package com.ebarapp.ebar.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,16 +17,6 @@ public class BarService {
 
 	public List<Bar> findAllBar() {
 		return this.barRepository.findAll();
-	}
-
-  // Unificar con el de findBarById. Quitar este finalmente
-	public Bar getBarById(Integer id) {
-		Optional<Bar> bar = this.barRepository.findById(id);
-		Bar res = null;
-		if (bar.isPresent()) {
-			res = bar.get();
-		}
-		return res;
 	}
 
 	public Bar findBarById(Integer id) {
