@@ -76,8 +76,8 @@ class VotingControllerTest {
         BDDMockito.given(this.votingService.getVotingById(TEST_VOTING_ID)).willReturn(voting);
         BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting)).willReturn(voting);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting2)).willReturn(voting2);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting2)).willReturn(voting2);
 
         Bar bar = new Bar();
         bar.setId(1);
@@ -97,7 +97,7 @@ class VotingControllerTest {
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void successCreateVoting() throws Exception{
-        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-03-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+    	String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 19:00:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +108,7 @@ class VotingControllerTest {
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void failureCreateVoting() throws Exception{
-        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-03-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/voting")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -168,7 +168,7 @@ class VotingControllerTest {
     @WithMockUser(username = "admin", roles = {"OWNER"})
     @Test
     void failureUpdateVotingVoting() throws Exception {
-        String json = "{ \n \"title\": \"Voting Test Modified\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-03-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+        String json = "{ \n \"title\": \"Voting Test Modified\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.put("/api/voting/2")
                 .contentType(MediaType.APPLICATION_JSON)

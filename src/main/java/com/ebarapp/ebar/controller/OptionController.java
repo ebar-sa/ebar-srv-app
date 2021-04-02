@@ -39,7 +39,7 @@ public class OptionController {
                 return ResponseEntity.notFound().build();
             }
             voting.addOption(option);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(option, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,7 +63,7 @@ public class OptionController {
                 return ResponseEntity.badRequest().build();
             }
             voting.deleteOption(option);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             optionService.removeOption(optionId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class OptionController {
             optionService.createOption(option);
 
             voting.addVoter(username);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

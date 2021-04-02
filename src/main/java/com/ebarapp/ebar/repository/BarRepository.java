@@ -4,12 +4,15 @@ package com.ebarapp.ebar.repository;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
+
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.model.User;
 
+@Repository
 public interface BarRepository extends JpaRepository<Bar, Integer> {
 
 	Bar getBarById(Integer id);

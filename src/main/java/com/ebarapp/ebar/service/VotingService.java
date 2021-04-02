@@ -15,7 +15,7 @@ public class VotingService {
     @Autowired
     private VotingRepository votingRepository;
 
-    public Voting createOrUpadteVoting(Voting newVoting) {
+    public Voting createOrUpdateVoting(Voting newVoting) {
         return votingRepository.save(newVoting);
     }
 

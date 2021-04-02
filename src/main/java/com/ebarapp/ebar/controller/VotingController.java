@@ -36,7 +36,7 @@ public class VotingController {
         dataBinder.setValidator(new VotingValidator());
     }
 
-    @PostMapping("bar/{barId}/voting")
+    @PostMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
         Bar bar = barService.findBarById(barId);
@@ -45,14 +45,14 @@ public class VotingController {
         }
         try {
             //Can't restrict the vote of a client
-            if (!newVoting.getVotersUsernames().isEmpty()){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if (!newVoting.getVotersUsernames().isEmpty()) {
+            	return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else {                    
+                Voting voting = votingService.createOrUpdateVoting(newVoting);
+                bar.addVoting(voting);
+                barService.createBar(bar);
+                return new ResponseEntity<>(voting, HttpStatus.CREATED);
             }
-            Voting voting = votingService.createOrUpadteVoting(newVoting);
-            bar.addVoting(voting);
-            barService.createBar(bar);
-            return new ResponseEntity<>(voting, HttpStatus.CREATED);
-
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -72,7 +72,7 @@ public class VotingController {
         }
     }
 
-    @DeleteMapping("bar/{barId}/voting/{id}")
+    @DeleteMapping("/bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> deleteVoting(@PathVariable("barId") Integer barId, @PathVariable("id") Integer id) {
         try {
@@ -91,7 +91,7 @@ public class VotingController {
         }
     }
 
-    @PutMapping("/voting/{id}")
+    @PutMapping("voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> updateVoting(@Valid @RequestBody Voting updatedVoting,@PathVariable("id") Integer id) {
         try {
@@ -107,7 +107,7 @@ public class VotingController {
             }
 
             updatedVoting.setId(voting.getId());
-            votingService.createOrUpadteVoting(updatedVoting);
+            votingService.createOrUpdateVoting(updatedVoting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -123,7 +123,7 @@ public class VotingController {
                 return ResponseEntity.notFound().build();
             }
             voting.setClosingHour(LocalDateTime.now());
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

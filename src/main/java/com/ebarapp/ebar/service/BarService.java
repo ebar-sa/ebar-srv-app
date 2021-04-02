@@ -1,4 +1,3 @@
-
 package com.ebarapp.ebar.service;
 
 import java.util.List;
@@ -28,3 +27,4 @@ public class BarService {
 	public void removeBar(Integer id) { barRepository.deleteById(id);}
 
 }
+

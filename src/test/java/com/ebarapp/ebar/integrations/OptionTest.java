@@ -106,8 +106,8 @@ class OptionTest {
         this.bar.setVotings(votings);
         this.barService.createBar(this.bar);
 
-        this.votingService.createOrUpadteVoting(this.voting);
-        this.votingService.createOrUpadteVoting(this.voting2);
+        this.votingService.createOrUpdateVoting(this.voting);
+        this.votingService.createOrUpdateVoting(this.voting2);
         this.barId = this.bar.getId();
         this.votingId = this.voting.getId();
         this.voting2Id = this.voting2.getId();
@@ -115,8 +115,8 @@ class OptionTest {
         this.optionService.createOption(this.option2);
         this.optionId = this.option.getId();
         this.option2Id = this.option2.getId();
-        this.votingService.createOrUpadteVoting(voting);
-        this.votingService.createOrUpadteVoting(voting2);
+        this.votingService.createOrUpdateVoting(voting);
+        this.votingService.createOrUpdateVoting(voting2);
     }
 
     @AfterEach
