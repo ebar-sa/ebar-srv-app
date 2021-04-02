@@ -58,7 +58,7 @@ class BarControllerTests {
 
         allBares.add(bar);
 
-        given(this.barService.findBarById(TEST_BAR_ID)).willReturn(bar);
+        given(this.barService.getBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barService.findAllBar()).willReturn(allBares);
     }
 
