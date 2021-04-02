@@ -70,7 +70,7 @@ class VotingTest {
         this.bar.setVotings(votings);
         barService.createBar(this.bar);
 
-        votingService.createOrUpadteVoting(voting);
+        votingService.createOrUpdateVoting(voting);
         barId = this.bar.getId();
         votingId = this.voting.getId();
     }

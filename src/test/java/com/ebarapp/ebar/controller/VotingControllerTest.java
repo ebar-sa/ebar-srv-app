@@ -76,8 +76,8 @@ class VotingControllerTest {
         BDDMockito.given(this.votingService.getVotingById(TEST_VOTING_ID)).willReturn(voting);
         BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting)).willReturn(voting);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting2)).willReturn(voting2);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting2)).willReturn(voting2);
 
         Bar bar = new Bar();
         bar.setId(1);

@@ -53,12 +53,6 @@ public class VotingController {
                 barService.createBar(bar);
                 return new ResponseEntity<>(voting, HttpStatus.CREATED);
             }
-
-            Voting voting = votingService.createOrUpadteVoting(newVoting);
-            bar.addVoting(voting);
-            barService.createBar(bar);
-            return new ResponseEntity<>(voting, HttpStatus.CREATED);
-
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

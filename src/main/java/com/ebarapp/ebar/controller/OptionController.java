@@ -39,7 +39,7 @@ public class OptionController {
                 return ResponseEntity.notFound().build();
             }
             voting.addOption(option);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(option, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
