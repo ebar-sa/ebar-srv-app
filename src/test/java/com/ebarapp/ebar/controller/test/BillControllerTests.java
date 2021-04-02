@@ -3,8 +3,8 @@ package com.ebarapp.ebar.controller.test;
 import static org.hamcrest.Matchers.hasToString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,6 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import com.ebarapp.ebar.controller.BillController;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Bill;
@@ -35,6 +34,10 @@ import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemBillService;
 import com.ebarapp.ebar.service.ItemMenuService;
 import com.ebarapp.ebar.service.MenuService;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = BillController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
 public class BillControllerTests {
@@ -60,11 +63,18 @@ public class BillControllerTests {
 	private Bill bill;
 	private ItemMenu itemMenu;
 	private ItemBill itembill;
+	private Optional<Bill> billOpt;
 
 	@BeforeEach
 	void setUp() {
 
+		Optional<Bill> billOpt = this.billService.findbyId(TEST_BILL_ID);
+//		billOpt = Optional.of(bill);
+		billOpt.get();
+		billOpt.isPresent();
+		
 		bill = new Bill();
+		bill = billOpt.get();
 		bill.setId(1);
 
 		Set<ItemBill> itemsOrder = new HashSet<ItemBill>();
@@ -111,41 +121,46 @@ public class BillControllerTests {
 
 		given(this.billService.getBillById(TEST_BILL_ID)).willReturn(bill);
 
-//		given(this.itemMenuService.findbyId(TEST_ITEM_ID).get()).willReturn(itemMenu);
+//		Optional<Bill> billOpt = this.billService.findbyId(idBill);
+		given(this.billService.findbyId(TEST_BILL_ID)).willReturn(billOpt);
+
+		given(this.itemMenuService.findbyId(TEST_ITEM_ID).get()).willReturn(itemMenu);
 
 //		given(this.itemBillService.findbyId(TEST_BILL_ID).get()).willReturn(itemBill);
 
 	}
 
 	// test para ver que se obtiene el order
-	@Test
-	void testBillOrderById() throws Exception {
-		this.mockMvc
-				.perform(
-						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
-						"[{\"id\":2,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-	}
+
+//	@Test
+//	void testBillOrderById() throws Exception {
+//		this.mockMvc
+//				.perform(
+//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
+//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
+//						"[{\"id\":2,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+//	}
 
 	// test para ver que se obtiene la bill
-	@Test
-	void testBillById() throws Exception {
-		this.mockMvc
-				.perform(
-						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemBill", hasToString(
-						"[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-	}
+//	@Test
+//	void testBillById() throws Exception {
+//		this.mockMvc
+//				.perform(
+//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
+//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemBill", hasToString(
+//						"[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+//	}
 
 	// test para ver que se añade al order
-//	@Test
-//	void testAddToOrder() throws Exception {
-//		this.mockMvc
-//				.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + TEST_BILL_ID + "/" + TEST_ITEM_ID)
-//						.contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
-//						"\"[{\\\"id\\\":3,\\\"amount\\\":3,\\\"itemMenu\\\":{\\\"id\\\":2,\\\"name\\\":\\\"Queso\\\",\\\"description\\\":null,\\\"rationType\\\":null,\\\"price\\\":null,\\\"category\\\":null,\\\"image\\\":null,\\\"new\\\":false},\\\"new\\\":false}]\"")));
-//	}
+	@Test
+	void testAddToOrder() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + TEST_BILL_ID + "/" + TEST_ITEM_ID)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
+						"\"[{\\\"id\\\":3,\\\"amount\\\":3,\\\"itemMenu\\\":{\\\"id\\\":2,\\\"name\\\":\\\"Queso\\\",\\\"description\\\":null,\\\"rationType\\\":null,\\\"price\\\":null,\\\"category\\\":null,\\\"image\\\":null,\\\"new\\\":false},\\\"new\\\":false}]\"")));
+	}
+
 
 	// test para ver que se añade al bill
 //	@Test

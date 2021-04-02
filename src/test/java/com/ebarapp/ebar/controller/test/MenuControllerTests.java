@@ -102,5 +102,6 @@ public class MenuControllerTests {
 				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("items", hasToString(
 						"[{\"id\":1,\"name\":\"Calamares\",\"description\":\"Calamares muy ricos\",\"rationType\":\"RATION\",\"price\":2.0,\"category\":{\"id\":null,\"name\":\"Categoria 1\",\"new\":true},\"image\":{\"id\":1,\"fileName\":null,\"fileType\":null,\"data\":null,\"new\":false},\"new\":false}]")));
 	}
+	
 
 }
