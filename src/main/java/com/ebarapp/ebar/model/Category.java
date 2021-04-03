@@ -18,4 +18,5 @@ public class Category extends BaseEntity {
 	@NotNull
 	@Column(name = "name")
 	private String name;
+	
 }
