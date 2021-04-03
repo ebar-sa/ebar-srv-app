@@ -30,7 +30,7 @@ import com.ebarapp.ebar.service.ItemBillService;
 import com.ebarapp.ebar.service.ItemMenuService;
 
 @WebMvcTest(controllers = BillController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
-public class BillControllerTests {
+class BillControllerTests {
 
 	private static final int	TEST_MENU_ID		= 1;
 	private static final int	TEST_BAR_ID			= 1;

@@ -32,7 +32,7 @@ import com.ebarapp.ebar.service.MenuService;
 
 @WebMvcTest(controllers = MenuController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
 
-public class MenuControllerTests {
+class MenuControllerTests {
 
 	private static final int	TEST_MENU_ID	= 1;
 	private static final int	TEST_BAR_ID		= 1;
