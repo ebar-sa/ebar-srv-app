@@ -35,7 +35,7 @@ public class BillControllerTests {
 	private static final int	TEST_MENU_ID		= 1;
 	private static final int	TEST_BAR_ID			= 1;
 	private static final int	TEST_BILL_ID		= 1;
-	private static final int	TEST_ITEM_ID		= 3;
+	private static final int	TEST_ITEM_ID		= 1;
 	private static final int	TEST_ITEMBILL_ID	= 4;
 
 	@Autowired
@@ -51,7 +51,8 @@ public class BillControllerTests {
 	private ItemBillService		itemBillService;
 
 	private Bill				bill;
-	private ItemBill			itembill;
+	private ItemMenu			itemMenu;
+	private ItemBill			itemBill;
 	private Optional<Bill>		billOpt;
 
 
@@ -63,7 +64,7 @@ public class BillControllerTests {
 
 		Set<ItemBill> itemsOrder = new HashSet<ItemBill>();
 		ItemBill itemOrder = new ItemBill();
-		itemOrder.setId(2);
+		itemOrder.setId(BillControllerTests.TEST_ITEMBILL_ID);
 		itemOrder.setAmount(3);
 		ItemMenu itemMenuOrder = new ItemMenu();
 		itemMenuOrder.setId(2);
@@ -71,88 +72,102 @@ public class BillControllerTests {
 		itemOrder.setItemMenu(itemMenuOrder);
 		itemsOrder.add(itemOrder);
 
+		Set<ItemMenu> iob = new HashSet<ItemMenu>();
+		iob.add(itemMenuOrder);
+
 		this.bill.setItemOrder(itemsOrder);
 
 		Set<ItemBill> itemsBill = new HashSet<ItemBill>();
-		ItemBill itemBill = new ItemBill();
-		itemBill.setId(1);
-		itemBill.setAmount(2);
-		ItemMenu itemMenu = new ItemMenu();
-		itemMenu.setId(1);
-		itemMenu.setName("Calamares");
-		itemBill.setItemMenu(itemMenu);
-		itemsBill.add(itemBill);
+		this.itemBill = new ItemBill();
+		this.itemBill.setId(1);
+		this.itemBill.setAmount(2);
+		this.itemMenu = new ItemMenu();
+		this.itemMenu.setId(BillControllerTests.TEST_ITEM_ID);
+		this.itemMenu.setName("Calamares");
+		this.itemBill.setItemMenu(this.itemMenu);
+		itemsBill.add(this.itemBill);
+
+		Set<ItemMenu> imb = new HashSet<ItemMenu>();
+		imb.add(this.itemMenu);
 
 		this.bill.setItemBill(itemsBill);
 
-		Optional<Bill> billOpt = this.billService.findbyId(BillControllerTests.TEST_BILL_ID);
-		//		billOpt = Optional.of(bill);
+		Optional<ItemMenu> itemOpt = Optional.of(this.itemMenu);
+		this.billOpt = Optional.of(this.bill);
 
 		// item para meterlo en Order
-		//		ItemBill item = new ItemBill();
-		//		item.setId(3);
-		//		item.setAmount(1);
-		//		ItemMenu itemMenuForOrder = new ItemMenu();
-		//		itemMenuForOrder.setId(2);
-		//		itemMenuForOrder.setName("Queso");
-		//		item.setItemMenu(itemMenuForOrder);
+		ItemBill item = new ItemBill();
+		item.setId(3);
+		item.setAmount(1);
+		ItemMenu itemMenuForOrder = new ItemMenu();
+		itemMenuForOrder.setId(2);
+		itemMenuForOrder.setName("Queso");
+		item.setItemMenu(itemMenuForOrder);
 
 		// itemOrder para meterlo en la bill
-		//		ItemBill itemOrder2 = new ItemBill();
-		//		itemOrder2.setId(4);
-		//		itemOrder2.setAmount(10);
-		//		ItemMenu itemMenuOrderForBill = new ItemMenu();
-		//		itemMenuOrderForBill.setId(2);
-		//		itemMenuOrderForBill.setName("Puré de calabaza");
-		//		itemOrder.setItemMenu(itemMenuOrderForBill);
+		ItemBill itemOrder2 = new ItemBill();
+		itemOrder2.setId(1);
+		itemOrder2.setAmount(10);
+		ItemMenu itemMenuOrderForBill = new ItemMenu();
+		itemMenuOrderForBill.setId(3);
+		itemMenuOrderForBill.setName("Puré de calabaza");
+		itemOrder2.setItemMenu(itemMenuOrderForBill);
+
+		Optional<ItemMenu> item3Opt = Optional.of(itemMenuOrderForBill);
+
+		Optional<ItemBill> itemBillOpt = Optional.of(itemOrder2);
 
 		BDDMockito.given(this.billService.getBillById(BillControllerTests.TEST_BILL_ID)).willReturn(this.bill);
-
-		//		Optional<Bill> billOpt = this.billService.findbyId(idBill);
-		BDDMockito.given(this.billService.findbyId(BillControllerTests.TEST_BILL_ID)).willReturn(billOpt);
-
-		BDDMockito.given(this.itemMenuService.findbyId(1).get()).willReturn(itemMenu);
-
-		//		given(this.itemBillService.findbyId(TEST_BILL_ID).get()).willReturn(itemBill);
-
+		BDDMockito.given(this.billService.findbyId(BillControllerTests.TEST_BILL_ID)).willReturn(this.billOpt);
+		BDDMockito.given(this.itemMenuService.findbyId(BillControllerTests.TEST_ITEM_ID)).willReturn(itemOpt);
+		BDDMockito.given(this.itemMenuService.getItemMenuById(BillControllerTests.TEST_ITEM_ID)).willReturn(this.itemMenu);
+		BDDMockito.given(this.billService.getItemOrderByBillId(BillControllerTests.TEST_BILL_ID)).willReturn(iob);
+		BDDMockito.given(this.billService.getItemMenuByBillId(BillControllerTests.TEST_BILL_ID)).willReturn(imb);
+		BDDMockito.given(this.itemBillService.getItemBillById(BillControllerTests.TEST_ITEMBILL_ID)).willReturn(itemOrder);
+		BDDMockito.given(this.itemMenuService.findbyId(3)).willReturn(item3Opt);
+		BDDMockito.given(this.itemBillService.findbyId(BillControllerTests.TEST_ITEMBILL_ID)).willReturn(itemBillOpt);
 	}
 
 	// test para ver que se obtiene el order
 
-	//	@Test
-	//	void testBillOrderById() throws Exception {
-	//		this.mockMvc
-	//				.perform(
-	//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
-	//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder", hasToString(
-	//						"[{\"id\":2,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-	//	}
+	@Test
+	void testBillOrderById() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/" + BillControllerTests.TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemOrder",
+			Matchers.hasToString("[{\"id\":4,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+	}
 
 	// test para ver que se obtiene la bill
-	//	@Test
-	//	void testBillById() throws Exception {
-	//		this.mockMvc
-	//				.perform(
-	//						MockMvcRequestBuilders.get("/api/bill/" + TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON))
-	//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemBill", hasToString(
-	//						"[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-	//	}
+	@Test
+	void testBillById() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/" + BillControllerTests.TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("itemBill",
+			Matchers.hasToString("[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+	}
 
 	// test para ver que se añade al order
 	@Test
 	void testAddToOrder() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/" + BillControllerTests.TEST_ITEM_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasToString(
-				"\"[{\\\"id\\\":3,\\\"amount\\\":3,\\\"itemMenu\\\":{\\\"id\\\":2,\\\"name\\\":\\\"Queso\\\",\\\"description\\\":null,\\\"rationType\\\":null,\\\"price\\\":null,\\\"category\\\":null,\\\"image\\\":null,\\\"new\\\":false},\\\"new\\\":false}]\"")));
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/" + BillControllerTests.TEST_ITEM_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk());
+		//.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasToString(
+		//	"[{\"id\":4,\"amount\":3,\"itemMenu\":{\"id\":2,\"name\":\"Tortilla de patatas\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false},{\"id\":null,\"amount\":1,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":true}]")));
+
+	}
+
+	@Test
+	void testDontAddToOrder() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/4").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().is5xxServerError());
 	}
 
 	// test para ver que se añade al bill
-	//	@Test
-	//	void testAddToBill() throws Exception {
-	//		this.mockMvc
-	//				.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + TEST_BILL_ID + "/" + TEST_ITEMBILL_ID)
-	//						.contentType(MediaType.APPLICATION_JSON))
-	//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("", hasToString("")));
-	//	}
+	@Test
+	void testAddToBill() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/" + BillControllerTests.TEST_ITEMBILL_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk());
+		//.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasToString(
+		//	"[{\"id\":1,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false},{\"id\":null,\"amount\":1,\"itemMenu\":{\"id\":3,\"name\":\"Puré de calabaza\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":true}]")));
+	}
+
+	@Test
+	void testDontAddToBill() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/5").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().is5xxServerError());
+	}
 
 }
