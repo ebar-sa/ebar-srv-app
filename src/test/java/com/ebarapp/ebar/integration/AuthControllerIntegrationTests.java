@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.controller;
+package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
 import com.ebarapp.ebar.model.User;
