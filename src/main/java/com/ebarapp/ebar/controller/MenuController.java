@@ -19,7 +19,6 @@ import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.MenuService;
 
-
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api")
@@ -30,7 +29,9 @@ public class MenuController {
 
 	@Autowired
 	private BarService	barService;
-	
+
+
+	@GetMapping("/menu/{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Menu> getMenuById(@PathVariable("id") final Integer id) {
 		try {
@@ -52,20 +53,21 @@ public class MenuController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-	}	
-	
+	}
+
 	@GetMapping("/bares/{idBar}/menu")
 	@PreAuthorize("hasRole('ROLE_OWNER')")
-	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar, Principal p) {
+	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar, final Principal p) {
 		try {
 			String username = p.getName();
-			Bar b = barService.findBarById(idBar);
-			if(b.getOwner().getUsername().equals(username)) {
+			Bar b = this.barService.findBarById(idBar);
+			if (b.getOwner().getUsername().equals(username)) {
 				Menu m = b.getMenu();
-				if(m != null) 
+				if (m != null) {
 					return new ResponseEntity<>(m, HttpStatus.OK);
-				else
+				} else {
 					return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				}
 			} else {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
