@@ -23,7 +23,7 @@ import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemBillService;
 import com.ebarapp.ebar.service.ItemMenuService;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = {"http://localhost:8081","https://ebar-gui-sprint1.herokuapp.com/"})
 @RestController
 @RequestMapping("/api/bill")
 public class BillController {
