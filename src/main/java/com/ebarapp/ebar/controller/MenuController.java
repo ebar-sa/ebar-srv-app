@@ -33,18 +33,19 @@ public class MenuController {
 	@GetMapping("/menu/{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Menu> getMenuById(@PathVariable("id") final Integer id) {
-		try {
-			Bar bar = this.barService.findBarById(id);
-			Menu menu = bar.getMenu();
 
-			return new ResponseEntity<>(menu, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		Bar bar = this.barService.findBarById(id);
+		if (bar != null) {
+			Menu menu = bar.getMenu();
+			return ResponseEntity.ok(menu);
+		} else {
+			return ResponseEntity.notFound().build();
 		}
+
 	}
 
 	@DeleteMapping("/menu/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Menu> deleteMenu(@PathVariable("id") final Integer id) {
 		try {
 			this.menuService.removeMenu(id);

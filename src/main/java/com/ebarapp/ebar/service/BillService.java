@@ -10,14 +10,12 @@ import org.springframework.stereotype.Service;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.repository.BillRepository;
-import com.ebarapp.ebar.repository.ItemMenuRepository;
 
 @Service
 public class BillService {
 
 	@Autowired
-	private BillRepository		billRepository;
-	private ItemMenuRepository	itemMenuRepository;
+	private BillRepository billRepository;
 
 
 	public Bill createBill(final Bill newBill) {
@@ -52,22 +50,4 @@ public class BillService {
 	public Set<ItemMenu> getItemMenuByBillId(final Integer id) {
 		return this.billRepository.getItemMenuByBillId(id);
 	}
-
-	//	public void addOrder(final Integer idItem, final Integer idBill) {
-	//		Bill c = this.getBillById(idBill);
-	//		ItemBill item = this.itemMenuRepository.findById(idItem).get();
-	//		Set<ItemBill> itemsOrder = new HashSet<ItemBill>();
-	//		itemsOrder.addAll(c.getItemOrder());
-	//		itemsOrder.add(item);
-	//
-	//	}
-	//
-	//	public void updateBill(final Integer idItem, final Integer idBill) {
-	//		Bill c = this.getBillById(idBill);
-	//		ItemBill item = this.itemMenuRepository.findById(idItem).get();
-	//		Set<ItemBill> itemsMenu = new HashSet<ItemBill>();
-	//		itemsMenu.addAll(c.getItemMenu());
-	//		itemsMenu.add(item);
-	//		c.getItemOrder().remove(item);
-	//	}
 }
