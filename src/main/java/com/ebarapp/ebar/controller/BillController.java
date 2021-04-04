@@ -39,7 +39,7 @@ public class BillController {
 
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
 		Bill bill = this.billService.getBillById(id);
 
@@ -60,7 +60,7 @@ public class BillController {
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Bill> deleteBill(@PathVariable("id") final Integer id) {
 		try {
 			this.billService.removeBill(id);
@@ -71,7 +71,7 @@ public class BillController {
 	}
 
 	@GetMapping("/addToOrder/{idBill}/{idItem}")
-	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
@@ -102,7 +102,7 @@ public class BillController {
 	}
 
 	@GetMapping("/addToBill/{idBill}/{idItemBill}")
-	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);

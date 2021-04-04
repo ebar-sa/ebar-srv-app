@@ -41,7 +41,7 @@ public class BarTableController {
 
 
 	@GetMapping("")
-	@PreAuthorize("hasRole('ROLE_EMPLOYEE')")
+	@PreAuthorize("hasRole('EMPLOYEE')")
 	public ResponseEntity<List<BarTable>> getAllTables() {
 		try {
 
@@ -88,7 +88,7 @@ public class BarTableController {
 	}
 	
 	@GetMapping("/busyTable/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<BarTable> busyTable(@PathVariable("id") final Integer id) {
 		try {
 
@@ -111,7 +111,7 @@ public class BarTableController {
 	}
 
 	@GetMapping("/freeTable/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Map<Integer, Object>> freeTable(@PathVariable("id") final Integer id) {
 		try {
 			Map<Integer,Object> res = new HashMap<Integer, Object>();
@@ -145,7 +145,7 @@ public class BarTableController {
 
 	}
 	@GetMapping("/autoOccupateTable/{id}/{token}")
-	@PreAuthorize("hasRole('ROLE_CLIENT')")
+	@PreAuthorize("hasRole('CLIENT')")
 	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("id") Integer id,@PathVariable("token") String token){
 		try {
 			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
