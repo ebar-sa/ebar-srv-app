@@ -14,8 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.ebarapp.ebar.configuration.security.jwtConfiguration.AuthEntryPointJwt;
-import com.ebarapp.ebar.configuration.security.jwtConfiguration.AuthTokenFilter;
+import com.ebarapp.ebar.configuration.security.jwt_configuration.AuthEntryPointJwt;
+import com.ebarapp.ebar.configuration.security.jwt_configuration.AuthTokenFilter;
 import com.ebarapp.ebar.service.UserService;
 
 @Configuration
@@ -58,8 +58,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/test/**").permitAll()
                 .antMatchers("/api/bares/**").permitAll()
                 .antMatchers("/api/tables/**").permitAll()
+                .antMatchers("/api/bill/**").permitAll()
+                .antMatchers("/api/menu/**").permitAll()
+                .antMatchers("/api/bares/{idBar}/menu**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
 }
