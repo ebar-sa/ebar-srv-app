@@ -24,10 +24,8 @@ public class VotingValidator implements Validator {
         LocalDateTime closingHour = voting.getClosingHour();
 
         //ClosingHour can't be before OpeningHour
-        if(closingHour != null && closingHour.toString() != "") {
-	        if (closingHour.isBefore(openingHour)) {
-	            errors.reject("closingHour", "ClosingHour can't be before OpeningHour");
-	        }
+        if(closingHour != null && !closingHour.toString().equals("") && closingHour.isBefore(openingHour)) {
+            errors.reject("closingHour", "ClosingHour can't be before OpeningHour");
         }
         
         if (openingHour.isBefore(LocalDateTime.now())) {

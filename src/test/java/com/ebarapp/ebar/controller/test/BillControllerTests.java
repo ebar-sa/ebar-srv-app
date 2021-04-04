@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import com.ebarapp.ebar.model.type.RationType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,7 +153,7 @@ class BillControllerTests {
 
 	@Test
 	void testDontAddToOrder() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/4").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().is5xxServerError());
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/4").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 	// test para ver que se añade al bill
@@ -165,7 +166,7 @@ class BillControllerTests {
 
 	@Test
 	void testDontAddToBill() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/5").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().is5xxServerError());
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/5").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 }

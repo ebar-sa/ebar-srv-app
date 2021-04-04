@@ -1,10 +1,9 @@
 package com.ebarapp.ebar.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
 
+import com.ebarapp.ebar.model.dtos.VotingDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,11 +11,9 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -27,11 +24,23 @@ import lombok.Setter;
 @Table(name="voting")
 public class Voting extends BaseEntity {
 
-    @NotNull
+    public Voting() {}
+
+    public Voting(VotingDTO votingDTO) {
+        this.title = votingDTO.getTitle();
+        this.description = votingDTO.getDescription();
+        this.openingHour = votingDTO.getOpeningHour();
+        this.closingHour = votingDTO.getClosingHour();
+        this.timer = votingDTO.getTimer();
+        this.options = votingDTO.getOptions();
+        this.votersUsernames = votingDTO.getVotersUsernames();
+    }
+
+    @NotBlank
     @Column(name = "title")
     private String title;
 
-    @NotNull
+    @NotBlank
     @Column(name = "description")
     private String description;
 
