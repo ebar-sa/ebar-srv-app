@@ -46,14 +46,12 @@ class AuthControllerIntegrationTests {
     @MockBean
     private UserRepository userRepository;
 
-    private User user;
-
     @BeforeEach
     void setUp() {
         Set<RoleType> roles = new HashSet<>();
         roles.add(RoleType.ROLE_CLIENT);
 
-        user = new User();
+        User user = new User();
         user.setUsername(USERNAME);
         user.setFirstName("Pepe");
         user.setLastName("Díaz");

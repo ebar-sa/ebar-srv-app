@@ -53,12 +53,16 @@ import java.util.Set;
         option1.setDescription("Option 1");
 
         Option option2 = new Option();
-        option1.setId(2);
-        option1.setVotes(0);
-        option1.setDescription("Option 2");
+        option2.setId(2);
+        option2.setVotes(0);
+        option2.setDescription("Option 2");
 
         Set<Option> options  = new HashSet<>();
         options.add(option2);
+
+        String participant = "user1";
+        Set<String> participants = new HashSet<>();
+        participants.add(participant);
 
         Voting voting = new Voting();
         voting.setId(1);
@@ -68,7 +72,7 @@ import java.util.Set;
         voting.setDescription("Lorem Ipsum");
         voting.setTimer(null);
         voting.setVotersUsernames(new HashSet<>());
-        voting.setOptions(new HashSet<>());
+        voting.setOptions(options);
 
         Voting voting2 = new Voting();
         voting2.setId(3);
@@ -77,18 +81,21 @@ import java.util.Set;
         voting2.setClosingHour(LocalDateTime.now().plusHours(2L));
         voting2.setDescription("Lorem Ipsum");
         voting2.setTimer(null);
-        voting2.setVotersUsernames(new HashSet<>());
+        voting2.setVotersUsernames(participants);
         voting2.setOptions(options);
 
         Set<Voting> votings = new HashSet<>();
         votings.add(voting);
         votings.add(voting2);
 
+
         BDDMockito.given(this.votingService.getVotingById(1)).willReturn(voting);
         BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
         BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
         BDDMockito.given(this.optionService.getOptionById(1)).willReturn(option1);
+        BDDMockito.given(this.optionService.getOptionById(2)).willReturn(null);
+        BDDMockito.given(this.optionService.getOptionById(3)).willReturn(option2);
         BDDMockito.given(this.optionService.createOption(Mockito.any(Option.class))).willReturn(option1);
 
         Bar bar = new Bar();
@@ -129,14 +136,35 @@ import java.util.Set;
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void successDeleteOption() throws Exception{
-        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/voting/1/option/1"))
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/voting/1/option/3"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
-    void failureDeleteOption() throws Exception{
+    void failureDeleteOptionNotFound() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/voting/1/option/2"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureDeleteOptionVotingNotFound() throws Exception{
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/voting/2/option/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureDeleteOptionVotingHasStarted() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/voting/3/option/1"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureDeleteOptionVotingNotContains() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/voting/1/option/1"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
@@ -159,5 +187,26 @@ import java.util.Set;
     void successVote() throws Exception{
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/3/option/1/vote"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void failureVoteVotingNotFound() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/2/option/1/vote"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void failureVoteNotActive() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/1/option/1/vote"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="user1", roles={"CLIENT"})
+    @Test
+    void failureVoteCantVoteTwice() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/3/option/1/vote"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 }
