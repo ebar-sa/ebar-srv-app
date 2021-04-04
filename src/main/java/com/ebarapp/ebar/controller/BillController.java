@@ -111,10 +111,10 @@ public class BillController {
 			Optional<ItemBill> itemBillOpt = this.itemBillService.findbyId(idItemBill);
 			if (billOpt.isPresent() && itemBillOpt.isPresent()) {
 				Bill bill = billOpt.get();
-				ItemBill res = this.itemBillService.findbyId(idItemBill).get();
+				ItemBill res = itemBillOpt.get();
 				Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(res.getId());
 				if (itemOpt.isPresent()) {
-					ItemMenu item = this.itemMenuService.findbyId(res.getItemMenu().getId()).get();
+					ItemMenu item = itemOpt.get();
 					Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
 					if (im.contains(item)) {
 						for (ItemBill ib : bill.getItemBill()) {
@@ -157,5 +157,4 @@ public class BillController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
 }
