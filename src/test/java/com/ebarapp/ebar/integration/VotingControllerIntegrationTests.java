@@ -25,7 +25,6 @@ import java.util.Set;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@TestMethodOrder(MethodOrderer.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class VotingControllerIntegrationTests {
 
