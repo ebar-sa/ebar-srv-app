@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ebarapp.ebar.configuration.security.jwtConfiguration.JwtUtils;
+import com.ebarapp.ebar.configuration.security.jwt_configuration.JwtUtils;
 import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
 import com.ebarapp.ebar.configuration.security.payload.request.SignupRequest;
 import com.ebarapp.ebar.configuration.security.payload.response.LoginResponse;
@@ -46,7 +47,7 @@ public class AuthController {
 	JwtUtils jwtUtils;
 
 	@PostMapping("/signin")
-	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -56,9 +57,9 @@ public class AuthController {
 		
 		User userDetails = (User) authentication.getPrincipal();		
 		List<String> roles = userDetails.getAuthorities().stream()
-				.map(item -> item.getAuthority())
+				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
-
+		
 		return ResponseEntity.ok(new LoginResponse(jwt, 
 												 userDetails.getUsername(), 
 												 userDetails.getEmail(), 
@@ -66,7 +67,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userService.existsUserByUsername(signUpRequest.getUsername())) {
 			return ResponseEntity
 					.badRequest()

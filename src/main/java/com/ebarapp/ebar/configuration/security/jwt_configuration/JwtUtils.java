@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.configuration.security.jwtConfiguration;
+package com.ebarapp.ebar.configuration.security.jwt_configuration;
 
 import java.util.Date;
 

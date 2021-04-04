@@ -12,9 +12,13 @@ import com.ebarapp.ebar.repository.UserRepository;
 @Service
 public class UserService implements UserDetailsService {
 
-	@Autowired
 	private UserRepository userRepository;
-	
+
+	@Autowired
+	public UserService(final UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
