@@ -41,7 +41,7 @@ public class BarTableController {
 
 
 	@GetMapping("")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<List<BarTable>> getAllTables() {
 		try {
 
