@@ -39,7 +39,7 @@ public class BillController {
 
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
 		try {
 			Bill bill = this.billService.getBillById(id);
@@ -59,7 +59,7 @@ public class BillController {
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> deleteBill(@PathVariable("id") final Integer id) {
 		try {
 			this.billService.removeBill(id);
@@ -70,7 +70,7 @@ public class BillController {
 	}
 
 	@GetMapping("/addToOrder/{idBill}/{idItem}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem) {
 		try {
 			Optional<Bill> billOpt = this.billService.findbyId(idBill);
@@ -88,6 +88,7 @@ public class BillController {
 							ib.setAmount(i);
 						}
 					}
+				
 				} else {
 					ItemBill b = new ItemBill();
 					b.setItemMenu(item);
@@ -107,7 +108,7 @@ public class BillController {
 	}
 
 	@GetMapping("/addToBill/{idBill}/{idItemBill}")
-	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		try {
 
