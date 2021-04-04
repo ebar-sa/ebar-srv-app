@@ -21,10 +21,10 @@ public class ItemBillService {
 	}
 
 	public ItemBill getItemBillById(final Integer id) {
-		Optional<ItemBill> ItemBill = this.itemBillRepository.findById(id);
+		Optional<ItemBill> itemBill = this.itemBillRepository.findById(id);
 		ItemBill res = null;
-		if (ItemBill.isPresent()) {
-			res = ItemBill.get();
+		if (itemBill.isPresent()) {
+			res = itemBill.get();
 		}
 		return res;
 	}

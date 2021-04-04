@@ -152,7 +152,7 @@ class BillControllerTests {
 
 	@Test
 	void testDontAddToOrder() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/4").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().is5xxServerError());
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/2/99").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNoContent());
 	}
 
 	// test para ver que se añade al bill
@@ -165,7 +165,7 @@ class BillControllerTests {
 
 	@Test
 	void testDontAddToBill() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/5").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().is5xxServerError());
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/2/99").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNoContent());
 	}
 
 }

@@ -39,21 +39,18 @@ public class BillController {
 
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
 		try {
 			Bill bill = this.billService.getBillById(id);
-			Set<ItemBill> order = new HashSet<ItemBill>();
-			Set<ItemBill> itemBill = new HashSet<ItemBill>();
-			if (!bill.getItemOrder().isEmpty() && bill.getItemOrder() != null) {
-			} else {
+			Set<ItemBill> order = new HashSet<>();
+			Set<ItemBill> itemBill = new HashSet<>();
+			if (bill.getItemOrder().isEmpty() || bill.getItemOrder() == null) {
 				bill.setItemOrder(order);
 			}
-			if (!bill.getItemBill().isEmpty() && bill.getItemBill() != null) {
-			} else {
+			if (bill.getItemBill().isEmpty() && bill.getItemBill() == null) {
 				bill.setItemBill(itemBill);
 			}
-
 			return new ResponseEntity<>(bill, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -61,7 +58,7 @@ public class BillController {
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> deleteBill(@PathVariable("id") final Integer id) {
 		try {
 			this.billService.removeBill(id);
@@ -72,18 +69,18 @@ public class BillController {
 	}
 
 	@GetMapping("/addToOrder/{idBill}/{idItem}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem) {
 		try {
 			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			if (billOpt.isPresent()) {
+			Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
+			if (billOpt.isPresent() && itemOpt.isPresent()) {
 				Bill bill = billOpt.get();
-				ItemMenu item = this.itemMenuService.findbyId(idItem).get();
+				ItemMenu item = itemOpt.get();
 				Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
 				if (im.contains(item)) {
-
 					for (ItemBill ib : bill.getItemOrder()) {
-						if (ib.getItemMenu().getId() == item.getId()) {
+						if (ib.getItemMenu().getId().equals(item.getId())) {
 							Integer i = ib.getAmount();
 							i++;
 							ib.setAmount(i);
@@ -96,66 +93,68 @@ public class BillController {
 					this.itemBillService.saveItemBill(b);
 					bill.getItemOrder().add(b);
 				}
-
 				this.billService.saveBill(bill);
-				return new ResponseEntity<Bill>(bill, HttpStatus.OK);
+				return new ResponseEntity<>(bill, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<Bill>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@GetMapping("/addToBill/{idBill}/{idItemBill}")
-	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		try {
-
 			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			ItemBill res = this.itemBillService.findbyId(idItemBill).get();
-			if (billOpt.isPresent()) {
+			Optional<ItemBill> itemBillOpt = this.itemBillService.findbyId(idItemBill);
+			if (billOpt.isPresent() && itemBillOpt.isPresent()) {
 				Bill bill = billOpt.get();
-				ItemMenu item = this.itemMenuService.findbyId(res.getItemMenu().getId()).get();
-				Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
-				if (im.contains(item)) {
-
-					for (ItemBill ib : bill.getItemBill()) {
-						if (ib.getItemMenu().getId() == item.getId()) {
-							Integer i = ib.getAmount();
-							i++;
-							ib.setAmount(i);
-							if (res.getAmount() == 1) {
-								bill.getItemOrder().remove(res);
-							} else {
-								Integer a = res.getAmount();
-								a--;
-								res.setAmount(a);
+				ItemBill res = this.itemBillService.findbyId(idItemBill).get();
+				Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(res.getId());
+				if (itemOpt.isPresent()) {
+					ItemMenu item = this.itemMenuService.findbyId(res.getItemMenu().getId()).get();
+					Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
+					if (im.contains(item)) {
+						for (ItemBill ib : bill.getItemBill()) {
+							if (ib.getItemMenu().getId().equals(item.getId())) {
+								Integer i = ib.getAmount();
+								i++;
+								ib.setAmount(i);
+								if (res.getAmount() == 1) {
+									bill.getItemOrder().remove(res);
+								} else {
+									Integer a = res.getAmount();
+									a--;
+									res.setAmount(a);
+								}
 							}
 						}
-					}
-				} else {
-					ItemBill b = new ItemBill();
-					b.setItemMenu(item);
-					b.setAmount(1);
-					this.itemBillService.saveItemBill(b);
-					bill.getItemBill().add(b);
-					if (res.getAmount() == 1) {
-						bill.getItemOrder().remove(res);
 					} else {
-						Integer a = res.getAmount();
-						a--;
-						res.setAmount(a);
+						ItemBill b = new ItemBill();
+						b.setItemMenu(item);
+						b.setAmount(1);
+						this.itemBillService.saveItemBill(b);
+						bill.getItemBill().add(b);
+						if (res.getAmount() == 1) {
+							bill.getItemOrder().remove(res);
+						} else {
+							Integer a = res.getAmount();
+							a--;
+							res.setAmount(a);
+						}
 					}
+					this.billService.saveBill(bill);
+					return new ResponseEntity<>(bill, HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 				}
-
-				this.billService.saveBill(bill);
-				return new ResponseEntity<Bill>(bill, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<Bill>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
