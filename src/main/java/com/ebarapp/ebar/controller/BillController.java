@@ -43,14 +43,12 @@ public class BillController {
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
 		try {
 			Bill bill = this.billService.getBillById(id);
-			Set<ItemBill> order = new HashSet<ItemBill>();
-			Set<ItemBill> itemBill = new HashSet<ItemBill>();
-			if (!bill.getItemOrder().isEmpty() && bill.getItemOrder() != null) {
-			} else {
+			Set<ItemBill> order = new HashSet<>();
+			Set<ItemBill> itemBill = new HashSet<>();
+			if (bill.getItemOrder() == null || bill.getItemOrder().isEmpty()) {
 				bill.setItemOrder(order);
 			}
-			if (!bill.getItemBill().isEmpty() && bill.getItemBill() != null) {
-			} else {
+			if (bill.getItemBill() == null || bill.getItemBill().isEmpty()) {
 				bill.setItemBill(itemBill);
 			}
 
@@ -76,16 +74,15 @@ public class BillController {
 	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem) {
 		try {
 			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			if (billOpt.isPresent()) {
+			Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
+			if (billOpt.isPresent() && itemOpt.isPresent()) {
 				Bill bill = billOpt.get();
-				Optional<ItemMenu> it = this.itemMenuService.findbyId(idItem);
-				if(it.isPresent()) {
-					ItemMenu item = it.get();
-					Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
-					if (im.contains(item)) {
+				ItemMenu item = itemOpt.get();
+				Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
+				if (im.contains(item)) {
 
 					for (ItemBill ib : bill.getItemOrder()) {
-						if (ib.getItemMenu().getId() == item.getId()) {
+						if (ib.getItemMenu().getId().equals(item.getId())) {
 							Integer i = ib.getAmount();
 							i++;
 							ib.setAmount(i);
@@ -101,15 +98,12 @@ public class BillController {
 				}
 
 				this.billService.saveBill(bill);
-				return new ResponseEntity<Bill>(bill, HttpStatus.OK);
-			} else { 
-				return new ResponseEntity<Bill>(HttpStatus.NO_CONTENT);
-			}
+				return new ResponseEntity<>(bill, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<Bill>(HttpStatus.NO_CONTENT);
+				return ResponseEntity.notFound().build();
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
@@ -119,15 +113,16 @@ public class BillController {
 		try {
 
 			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			ItemBill res = this.itemBillService.findbyId(idItemBill).get();
-			if (billOpt.isPresent()) {
+			Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
+			if (billOpt.isPresent() && resOpt.isPresent()) {
 				Bill bill = billOpt.get();
-				ItemMenu item = this.itemMenuService.findbyId(res.getItemMenu().getId()).get();
+				ItemBill res = resOpt.get();
+				ItemMenu item = res.getItemMenu();
 				Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
 				if (im.contains(item)) {
 
 					for (ItemBill ib : bill.getItemBill()) {
-						if (ib.getItemMenu().getId() == item.getId()) {
+						if (ib.getItemMenu().getId().equals(item.getId())) {
 							Integer i = ib.getAmount();
 							i++;
 							ib.setAmount(i);
@@ -156,12 +151,12 @@ public class BillController {
 				}
 
 				this.billService.saveBill(bill);
-				return new ResponseEntity<Bill>(bill, HttpStatus.OK);
+				return ResponseEntity.ok(bill);
 			} else {
-				return new ResponseEntity<Bill>(HttpStatus.NO_CONTENT);
+				return ResponseEntity.notFound().build();
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 

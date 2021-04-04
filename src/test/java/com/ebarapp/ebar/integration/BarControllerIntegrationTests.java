@@ -1,6 +1,7 @@
 package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.repository.BarRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,13 @@ class BarControllerIntegrationTests {
 
     @BeforeEach
     void setUp() {
+        Set<BarTable> barTables = new HashSet<>();
+
+        BarTable barTable = new BarTable();
+        barTable.setName("Mesa 1");
+        barTable.setFree(true);
+        barTables.add(barTable);
+
         Bar bar = new Bar();
         bar.setName(TEST_BAR_NAME);
         bar.setDescription(TEST_BAR_DESCRIPTION);
@@ -54,7 +62,7 @@ class BarControllerIntegrationTests {
         bar.setLocation(TEST_BAR_LOCATION);
         bar.setOpeningTime(TEST_BAR_OPENING_TIME);
         bar.setClosingTime(TEST_BAR_CLOSING_TIME);
-        bar.setBarTables(new HashSet<>());
+        bar.setBarTables(barTables);
 
         List<Bar> bars = Collections.singletonList(bar);
 
@@ -85,8 +93,15 @@ class BarControllerIntegrationTests {
     }
 
     @Test
-    void shouldNotGetBarById() throws Exception {
+    void shouldNotGetBarByIdUnauthorized() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
+    @Test
+    void shouldNotGetBarByIdNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2000").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

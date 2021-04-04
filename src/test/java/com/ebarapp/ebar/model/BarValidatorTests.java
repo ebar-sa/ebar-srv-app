@@ -1,6 +1,5 @@
 package com.ebarapp.ebar.model;
 
-import com.ebarapp.ebar.model.Bar;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
