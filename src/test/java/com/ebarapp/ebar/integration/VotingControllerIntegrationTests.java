@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.integrations;
+package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Voting;
@@ -27,7 +27,7 @@ import java.util.Set;
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class VotingTest {
+class VotingControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;

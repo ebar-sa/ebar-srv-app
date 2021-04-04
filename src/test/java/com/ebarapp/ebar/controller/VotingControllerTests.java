@@ -30,7 +30,7 @@ import java.util.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class VotingControllerTest {
+class VotingControllerTests {
 
     @MockBean
     private VotingService votingService;

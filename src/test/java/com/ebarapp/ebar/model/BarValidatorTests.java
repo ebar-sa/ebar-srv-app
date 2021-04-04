@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.unit;
+package com.ebarapp.ebar.model;
 
 import com.ebarapp.ebar.model.Bar;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.integrations;
+package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Option;
@@ -30,7 +30,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class OptionTest {
+class OptionControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
