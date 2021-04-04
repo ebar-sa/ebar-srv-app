@@ -107,43 +107,20 @@ public class BillController {
 	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		try {
+
 			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			Optional<ItemBill> itemBillOpt = this.itemBillService.findbyId(idItemBill);
-			if (billOpt.isPresent() && itemBillOpt.isPresent()) {
+			Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
+			if (billOpt.isPresent() && resOpt.isPresent()) {
 				Bill bill = billOpt.get();
-				ItemBill res = itemBillOpt.get();
-				Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(res.getId());
+				ItemBill res = resOpt.get();
+				Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(res.getItemMenu().getId());
 				if (itemOpt.isPresent()) {
 					ItemMenu item = itemOpt.get();
 					Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
 					if (im.contains(item)) {
-						for (ItemBill ib : bill.getItemBill()) {
-							if (ib.getItemMenu().getId().equals(item.getId())) {
-								Integer i = ib.getAmount();
-								i++;
-								ib.setAmount(i);
-								if (res.getAmount() == 1) {
-									bill.getItemOrder().remove(res);
-								} else {
-									Integer a = res.getAmount();
-									a--;
-									res.setAmount(a);
-								}
-							}
-						}
+						this.addOrderToBill(bill, res, item);
 					} else {
-						ItemBill b = new ItemBill();
-						b.setItemMenu(item);
-						b.setAmount(1);
-						this.itemBillService.saveItemBill(b);
-						bill.getItemBill().add(b);
-						if (res.getAmount() == 1) {
-							bill.getItemOrder().remove(res);
-						} else {
-							Integer a = res.getAmount();
-							a--;
-							res.setAmount(a);
-						}
+						this.newOrderToBill(bill, res, item);
 					}
 					this.billService.saveBill(bill);
 					return new ResponseEntity<>(bill, HttpStatus.OK);
@@ -155,6 +132,38 @@ public class BillController {
 			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	protected void newOrderToBill(final Bill bill, final ItemBill res, final ItemMenu item) {
+		ItemBill b = new ItemBill();
+		b.setItemMenu(item);
+		b.setAmount(1);
+		this.itemBillService.saveItemBill(b);
+		bill.getItemBill().add(b);
+		if (res.getAmount() == 1) {
+			bill.getItemOrder().remove(res);
+		} else {
+			Integer a = res.getAmount();
+			a--;
+			res.setAmount(a);
+		}
+	}
+
+	protected void addOrderToBill(final Bill bill, final ItemBill res, final ItemMenu item) {
+		for (ItemBill ib : bill.getItemBill()) {
+			if (ib.getItemMenu().getId().equals(item.getId())) {
+				Integer i = ib.getAmount();
+				i++;
+				ib.setAmount(i);
+				if (res.getAmount() == 1) {
+					bill.getItemOrder().remove(res);
+				} else {
+					Integer a = res.getAmount();
+					a--;
+					res.setAmount(a);
+				}
+			}
 		}
 	}
 }
