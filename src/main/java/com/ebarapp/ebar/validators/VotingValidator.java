@@ -17,7 +17,7 @@ public class VotingValidator implements Validator {
     @Override
     public void validate(Object o, Errors errors) {
         Voting voting = (Voting) o;
-        String tilte = voting.getTitle();
+        String title = voting.getTitle();
         String description = voting.getDescription();
         Integer timer = voting.getTimer();
         LocalDateTime openingHour = voting.getOpeningHour();
@@ -38,7 +38,7 @@ public class VotingValidator implements Validator {
         }
 
         //Description and Title can't be blank
-        if(tilte.isEmpty() || description.isEmpty()) {
+        if(title.isEmpty() || description.isEmpty()) {
             errors.reject("title", "Description and Title can't be blank");
         }
     }
