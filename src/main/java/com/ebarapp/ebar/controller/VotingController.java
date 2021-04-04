@@ -134,8 +134,11 @@ public class VotingController {
 
     @GetMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
-    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Long barId) {
-        List<Voting> votaciones = votingService.getVotingsByBarId(barId);
-        return new ResponseEntity<>(votaciones, HttpStatus.OK);
+    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Integer barId) {
+        if(barService.findBarById(barId) == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Voting> votings = votingService.getVotingsByBarId(barId);
+        return ResponseEntity.ok(votings);
     }
 }

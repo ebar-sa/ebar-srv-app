@@ -1,6 +1,7 @@
 package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.service.BarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -41,6 +43,12 @@ class BarControllerTests {
     @BeforeEach
     void setUp() {
         List<Bar> allBares = new ArrayList<>();
+        Set<BarTable> barTables = new HashSet<>();
+
+        BarTable barTable = new BarTable();
+        barTable.setName("Mesa 1");
+        barTable.setFree(true);
+        barTables.add(barTable);
 
         bar = new Bar();
         bar.setId(10);
@@ -48,7 +56,7 @@ class BarControllerTests {
         bar.setDescription("Restaurant");
         bar.setContact("alfredo@gmail.com");
         bar.setLocation("Pennsylvania");
-        bar.setBarTables(new HashSet<>());
+        bar.setBarTables(barTables);
 
         allBares.add(bar);
 
@@ -79,9 +87,16 @@ class BarControllerTests {
     }
 
     @Test
-    void shouldNotGetBarById() throws Exception {
+    void shouldNotGetBarByIdUnauthorized() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
+    @Test
+    void shouldNotGetBarByIdNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2000").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
 }

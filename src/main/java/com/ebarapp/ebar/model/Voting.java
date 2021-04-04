@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
@@ -35,11 +36,11 @@ public class Voting extends BaseEntity {
         this.votersUsernames = votingDTO.getVotersUsernames();
     }
 
-    @NotNull
+    @NotBlank
     @Column(name = "title")
     private String title;
 
-    @NotNull
+    @NotBlank
     @Column(name = "description")
     private String description;
 

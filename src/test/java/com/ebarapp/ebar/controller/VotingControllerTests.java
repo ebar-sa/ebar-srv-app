@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -78,6 +80,7 @@ class VotingControllerTests {
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
         BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
         BDDMockito.given(this.votingService.createOrUpdateVoting(voting2)).willReturn(voting2);
+        BDDMockito.given(this.votingService.getVotingsByBarId(TEST_BAR_ID)).willReturn(new ArrayList<>(votings));
 
         Bar bar = new Bar();
         bar.setId(1);
@@ -175,5 +178,31 @@ class VotingControllerTests {
                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void successGetVotingsByBarId() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID + "/voting")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void failureGetVotingsByBarIdUnauthorized() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID + "/voting")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void failureGetVotingsByBarIdUNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2000/voting")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+
 
 }
