@@ -77,6 +77,7 @@ public class BarTableControllerTest {
 	    	
 	    		Menu m =  new Menu();
 		        m.setId(1);	
+		        m.setItems(new HashSet<>());
 	    		
 	    	 	bar = new Bar();
 		        bar.setId(10);
@@ -90,14 +91,6 @@ public class BarTableControllerTest {
 		        Bill b = new Bill();
 		        b.setId(1);
 		        
-		        
-		        
-		        
-		        
-		        
-		        
-
-	        
 	        
 	        table = new BarTable();
 	        table.setId(20);
@@ -124,30 +117,18 @@ public class BarTableControllerTest {
 	        table3.setFree(true);
 	       
 	        
-	        
-	        
-	        
-	       
-	        
 	       given(this.tableService.findbyId(20)).willReturn(table);
 	       given(this.tableService.findbyId(21)).willReturn(table2);
 	       given(this.tableService.findbyId(22)).willReturn(table3);
 	       given(this.tableService.getBillByTableId(21)).willReturn(b);
 	       
-	       
-
-	       
-	       
-	       
-	       
-	    
 	    }
 
 	   
 	    @WithMockUser(username="user", roles={"CLIENT"})
 	    @Test
 	    void testGetTableById() throws Exception {
-	    	String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false},\"1\":{\"id\":1,\"items\":null}}";
+	    	String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false},\"1\":{\"id\":1,\"items\":[],\"categories\":[],\"new\":false},\"2\":{\"id\":1,\"itemBill\":null,\"itemOrder\":null,\"new\":false}}";
 	        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 	        		.contentType(MediaType.APPLICATION_JSON)
 	        		.content(json))

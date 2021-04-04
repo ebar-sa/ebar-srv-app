@@ -3,6 +3,7 @@ package com.ebarapp.ebar.service;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.repository.BarTableRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,10 +47,9 @@ public class BarTableService {
 		String bancoLetras="abcdefghijklmnopqrstuvw";
 		String bancoNumeros = "123456789";
 		StringBuilder strB = new StringBuilder();
-		Random random = new Random();
 		for (int i = 0; i <= 6; i++) {
 			if(i < 3) {
-			int randomInt = random.nextInt(bancoLetras.length());
+			int randomInt = secureRandom.nextInt(bancoLetras.length());
 	        char randomChar = bancoLetras.charAt(randomInt);
 	        strB.append(randomChar);
 			}
@@ -57,7 +57,7 @@ public class BarTableService {
 	        	strB.append("-");
 	        }
 	        if(i > 3) {
-	        	int randomNumInt = random.nextInt(bancoNumeros.length());
+	        	int randomNumInt = secureRandom.nextInt(bancoNumeros.length());
 		        char randomNum = bancoNumeros.charAt(randomNumInt);
 		        strB.append(randomNum);
 	        }

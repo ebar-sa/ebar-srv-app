@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
-import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.Menu;
-import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 
@@ -31,8 +29,6 @@ public class BarTableController {
 	@Autowired
 	private BarTableService	barTableService;
 
-	@Autowired
-	private BarService		barService;
 	
 	@Autowired
 	private BillService		billServie;
@@ -46,13 +42,13 @@ public class BarTableController {
 			List<BarTable> tables = this.barTableService.findAllBarTable();
 
 			if (!tables.isEmpty()) {
-				return new ResponseEntity<List<BarTable>>(tables, HttpStatus.OK);
+				return new ResponseEntity<>(tables, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<List<BarTable>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
@@ -62,7 +58,7 @@ public class BarTableController {
 	public ResponseEntity<Map<Integer, Object>> getTableDetails(@PathVariable("id") final Integer id) {
 
 		try {
-			Map<Integer, Object> res = new HashMap<Integer, Object>();
+			Map<Integer, Object> res = new HashMap<>();
 			BarTable barTable = this.barTableService.findbyId(id);
 			if (barTable != null) {
 				Menu menu = barTable.getBar().getMenu();
@@ -71,13 +67,13 @@ public class BarTableController {
 				res.put(0, barTable);
 				res.put(1, menu);
 				res.put(2, bill);
-				return new ResponseEntity<Map<Integer, Object>>(res, HttpStatus.OK);
+				return new ResponseEntity<>(res, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<Map<Integer, Object>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
@@ -92,15 +88,15 @@ public class BarTableController {
 				if (barTable.isFree()) {
 					barTable.setFree(false);
 					this.barTableService.saveTable(barTable);
-					return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
+					return new ResponseEntity<>(barTable, HttpStatus.OK);
 				} else {
-					return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+					return new ResponseEntity<>(HttpStatus.CONFLICT);
 				}
 			} else {
-				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -108,7 +104,7 @@ public class BarTableController {
 	@PreAuthorize("hasRole('ROLE_OWNER')")
 	public ResponseEntity<Map<Integer, Object>> freeTable(@PathVariable("id") final Integer id) {
 		try {
-			Map<Integer,Object> res = new HashMap<Integer, Object>();
+			Map<Integer,Object> res = new HashMap<>();
 			BarTable barTable = this.barTableService.findbyId(id);
 			String token = BarTableService.generarToken();
 			if (barTable != null) {
@@ -117,23 +113,23 @@ public class BarTableController {
 					barTable.setToken(token);
 					Bill b = this.barTableService.getBillByTableId(barTable.getId());
 					if(b.getId() != null) {
-						b.setItemBill(new HashSet<ItemBill>());
-						b.setItemOrder(new HashSet<ItemBill>());
+						b.setItemBill(new HashSet<>());
+						b.setItemOrder(new HashSet<>());
 						this.billServie.createBill(b);
 						barTable.setBill(b);
 					}
 					this.barTableService.saveTable(barTable);
 					res.put(0, barTable);
 					res.put(1, b);
-					return new ResponseEntity<Map<Integer,Object>>(res, HttpStatus.OK);
+					return new ResponseEntity<>(res, HttpStatus.OK);
 				} else {
-					return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+					return new ResponseEntity<>(HttpStatus.CONFLICT);
 				}
 			} else {
-				return new ResponseEntity<Map<Integer,Object>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
