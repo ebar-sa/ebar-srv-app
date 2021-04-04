@@ -46,7 +46,7 @@ public class MenuController {
 	}
 
 	@DeleteMapping("/menu/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Menu> deleteMenu(@PathVariable("id") final Integer id) {
 		try {
 			this.menuService.removeMenu(id);
