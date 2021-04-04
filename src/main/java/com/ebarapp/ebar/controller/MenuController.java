@@ -29,7 +29,8 @@ public class MenuController {
 
 	@Autowired
 	private BarService barService;
-
+	
+	@GetMapping("/menu/{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Menu> getMenuById(@PathVariable("id") final Integer id) {
 		try {
@@ -54,7 +55,7 @@ public class MenuController {
 	}
 
 	@GetMapping("/bares/{idBar}/menu")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
