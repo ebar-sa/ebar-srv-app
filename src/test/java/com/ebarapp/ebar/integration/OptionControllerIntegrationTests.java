@@ -1,4 +1,4 @@
-package com.ebarapp.ebar.integrations;
+package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Option;
@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -27,10 +28,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles(profiles = "dev")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class OptionTest {
+class OptionControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;

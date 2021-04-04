@@ -31,7 +31,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
- class OptionControllerTest {
+ class OptionControllerTests {
 
     @MockBean
     private OptionService optionService;

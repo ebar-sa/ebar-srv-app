@@ -10,7 +10,6 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 public class BarTableService {
@@ -41,10 +40,9 @@ public class BarTableService {
 		String bancoLetras="abcdefghijklmnopqrstuvw";
 		String bancoNumeros = "123456789";
 		StringBuilder strB = new StringBuilder();
-		Random random = new Random();
 		for (int i = 0; i <= 6; i++) {
 			if(i < 3) {
-			int randomInt = random.nextInt(bancoLetras.length());
+			int randomInt = secureRandom.nextInt(bancoLetras.length());
 	        char randomChar = bancoLetras.charAt(randomInt);
 	        strB.append(randomChar);
 			}
@@ -52,7 +50,7 @@ public class BarTableService {
 	        	strB.append("-");
 	        }
 	        if(i > 3) {
-	        	int randomNumInt = random.nextInt(bancoNumeros.length());
+	        	int randomNumInt = secureRandom.nextInt(bancoNumeros.length());
 		        char randomNum = bancoNumeros.charAt(randomNumInt);
 		        strB.append(randomNum);
 	        }
