@@ -70,7 +70,7 @@ class BarControllerIntegrationTests {
         given(this.barRepository.findAll()).willReturn(bars);
     }
 
-    @WithMockUser(username="test", authorities="EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test
     void testGetAllTablesAndCapacity() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
@@ -78,7 +78,7 @@ class BarControllerIntegrationTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
     }
 
-    @WithMockUser(username="test", authorities="EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test
     void testGetBarById() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
@@ -98,7 +98,7 @@ class BarControllerIntegrationTests {
                 .andExpect(status().isUnauthorized());
     }
 
-    @WithMockUser(username="test", authorities="EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test
     void shouldNotGetBarByIdNotFound() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2000").contentType(MediaType.APPLICATION_JSON))

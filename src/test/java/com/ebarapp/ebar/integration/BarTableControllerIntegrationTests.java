@@ -76,7 +76,7 @@ class BarTableControllerIntegrationTests {
         given(this.barTableRepository.findAll()).willReturn(tableList);
     }
 
-    @WithMockUser(username="test", authorities="EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test
     void testGetAllTables() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/").contentType(MediaType.APPLICATION_JSON))
