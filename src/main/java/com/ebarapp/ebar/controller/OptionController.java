@@ -2,6 +2,7 @@ package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
+import com.ebarapp.ebar.model.dtos.OptionDTO;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import com.ebarapp.ebar.validators.OptionValidator;
@@ -31,15 +32,16 @@ public class OptionController {
 
     @PostMapping("/voting/{votingId}/option")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @RequestBody Option newOption) {
+    public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @RequestBody OptionDTO newOptionDTO) {
         try {
+            Option newOption = new Option(newOptionDTO);
             Option option = optionService.createOption(newOption);
             Voting voting = votingService.getVotingById(votingId);
             if(voting == null) {
                 return ResponseEntity.notFound().build();
             }
             voting.addOption(option);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(option, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,7 +65,7 @@ public class OptionController {
                 return ResponseEntity.badRequest().build();
             }
             voting.deleteOption(option);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             optionService.removeOption(optionId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
@@ -117,7 +119,7 @@ public class OptionController {
             optionService.createOption(option);
 
             voting.addVoter(username);
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -31,7 +31,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
- class OptionControllerTest {
+ class OptionControllerTests {
 
     @MockBean
     private OptionService optionService;
@@ -86,7 +86,7 @@ import java.util.Set;
         BDDMockito.given(this.votingService.getVotingById(1)).willReturn(voting);
         BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting)).willReturn(voting);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
         BDDMockito.given(this.optionService.getOptionById(1)).willReturn(option1);
         BDDMockito.given(this.optionService.createOption(option1)).willReturn(option1);
 

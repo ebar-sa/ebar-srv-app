@@ -15,7 +15,7 @@ public class VotingService {
     @Autowired
     private VotingRepository votingRepository;
 
-    public Voting createOrUpadteVoting(Voting newVoting) {
+    public Voting createOrUpdateVoting(Voting newVoting) {
         return votingRepository.save(newVoting);
     }
 
@@ -33,7 +33,7 @@ public class VotingService {
     }
 
     @Transactional(readOnly = true)
-    public List<Voting> getVotingsByBarId(Long barId) {
-        return votingRepository.getVotingsByBarId(barId.intValue());
+    public List<Voting> getVotingsByBarId(Integer barId) {
+        return votingRepository.getVotingsByBarId(barId);
     }
 }

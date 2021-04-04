@@ -2,6 +2,7 @@ package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Voting;
+import com.ebarapp.ebar.model.dtos.VotingDTO;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
@@ -36,23 +37,24 @@ public class VotingController {
         dataBinder.setValidator(new VotingValidator());
     }
 
-    @PostMapping("bar/{barId}/voting")
+    @PostMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
+    public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody VotingDTO newVotingDTO) {
         Bar bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
         try {
             //Can't restrict the vote of a client
-            if (!newVoting.getVotersUsernames().isEmpty()){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if (!newVotingDTO.getVotersUsernames().isEmpty()) {
+            	return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else {
+                Voting newVoting = new Voting(newVotingDTO);
+                Voting voting = votingService.createOrUpdateVoting(newVoting);
+                bar.addVoting(voting);
+                barService.createBar(bar);
+                return new ResponseEntity<>(voting, HttpStatus.CREATED);
             }
-            Voting voting = votingService.createOrUpadteVoting(newVoting);
-            bar.addVoting(voting);
-            barService.createBar(bar);
-            return new ResponseEntity<>(voting, HttpStatus.CREATED);
-
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -72,7 +74,7 @@ public class VotingController {
         }
     }
 
-    @DeleteMapping("bar/{barId}/voting/{id}")
+    @DeleteMapping("/bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> deleteVoting(@PathVariable("barId") Integer barId, @PathVariable("id") Integer id) {
         try {
@@ -91,9 +93,9 @@ public class VotingController {
         }
     }
 
-    @PutMapping("/voting/{id}")
+    @PutMapping("voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> updateVoting(@Valid @RequestBody Voting updatedVoting,@PathVariable("id") Integer id) {
+    public ResponseEntity<Voting> updateVoting(@Valid @RequestBody VotingDTO updatedVotingDTO, @PathVariable("id") Integer id) {
         try {
             Voting voting = votingService.getVotingById(id);
             if(voting == null) {
@@ -101,13 +103,13 @@ public class VotingController {
             }
             //Can't restrict the vote of a client
             //Can't edit a voting if it's active or finished
-            if(!updatedVoting.getVotersUsernames().isEmpty()
+            if(!updatedVotingDTO.getVotersUsernames().isEmpty()
             || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
                 return ResponseEntity.badRequest().build();
             }
-
+            Voting updatedVoting = new Voting(updatedVotingDTO);
             updatedVoting.setId(voting.getId());
-            votingService.createOrUpadteVoting(updatedVoting);
+            votingService.createOrUpdateVoting(updatedVoting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -123,7 +125,7 @@ public class VotingController {
                 return ResponseEntity.notFound().build();
             }
             voting.setClosingHour(LocalDateTime.now());
-            votingService.createOrUpadteVoting(voting);
+            votingService.createOrUpdateVoting(voting);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -132,8 +134,11 @@ public class VotingController {
 
     @GetMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
-    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Long barId) {
-        List<Voting> votaciones = votingService.getVotingsByBarId(barId);
-        return new ResponseEntity<>(votaciones, HttpStatus.OK);
+    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Integer barId) {
+        if(barService.findBarById(barId) == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Voting> votings = votingService.getVotingsByBarId(barId);
+        return ResponseEntity.ok(votings);
     }
 }

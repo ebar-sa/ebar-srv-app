@@ -25,12 +25,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class VotingControllerTest {
+class VotingControllerTests {
 
     @MockBean
     private VotingService votingService;
@@ -76,8 +78,9 @@ class VotingControllerTest {
         BDDMockito.given(this.votingService.getVotingById(TEST_VOTING_ID)).willReturn(voting);
         BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting)).willReturn(voting);
-        BDDMockito.given(this.votingService.createOrUpadteVoting(voting2)).willReturn(voting2);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting2)).willReturn(voting2);
+        BDDMockito.given(this.votingService.getVotingsByBarId(TEST_BAR_ID)).willReturn(new ArrayList<>(votings));
 
         Bar bar = new Bar();
         bar.setId(1);
@@ -97,7 +100,7 @@ class VotingControllerTest {
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void successCreateVoting() throws Exception{
-        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-03-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+    	String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 19:00:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +111,7 @@ class VotingControllerTest {
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void failureCreateVoting() throws Exception{
-        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-03-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/voting")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -168,12 +171,38 @@ class VotingControllerTest {
     @WithMockUser(username = "admin", roles = {"OWNER"})
     @Test
     void failureUpdateVotingVoting() throws Exception {
-        String json = "{ \n \"title\": \"Voting Test Modified\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-03-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+        String json = "{ \n \"title\": \"Voting Test Modified\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 18:10:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.put("/api/voting/2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void successGetVotingsByBarId() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID + "/voting")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void failureGetVotingsByBarIdUnauthorized() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID + "/voting")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void failureGetVotingsByBarIdUNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2000/voting")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+
 
 }

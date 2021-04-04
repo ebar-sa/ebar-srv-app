@@ -4,7 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.jetbrains.annotations.NotNull;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,4 +18,5 @@ public class Category extends BaseEntity {
 	@NotNull
 	@Column(name = "name")
 	private String name;
+	
 }
