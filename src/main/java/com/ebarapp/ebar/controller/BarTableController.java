@@ -41,8 +41,8 @@ public class BarTableController {
 
 
 	@GetMapping("")
-	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<BarTable>> getAllBars() {
+	@PreAuthorize("hasRole('ROLE_OWNER')")
+	public ResponseEntity<List<BarTable>> getAllTables() {
 		try {
 
 			List<BarTable> tables = this.barTableService.findAllBarTable();
