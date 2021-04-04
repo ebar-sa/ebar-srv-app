@@ -1,5 +1,5 @@
 
-package com.ebarapp.ebar.controller.test;
+package com.ebarapp.ebar.controller;
 
 import java.util.HashSet;
 import java.util.Set;

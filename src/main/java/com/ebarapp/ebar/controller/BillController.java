@@ -48,7 +48,7 @@ public class BillController {
 			if (bill.getItemOrder().isEmpty() || bill.getItemOrder() == null) {
 				bill.setItemOrder(order);
 			}
-			if (bill.getItemBill().isEmpty() && bill.getItemBill() == null) {
+			if (bill.getItemBill().isEmpty() || bill.getItemBill() == null) {
 				bill.setItemBill(itemBill);
 			}
 			return new ResponseEntity<>(bill, HttpStatus.OK);
@@ -96,10 +96,10 @@ public class BillController {
 				this.billService.saveBill(bill);
 				return new ResponseEntity<>(bill, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return ResponseEntity.notFound().build();
 			}
 		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
@@ -113,25 +113,22 @@ public class BillController {
 			if (billOpt.isPresent() && resOpt.isPresent()) {
 				Bill bill = billOpt.get();
 				ItemBill res = resOpt.get();
-				Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(res.getItemMenu().getId());
-				if (itemOpt.isPresent()) {
-					ItemMenu item = itemOpt.get();
-					Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
-					if (im.contains(item)) {
-						this.addOrderToBill(bill, res, item);
-					} else {
-						this.newOrderToBill(bill, res, item);
-					}
-					this.billService.saveBill(bill);
-					return new ResponseEntity<>(bill, HttpStatus.OK);
+				ItemMenu item = res.getItemMenu();
+				Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
+				if (im.contains(item)) {
+					this.addOrderToBill(bill, res, item);
 				} else {
-					return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+					this.newOrderToBill(bill, res, item);
 				}
+				this.billService.saveBill(bill);
+				return ResponseEntity.ok(bill);
 			} else {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return ResponseEntity.notFound().build();
 			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (
+
+		Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
