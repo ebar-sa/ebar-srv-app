@@ -2,6 +2,7 @@ package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Voting;
+import com.ebarapp.ebar.model.dtos.VotingDTO;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
@@ -38,16 +39,17 @@ public class VotingController {
 
     @PostMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody Voting newVoting) {
+    public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody VotingDTO newVotingDTO) {
         Bar bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
         try {
             //Can't restrict the vote of a client
-            if (!newVoting.getVotersUsernames().isEmpty()) {
+            if (!newVotingDTO.getVotersUsernames().isEmpty()) {
             	return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            } else {                    
+            } else {
+                Voting newVoting = new Voting(newVotingDTO);
                 Voting voting = votingService.createOrUpdateVoting(newVoting);
                 bar.addVoting(voting);
                 barService.createBar(bar);
@@ -93,7 +95,7 @@ public class VotingController {
 
     @PutMapping("voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> updateVoting(@Valid @RequestBody Voting updatedVoting,@PathVariable("id") Integer id) {
+    public ResponseEntity<Voting> updateVoting(@Valid @RequestBody VotingDTO updatedVotingDTO, @PathVariable("id") Integer id) {
         try {
             Voting voting = votingService.getVotingById(id);
             if(voting == null) {
@@ -101,11 +103,11 @@ public class VotingController {
             }
             //Can't restrict the vote of a client
             //Can't edit a voting if it's active or finished
-            if(!updatedVoting.getVotersUsernames().isEmpty()
+            if(!updatedVotingDTO.getVotersUsernames().isEmpty()
             || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
                 return ResponseEntity.badRequest().build();
             }
-
+            Voting updatedVoting = new Voting(updatedVotingDTO);
             updatedVoting.setId(voting.getId());
             votingService.createOrUpdateVoting(updatedVoting);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -132,8 +134,11 @@ public class VotingController {
 
     @GetMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
-    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Long barId) {
-        List<Voting> votaciones = votingService.getVotingsByBarId(barId);
-        return new ResponseEntity<>(votaciones, HttpStatus.OK);
+    public ResponseEntity<List<Voting>> getVotingsByBarId(@PathVariable("barId") Integer barId) {
+        if(barService.findBarById(barId) == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Voting> votings = votingService.getVotingsByBarId(barId);
+        return ResponseEntity.ok(votings);
     }
 }

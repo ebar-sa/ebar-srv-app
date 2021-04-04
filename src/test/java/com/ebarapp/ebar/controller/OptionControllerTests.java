@@ -6,10 +6,10 @@ import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,19 +17,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
+@ActiveProfiles(profiles = "dev")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
  class OptionControllerTests {
 
@@ -66,8 +67,8 @@ import java.util.Set;
         voting.setClosingHour(LocalDateTime.now().plusHours(2L));
         voting.setDescription("Lorem Ipsum");
         voting.setTimer(null);
-        voting.setVotersUsernames(Collections.emptySet());
-        voting.setOptions(Collections.emptySet());
+        voting.setVotersUsernames(new HashSet<>());
+        voting.setOptions(new HashSet<>());
 
         Voting voting2 = new Voting();
         voting2.setId(3);
@@ -76,7 +77,7 @@ import java.util.Set;
         voting2.setClosingHour(LocalDateTime.now().plusHours(2L));
         voting2.setDescription("Lorem Ipsum");
         voting2.setTimer(null);
-        voting2.setVotersUsernames(Collections.emptySet());
+        voting2.setVotersUsernames(new HashSet<>());
         voting2.setOptions(options);
 
         Set<Voting> votings = new HashSet<>();
@@ -88,7 +89,7 @@ import java.util.Set;
         BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
         BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
         BDDMockito.given(this.optionService.getOptionById(1)).willReturn(option1);
-        BDDMockito.given(this.optionService.createOption(option1)).willReturn(option1);
+        BDDMockito.given(this.optionService.createOption(Mockito.any(Option.class))).willReturn(option1);
 
         Bar bar = new Bar();
         bar.setId(1);
@@ -103,7 +104,6 @@ import java.util.Set;
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
-    @Disabled
     @Test
     void successCreateOption() throws Exception{
         String json = "{\n\"description\": \"Option 1\",\n \"votes\": \"0\"\n}";
@@ -155,7 +155,6 @@ import java.util.Set;
     }
 
     @WithMockUser(username="user", roles={"CLIENT"})
-    @Disabled
     @Test
     void successVote() throws Exception{
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/3/option/1/vote"))
