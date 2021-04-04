@@ -41,8 +41,9 @@ public class BillController {
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
-		try {
-			Bill bill = this.billService.getBillById(id);
+		Bill bill = this.billService.getBillById(id);
+
+		if (bill != null) {
 			Set<ItemBill> order = new HashSet<>();
 			Set<ItemBill> itemBill = new HashSet<>();
 			if (bill.getItemOrder().isEmpty() || bill.getItemOrder() == null) {
@@ -51,10 +52,11 @@ public class BillController {
 			if (bill.getItemBill().isEmpty() || bill.getItemBill() == null) {
 				bill.setItemBill(itemBill);
 			}
-			return new ResponseEntity<>(bill, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return ResponseEntity.ok(bill);
+		} else {
+			return ResponseEntity.notFound().build();
 		}
+
 	}
 
 	@DeleteMapping("/{id}")
@@ -71,64 +73,53 @@ public class BillController {
 	@GetMapping("/addToOrder/{idBill}/{idItem}")
 	@PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem) {
-		try {
-			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
-			if (billOpt.isPresent() && itemOpt.isPresent()) {
-				Bill bill = billOpt.get();
-				ItemMenu item = itemOpt.get();
-				Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
-				if (im.contains(item)) {
-					for (ItemBill ib : bill.getItemOrder()) {
-						if (ib.getItemMenu().getId().equals(item.getId())) {
-							Integer i = ib.getAmount();
-							i++;
-							ib.setAmount(i);
-						}
+		Optional<Bill> billOpt = this.billService.findbyId(idBill);
+		Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
+		if (billOpt.isPresent() && itemOpt.isPresent()) {
+			Bill bill = billOpt.get();
+			ItemMenu item = itemOpt.get();
+			Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
+			if (im.contains(item)) {
+				for (ItemBill ib : bill.getItemOrder()) {
+					if (ib.getItemMenu().getId().equals(item.getId())) {
+						Integer i = ib.getAmount();
+						i++;
+						ib.setAmount(i);
 					}
-				} else {
-					ItemBill b = new ItemBill();
-					b.setItemMenu(item);
-					b.setAmount(1);
-					this.itemBillService.saveItemBill(b);
-					bill.getItemOrder().add(b);
 				}
-				this.billService.saveBill(bill);
-				return new ResponseEntity<>(bill, HttpStatus.OK);
 			} else {
-				return ResponseEntity.notFound().build();
+				ItemBill b = new ItemBill();
+				b.setItemMenu(item);
+				b.setAmount(1);
+				this.itemBillService.saveItemBill(b);
+				bill.getItemOrder().add(b);
 			}
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			this.billService.saveBill(bill);
+			return new ResponseEntity<>(bill, HttpStatus.OK);
+		} else {
+			return ResponseEntity.notFound().build();
 		}
 	}
 
 	@GetMapping("/addToBill/{idBill}/{idItemBill}")
 	@PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_EMPLOYEE')")
 	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
-		try {
-
-			Optional<Bill> billOpt = this.billService.findbyId(idBill);
-			Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
-			if (billOpt.isPresent() && resOpt.isPresent()) {
-				Bill bill = billOpt.get();
-				ItemBill res = resOpt.get();
-				ItemMenu item = res.getItemMenu();
-				Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
-				if (im.contains(item)) {
-					this.addOrderToBill(bill, res, item);
-				} else {
-					this.newOrderToBill(bill, res, item);
-				}
-				this.billService.saveBill(bill);
-				return ResponseEntity.ok(bill);
+		Optional<Bill> billOpt = this.billService.findbyId(idBill);
+		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
+		if (billOpt.isPresent() && resOpt.isPresent()) {
+			Bill bill = billOpt.get();
+			ItemBill res = resOpt.get();
+			ItemMenu item = res.getItemMenu();
+			Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
+			if (im.contains(item)) {
+				this.addOrderToBill(bill, res, item);
 			} else {
-				return ResponseEntity.notFound().build();
+				this.newOrderToBill(bill, res, item);
 			}
-		} catch (
-
-		Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			this.billService.saveBill(bill);
+			return ResponseEntity.ok(bill);
+		} else {
+			return ResponseEntity.notFound().build();
 		}
 	}
 
