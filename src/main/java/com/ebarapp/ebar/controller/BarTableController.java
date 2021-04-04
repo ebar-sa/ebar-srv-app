@@ -21,7 +21,7 @@ import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = {"http://localhost:8081","https://ebar-gui-sprint1.herokuapp.com/"})
 @RestController
 @RequestMapping("/api/tables")
 public class BarTableController {

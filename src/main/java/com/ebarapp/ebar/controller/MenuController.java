@@ -19,7 +19,7 @@ import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.MenuService;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = {"http://localhost:8081","https://ebar-gui-sprint1.herokuapp.com/"})
 @RestController
 @RequestMapping("/api")
 public class MenuController {
