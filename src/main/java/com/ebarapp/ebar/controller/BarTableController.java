@@ -1,10 +1,9 @@
-
 package com.ebarapp.ebar.controller;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,115 +18,119 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.Menu;
-import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
+import com.ebarapp.ebar.service.BillService;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/tables")
 public class BarTableController {
 
 	@Autowired
-	private BarTableService	barTableService;
+	private BarTableService barTableService;
 
 	@Autowired
-	private BarService		barService;
-
+	private BillService billServie;
 
 	@GetMapping("")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<BarTable>> getAllBars() {
-		try {
+	public ResponseEntity<List<BarTable>> getAllTables() {
+		List<BarTable> tables = this.barTableService.findAllBarTable();
 
-			List<BarTable> tables = this.barTableService.findAllBarTable();
-
-			if (!tables.isEmpty()) {
-				return new ResponseEntity<List<BarTable>>(tables, HttpStatus.OK);
-			} else {
-				return new ResponseEntity<List<BarTable>>(HttpStatus.NO_CONTENT);
-			}
-
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		if (!tables.isEmpty()) {
+			return new ResponseEntity<>(tables, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 
 	}
 
 	@GetMapping("/tableDetails/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("permitAll()")
 	public ResponseEntity<Map<Integer, Object>> getTableDetails(@PathVariable("id") final Integer id) {
-
-		try {
-			Map<Integer, Object> res = new HashMap<Integer, Object>();
-			String token = BarTableService.generarToken();
-			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
-			if (barTableOpt.isPresent()) {
-				BarTable barTable = barTableOpt.get();
-				Menu menu = barTable.getBar().getMenu();
-				Bill bill = this.barTableService.getBillByTableId(id);
-				barTable.setToken(token);
-				this.barTableService.saveTable(barTable);
-				res.put(0, barTable);
-				res.put(1, menu);
-				res.put(2, bill);
-				return new ResponseEntity<Map<Integer, Object>>(res, HttpStatus.OK);
-			} else {
-				return new ResponseEntity<Map<Integer, Object>>(HttpStatus.NO_CONTENT);
-			}
-
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		Map<Integer, Object> res = new HashMap<>();
+		BarTable barTable = this.barTableService.findbyId(id);
+		if (barTable != null) {
+			Menu menu = barTable.getBar().getMenu();
+			Bill bill = this.barTableService.getBillByTableId(id);
+			this.barTableService.saveTable(barTable);
+			res.put(0, barTable);
+			res.put(1, menu);
+			res.put(2, bill);
+			return new ResponseEntity<>(res, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
 	}
 
 	@GetMapping("/busyTable/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<BarTable> busyTable(@PathVariable("id") final Integer id) {
-		try {
-
-			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
-			if (barTableOpt.isPresent()) {
-				BarTable barTable = barTableOpt.get();
-				if (barTable.isFree()) {
-					barTable.setFree(false);
-					this.barTableService.saveTable(barTable);
-					return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
-				} else {
-					return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-				}
+		BarTable barTable = this.barTableService.findbyId(id);
+		if (barTable != null) {
+			if (barTable.isFree()) {
+				barTable.setFree(false);
+				this.barTableService.saveTable(barTable);
+				return new ResponseEntity<>(barTable, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.CONFLICT);
 			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@GetMapping("/freeTable/{id}")
-	@PreAuthorize("hasRole('ROLE_OWNER')")
-	public ResponseEntity<BarTable> freeTable(@PathVariable("id") final Integer id) {
-		try {
-
-			Optional<BarTable> barTableOpt = this.barTableService.findbyId(id);
-			String token = BarTableService.generarToken();
-			if (barTableOpt.isPresent()) {
-				BarTable barTable = barTableOpt.get();
-				if (!barTable.isFree()) {
-					barTable.setFree(true);
-					barTable.setToken(token);
-					this.barTableService.saveTable(barTable);
-					return new ResponseEntity<BarTable>(barTable, HttpStatus.OK);
-				} else {
-					return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<Map<Integer, Object>> freeTable(@PathVariable("id") final Integer id) {
+		Map<Integer, Object> res = new HashMap<>();
+		BarTable barTable = this.barTableService.findbyId(id);
+		String token = BarTableService.generarToken();
+		if (barTable != null) {
+			if (!barTable.isFree()) {
+				barTable.setFree(true);
+				barTable.setToken(token);
+				Bill b = this.barTableService.getBillByTableId(barTable.getId());
+				if (b.getId() != null) {
+					b.setItemBill(new HashSet<>());
+					b.setItemOrder(new HashSet<>());
+					this.billServie.createBill(b);
+					barTable.setBill(b);
 				}
+				this.barTableService.saveTable(barTable);
+				res.put(0, barTable);
+				res.put(1, b);
+				return new ResponseEntity<>(res, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<BarTable>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.CONFLICT);
 			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
+	}
+
+	@GetMapping("/autoOccupateTable/{id}/{token}")
+	@PreAuthorize("hasRole('CLIENT')")
+	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("id") Integer id,
+			@PathVariable("token") String token) {
+		BarTable barTable = this.barTableService.findbyId(id);
+		if (barTable != null) {
+			if (barTable.isFree()) {
+				if (barTable.getToken().equals(token)) {
+					barTable.setFree(false);
+					this.barTableService.saveTable(barTable);
+					return new ResponseEntity<>(barTable, HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>(barTable, HttpStatus.OK);
+				}
+			} else {
+				return new ResponseEntity<>(barTable, HttpStatus.OK);
+			}
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 
 }

@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,84 +41,83 @@ class OptionControllerIntegrationTests {
 
     @Autowired
     private VotingService votingService;
-    private Voting voting;
-    private Voting voting2;
     private Integer votingId;
     private Integer voting2Id;
 
     @Autowired
     private OptionService optionService;
-    private Option option;
-    private Option option2;
     private Integer option2Id;
     private Integer optionId;
 
     @Autowired
     private BarService barService;
-    private Bar bar;
     private Integer barId;
 
     @BeforeEach
     private void setUp(){
 
-        this.bar = new Bar();
-        this.bar.setContact("test1@example.com");
-        this.bar.setLocation("Right Here");
-        this.bar.setDescription("Lorem Ipsum");
-        this.bar.setVotings(Collections.emptySet());
-        this.bar.setBarTables(null);
-        this.bar.setName("Test 1");
-        this.bar.setClosingTime(null);
-        this.bar.setOpeningTime(null);
+        Bar bar = new Bar();
+        bar.setContact("test1@example.com");
+        bar.setLocation("Right Here");
+        bar.setDescription("Lorem Ipsum");
+        bar.setVotings(Collections.emptySet());
+        bar.setBarTables(null);
+        bar.setName("Test 1");
+        bar.setClosingTime(null);
+        bar.setOpeningTime(null);
 
-        this.option = new Option();
-        this.option.setVotes(0);
-        this.option.setDescription("Option 1");
+        Option option = new Option();
+        option.setVotes(0);
+        option.setDescription("Option 1");
 
         Set<Option> options = new HashSet<>();
-        options.add(this.option);
+        options.add(option);
 
-        this.option2 = new Option();
-        this.option2.setVotes(0);
-        this.option2.setDescription("Option 2");
+        Option option2 = new Option();
+        option2.setVotes(0);
+        option2.setDescription("Option 2");
 
         Set<Option> options2 = new HashSet<>();
-        options2.add(this.option2);
+        options2.add(option2);
 
-        this.voting = new Voting();
-        this.voting.setTitle("Test 1");
-        this.voting.setOpeningHour(LocalDateTime.of(2021, 12, 30, 20, 0, 0, 0));
-        this.voting.setClosingHour(LocalDateTime.of(2021, 12, 30, 22, 0, 0, 0));
-        this.voting.setDescription("Lorem Ipsum");
-        this.voting.setTimer(null);
-        this.voting.setVotersUsernames(Collections.emptySet());
-        this.voting.setOptions(options);
+        Voting voting = new Voting();
+        voting.setTitle("Test 1");
+        voting.setOpeningHour(LocalDateTime.of(2021, 12, 30, 20, 0, 0, 0));
+        voting.setClosingHour(LocalDateTime.of(2021, 12, 30, 22, 0, 0, 0));
+        voting.setDescription("Lorem Ipsum");
+        voting.setTimer(null);
+        voting.setVotersUsernames(Collections.emptySet());
+        voting.setOptions(options);
 
-        this.voting2 = new Voting();
-        this.voting2.setTitle("Test 2");
-        this.voting2.setOpeningHour(LocalDateTime.now().minusHours(1L));
-        this.voting2.setClosingHour(LocalDateTime.now().plusHours(1L));
-        this.voting2.setDescription("Lorem Ipsum");
-        this.voting2.setTimer(null);
-        this.voting2.setVotersUsernames(Collections.emptySet());
-        this.voting2.setOptions(options2);
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+
+        Voting voting2 = new Voting();
+        voting2.setTitle("Test 2");
+        voting2.setOpeningHour(madridZoned.toLocalDateTime().minusHours(1L));
+        voting2.setClosingHour(madridZoned.toLocalDateTime().plusHours(1L));
+        voting2.setDescription("Lorem Ipsum");
+        voting2.setTimer(null);
+        voting2.setVotersUsernames(Collections.emptySet());
+        voting2.setOptions(options2);
 
         Set<Voting> votings = new HashSet<>();
-        votings.add(this.voting);
-        votings.add(this.voting2);
+        votings.add(voting);
+        votings.add(voting2);
 
-        this.bar.setVotings(votings);
-        this.barService.createBar(this.bar);
+        bar.setVotings(votings);
+        this.barService.createBar(bar);
 
-        this.votingService.createOrUpdateVoting(this.voting);
-        this.votingService.createOrUpdateVoting(this.voting2);
-        this.barId = this.bar.getId();
-        this.votingId = this.voting.getId();
-        this.voting2Id = this.voting2.getId();
-        this.optionService.createOption(this.option);
-        this.optionService.createOption(this.option2);
-        this.optionId = this.option.getId();
-        this.option2Id = this.option2.getId();
+        this.votingService.createOrUpdateVoting(voting);
+        this.votingService.createOrUpdateVoting(voting2);
+        this.barId = bar.getId();
+        this.votingId = voting.getId();
+        this.voting2Id = voting2.getId();
+        this.optionService.createOption(option);
+        this.optionService.createOption(option2);
+        this.optionId = option.getId();
+        this.option2Id = option2.getId();
         this.votingService.createOrUpdateVoting(voting);
         this.votingService.createOrUpdateVoting(voting2);
     }
