@@ -3,6 +3,7 @@ package com.ebarapp.ebar.service;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.repository.BarTableRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +25,13 @@ public class BarTableService {
 		return this.barTableRepository.findAll();
 	}
 
-	public Optional<BarTable> findbyId(Integer id) {
-		return  this.barTableRepository.findById(id);
+	public BarTable findbyId(Integer id) {
+		Optional<BarTable> barTableOpt =  this.barTableRepository.findById(id);
+		if(barTableOpt.isPresent()) {
+			return barTableOpt.get();
+		}else { 
+			return null;
+		}
 	}
 	
 	

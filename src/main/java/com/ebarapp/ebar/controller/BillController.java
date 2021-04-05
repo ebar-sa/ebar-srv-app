@@ -23,7 +23,7 @@ import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemBillService;
 import com.ebarapp.ebar.service.ItemMenuService;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/bill")
 public class BillController {

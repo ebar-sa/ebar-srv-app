@@ -18,7 +18,7 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class VotingController {
@@ -44,92 +44,72 @@ public class VotingController {
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
-        try {
-            //Can't restrict the vote of a client
-            if (!newVotingDTO.getVotersUsernames().isEmpty()) {
-            	return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            } else {
-                Voting newVoting = new Voting(newVotingDTO);
-                Voting voting = votingService.createOrUpdateVoting(newVoting);
-                bar.addVoting(voting);
-                barService.createBar(bar);
-                return new ResponseEntity<>(voting, HttpStatus.CREATED);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        //Can't restrict the vote of a client
+        if (!newVotingDTO.getVotersUsernames().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            Voting newVoting = new Voting(newVotingDTO);
+            Voting voting = votingService.createOrUpdateVoting(newVoting);
+            bar.addVoting(voting);
+            barService.createBar(bar);
+            return new ResponseEntity<>(voting, HttpStatus.CREATED);
         }
     }
 
     @GetMapping("/voting/{id}")
     @PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> getVotingById(@PathVariable("id") Integer id) {
-        try {
-            Voting voting = votingService.getVotingById(id);
-            if (voting == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return new ResponseEntity<>(voting, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        Voting voting = votingService.getVotingById(id);
+        if (voting == null) {
+            return ResponseEntity.notFound().build();
         }
+        return new ResponseEntity<>(voting, HttpStatus.OK);
     }
 
     @DeleteMapping("/bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> deleteVoting(@PathVariable("barId") Integer barId, @PathVariable("id") Integer id) {
-        try {
-            Voting voting = votingService.getVotingById(id);
-            Bar bar = barService.findBarById(barId);
-            if (bar == null || voting == null || ! bar.getVotings().contains(voting)) {
-                return ResponseEntity.notFound().build();
-            }
-            voting.getOptions().stream()
-                    .forEach(x->optionService.removeOption(x.getId()));
-            bar.deleteVoting(voting);
-            votingService.removeVoting(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        Voting voting = votingService.getVotingById(id);
+        Bar bar = barService.findBarById(barId);
+        if (bar == null || voting == null || ! bar.getVotings().contains(voting)) {
+            return ResponseEntity.notFound().build();
         }
+        voting.getOptions().stream()
+                .forEach(x->optionService.removeOption(x.getId()));
+        bar.deleteVoting(voting);
+        votingService.removeVoting(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> updateVoting(@Valid @RequestBody VotingDTO updatedVotingDTO, @PathVariable("id") Integer id) {
-        try {
-            Voting voting = votingService.getVotingById(id);
-            if(voting == null) {
-                return ResponseEntity.notFound().build();
-            }
-            //Can't restrict the vote of a client
-            //Can't edit a voting if it's active or finished
-            if(!updatedVotingDTO.getVotersUsernames().isEmpty()
-            || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
-                return ResponseEntity.badRequest().build();
-            }
-            Voting updatedVoting = new Voting(updatedVotingDTO);
-            updatedVoting.setId(voting.getId());
-            votingService.createOrUpdateVoting(updatedVoting);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        Voting voting = votingService.getVotingById(id);
+        if(voting == null) {
+            return ResponseEntity.notFound().build();
         }
+        //Can't restrict the vote of a client
+        //Can't edit a voting if it's active or finished
+        if(!updatedVotingDTO.getVotersUsernames().isEmpty()
+        || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().build();
+        }
+        Voting updatedVoting = new Voting(updatedVotingDTO);
+        updatedVoting.setId(voting.getId());
+        votingService.createOrUpdateVoting(updatedVoting);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/voting/{id}/finish")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> finishVoting(@PathVariable("id") Integer id) {
-        try {
-            Voting voting = votingService.getVotingById(id);
-            if(voting == null) {
-                return ResponseEntity.notFound().build();
-            }
-            voting.setClosingHour(LocalDateTime.now());
-            votingService.createOrUpdateVoting(voting);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        Voting voting = votingService.getVotingById(id);
+        if(voting == null) {
+            return ResponseEntity.notFound().build();
         }
+        voting.setClosingHour(LocalDateTime.now());
+        votingService.createOrUpdateVoting(voting);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/bar/{barId}/voting")
