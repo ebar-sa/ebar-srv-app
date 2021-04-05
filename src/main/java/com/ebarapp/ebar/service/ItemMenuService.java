@@ -21,10 +21,10 @@ public class ItemMenuService {
 	}
 
 	public ItemMenu getItemMenuById(final Integer id) {
-		Optional<ItemMenu> ItemMenu = this.itemMenuRepository.findById(id);
+		Optional<ItemMenu> itemMenu = this.itemMenuRepository.findById(id);
 		ItemMenu res = null;
-		if (ItemMenu.isPresent()) {
-			res = ItemMenu.get();
+		if (itemMenu.isPresent()) {
+			res = itemMenu.get();
 		}
 		return res;
 	}
