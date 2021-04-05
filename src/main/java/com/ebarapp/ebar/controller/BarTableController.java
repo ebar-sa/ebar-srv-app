@@ -33,7 +33,7 @@ public class BarTableController {
 	private BillService billServie;
 
 	@GetMapping("")
-	@PreAuthorize("hasRole('EMPLOYEE')")
+	@PreAuthorize("permitAll()")
 	public ResponseEntity<List<BarTable>> getAllTables() {
 		List<BarTable> tables = this.barTableService.findAllBarTable();
 
@@ -65,7 +65,7 @@ public class BarTableController {
 	}
 
 	@GetMapping("/busyTable/{id}")
-	@PreAuthorize("hasRole('OWNER')")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<BarTable> busyTable(@PathVariable("id") final Integer id) {
 		BarTable barTable = this.barTableService.findbyId(id);
 		if (barTable != null) {
@@ -82,7 +82,7 @@ public class BarTableController {
 	}
 
 	@GetMapping("/freeTable/{id}")
-	@PreAuthorize("hasRole('OWNER')")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Map<Integer, Object>> freeTable(@PathVariable("id") final Integer id) {
 		Map<Integer, Object> res = new HashMap<>();
 		BarTable barTable = this.barTableService.findbyId(id);
