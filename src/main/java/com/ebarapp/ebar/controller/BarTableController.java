@@ -33,7 +33,7 @@ public class BarTableController {
 	private BillService billServie;
 
 	@GetMapping("")
-	@PreAuthorize("hasRole('EMPLOYEE') or hasRole('OWNER')")
+	@PreAuthorize("permiteAll()")
 	public ResponseEntity<List<BarTable>> getAllTables() {
 		List<BarTable> tables = this.barTableService.findAllBarTable();
 
