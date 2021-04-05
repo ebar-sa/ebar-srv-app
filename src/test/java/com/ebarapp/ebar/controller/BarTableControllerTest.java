@@ -149,12 +149,39 @@ class BarTableControllerTest {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
-
+	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testFreeTableError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
+	}
+	
+	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
 	void testOcupateBarTableByToken() throws Exception {
 		this.mockMvc.perform(
 				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE3_ID + "/" + TOKEN_TEST)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testOcupateBarTableByTokenDiferent() throws Exception {
+		this.mockMvc.perform(
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE_ID + "/" + TOKEN_TEST)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testOcupateBarTableNotFreeByToken() throws Exception {
+		this.mockMvc.perform(
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE2_ID + "/" + TOKEN_TEST)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
