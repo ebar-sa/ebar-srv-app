@@ -55,7 +55,7 @@ public class MenuController {
 	}
 
 	@GetMapping("/bares/{idBar}/menu")
-	@PreAuthorize("hasRole('OWNER')")
+	@PreAuthorize("permitAll()")
 	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
