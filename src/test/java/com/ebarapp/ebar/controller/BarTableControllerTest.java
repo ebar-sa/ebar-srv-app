@@ -10,21 +10,14 @@ import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,15 +25,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = BarTableController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
@@ -50,7 +39,6 @@ class BarTableControllerTest {
 	private static final int TEST_TABLE2_ID = 21;
 	private static final int TEST_TABLE3_ID = 22;
 	private static final String TOKEN_TEST = "ihv-58k";
-	private static final int TEST_BAR_ID = 10;
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -149,12 +137,39 @@ class BarTableControllerTest {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
-
+	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testFreeTableError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
+	}
+	
+	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
 	void testOcupateBarTableByToken() throws Exception {
 		this.mockMvc.perform(
 				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE3_ID + "/" + TOKEN_TEST)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testOcupateBarTableByTokenDiferent() throws Exception {
+		this.mockMvc.perform(
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE_ID + "/" + TOKEN_TEST)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testOcupateBarTableNotFreeByToken() throws Exception {
+		this.mockMvc.perform(
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE2_ID + "/" + TOKEN_TEST)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
