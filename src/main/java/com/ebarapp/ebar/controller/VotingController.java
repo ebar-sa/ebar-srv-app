@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:8081")
@@ -90,8 +92,10 @@ public class VotingController {
         }
         //Can't restrict the vote of a client
         //Can't edit a voting if it's active or finished
+        ZoneId zoneId = ZoneId.of("Europe/Madrid");
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
         if(!updatedVotingDTO.getVotersUsernames().isEmpty()
-        || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
+        || voting.getOpeningHour().isBefore(zonedDateTime.toLocalDateTime())) {
             return ResponseEntity.badRequest().build();
         }
         Voting updatedVoting = new Voting(updatedVotingDTO);
@@ -107,7 +111,9 @@ public class VotingController {
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-        voting.setClosingHour(LocalDateTime.now());
+        ZoneId zoneId = ZoneId.of("Europe/Madrid");
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
+        voting.setClosingHour(zonedDateTime.toLocalDateTime());
         votingService.createOrUpdateVoting(voting);
         return new ResponseEntity<>(HttpStatus.OK);
     }

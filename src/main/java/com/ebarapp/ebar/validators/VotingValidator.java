@@ -5,6 +5,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 
 public class VotingValidator implements Validator {
@@ -27,8 +29,9 @@ public class VotingValidator implements Validator {
         if(closingHour != null && !closingHour.toString().equals("") && closingHour.isBefore(openingHour)) {
             errors.reject("closingHour", "ClosingHour can't be before OpeningHour");
         }
-        
-        if (openingHour.isBefore(LocalDateTime.now())) {
+        ZoneId zoneId = ZoneId.of("Europe/Madrid");
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
+        if (openingHour.isBefore(zonedDateTime.toLocalDateTime())) {
             errors.reject("openingHour", "OpeningHour must be future");
         }
 
