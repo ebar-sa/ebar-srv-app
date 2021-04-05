@@ -24,6 +24,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,21 +66,26 @@ import java.util.Set;
         Set<String> participants = new HashSet<>();
         participants.add(participant);
 
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+
         Voting voting = new Voting();
         voting.setId(1);
         voting.setTitle("Test 1");
-        voting.setOpeningHour(LocalDateTime.now().plusHours(1L));
-        voting.setClosingHour(LocalDateTime.now().plusHours(2L));
+        voting.setOpeningHour(madridZoned.toLocalDateTime().plusHours(1L));
+        voting.setClosingHour(madridZoned.toLocalDateTime().plusHours(2L));
         voting.setDescription("Lorem Ipsum");
         voting.setTimer(null);
         voting.setVotersUsernames(new HashSet<>());
         voting.setOptions(options);
 
+
         Voting voting2 = new Voting();
         voting2.setId(3);
         voting2.setTitle("Test 2");
-        voting2.setOpeningHour(LocalDateTime.now().minusHours(1L));
-        voting2.setClosingHour(LocalDateTime.now().plusHours(2L));
+        voting2.setOpeningHour(madridZoned.toLocalDateTime().minusHours(1L));
+        voting2.setClosingHour(madridZoned.toLocalDateTime().plusHours(2L));
         voting2.setDescription("Lorem Ipsum");
         voting2.setTimer(null);
         voting2.setVotersUsernames(participants);

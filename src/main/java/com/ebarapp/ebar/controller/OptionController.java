@@ -16,6 +16,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -58,7 +60,10 @@ public class OptionController {
             return ResponseEntity.notFound().build();
         }
         //Can't delete an option if the voting has started
-        if (voting.getOpeningHour().isBefore(LocalDateTime.now())){
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+        if (voting.getOpeningHour().isBefore(madridZoned.toLocalDateTime())){
             return ResponseEntity.badRequest().build();
         }
         if(!voting.getOptions().contains(option)) {
@@ -97,9 +102,13 @@ public class OptionController {
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
+
         //Clients can vote only when the voting is active
-        if (voting.getOpeningHour().isAfter(LocalDateTime.now()) ||
-        voting.getClosingHour() != null && voting.getClosingHour().isBefore(LocalDateTime.now())){
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+        if (voting.getOpeningHour().isAfter(madridZoned.toLocalDateTime()) ||
+        voting.getClosingHour() != null && voting.getClosingHour().isBefore(madridZoned.toLocalDateTime())){
             return ResponseEntity.badRequest().build();
         }
         //A client can't vote twice

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -90,8 +92,11 @@ public class VotingController {
         }
         //Can't restrict the vote of a client
         //Can't edit a voting if it's active or finished
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         if(!updatedVotingDTO.getVotersUsernames().isEmpty()
-        || voting.getOpeningHour().isBefore(LocalDateTime.now())) {
+        || voting.getOpeningHour().isBefore(madridZoned.toLocalDateTime())) {
             return ResponseEntity.badRequest().build();
         }
         Voting updatedVoting = new Voting(updatedVotingDTO);
@@ -107,7 +112,10 @@ public class VotingController {
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-        voting.setClosingHour(LocalDateTime.now());
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+        voting.setClosingHour(madridZoned.toLocalDateTime());
         votingService.createOrUpdateVoting(voting);
         return new ResponseEntity<>(HttpStatus.OK);
     }
