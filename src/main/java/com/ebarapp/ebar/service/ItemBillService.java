@@ -15,26 +15,8 @@ public class ItemBillService {
 	@Autowired
 	private ItemBillRepository itemBillRepository;
 
-
-	public ItemBill createItemBill(final ItemBill newItemBill) {
-		return this.itemBillRepository.save(newItemBill);
-	}
-
-	public ItemBill getItemBillById(final Integer id) {
-		Optional<ItemBill> itemBill = this.itemBillRepository.findById(id);
-		ItemBill res = null;
-		if (itemBill.isPresent()) {
-			res = itemBill.get();
-		}
-		return res;
-	}
-
 	public Optional<ItemBill> findbyId(final Integer id) {
 		return this.itemBillRepository.findById(id);
-	}
-
-	public void removeItemBill(final Integer id) {
-		this.itemBillRepository.deleteById(id);
 	}
 
 	public ItemBill saveItemBill(final ItemBill itemBill) {

@@ -119,10 +119,8 @@ class BillControllerTests {
 		BDDMockito.given(this.billService.getBillById(BillControllerTests.TEST_BILL_ID)).willReturn(this.bill);
 		BDDMockito.given(this.billService.findbyId(BillControllerTests.TEST_BILL_ID)).willReturn(this.billOpt);
 		BDDMockito.given(this.itemMenuService.findbyId(BillControllerTests.TEST_ITEM_ID)).willReturn(itemOpt);
-		BDDMockito.given(this.itemMenuService.getItemMenuById(BillControllerTests.TEST_ITEM_ID)).willReturn(this.itemMenu);
 		BDDMockito.given(this.billService.getItemOrderByBillId(BillControllerTests.TEST_BILL_ID)).willReturn(iob);
 		BDDMockito.given(this.billService.getItemMenuByBillId(BillControllerTests.TEST_BILL_ID)).willReturn(imb);
-		BDDMockito.given(this.itemBillService.getItemBillById(BillControllerTests.TEST_ITEMBILL_ID)).willReturn(itemOrder);
 		BDDMockito.given(this.itemMenuService.findbyId(3)).willReturn(item3Opt);
 		BDDMockito.given(this.itemBillService.findbyId(BillControllerTests.TEST_ITEMBILL_ID)).willReturn(itemBillOpt);
 	}
