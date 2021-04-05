@@ -30,7 +30,7 @@ import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.UserService;
 
-@CrossOrigin(origins = {"http://localhost:8081","https://ebar-gui-sprint1.herokuapp.com/"})
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

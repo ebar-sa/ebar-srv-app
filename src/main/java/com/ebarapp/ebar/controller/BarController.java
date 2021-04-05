@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.service.BarService;
 
-@CrossOrigin(origins = {"http://localhost:8081","https://ebar-gui-sprint1.herokuapp.com/"})
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/bar")
 public class BarController {

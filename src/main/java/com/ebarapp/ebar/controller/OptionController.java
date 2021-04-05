@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
-@CrossOrigin(origins = {"http://localhost:8081","https://ebar-gui-sprint1.herokuapp.com/"})
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class OptionController {
