@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -87,10 +89,14 @@ class OptionControllerIntegrationTests {
         voting.setVotersUsernames(Collections.emptySet());
         voting.setOptions(options);
 
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+
         Voting voting2 = new Voting();
         voting2.setTitle("Test 2");
-        voting2.setOpeningHour(LocalDateTime.now().minusHours(1L));
-        voting2.setClosingHour(LocalDateTime.now().plusHours(1L));
+        voting2.setOpeningHour(madridZoned.toLocalDateTime().minusHours(1L));
+        voting2.setClosingHour(madridZoned.toLocalDateTime().plusHours(1L));
         voting2.setDescription("Lorem Ipsum");
         voting2.setTimer(null);
         voting2.setVotersUsernames(Collections.emptySet());

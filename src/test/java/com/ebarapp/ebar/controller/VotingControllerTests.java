@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -47,11 +49,15 @@ class VotingControllerTests {
     @BeforeEach
     void setUp() {
 
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+
         Voting voting = new Voting();
         voting.setId(1);
         voting.setTitle("Test 1");
-        voting.setOpeningHour(LocalDateTime.now().minusHours(1L));
-        voting.setClosingHour(LocalDateTime.now().plusHours(1L));
+        voting.setOpeningHour(madridZoned.toLocalDateTime().minusHours(1L));
+        voting.setClosingHour(madridZoned.toLocalDateTime().plusHours(1L));
         voting.setDescription("Lorem Ipsum");
         voting.setTimer(null);
         voting.setVotersUsernames(Collections.emptySet());
@@ -61,7 +67,7 @@ class VotingControllerTests {
         voting2.setId(1);
         voting2.setTitle("Test 1");
         voting2.setDescription("Lorem Ipsum");
-        voting2.setOpeningHour(LocalDateTime.now().plusHours(1L));
+        voting2.setOpeningHour(madridZoned.toLocalDateTime().plusHours(1L));
         voting2.setClosingHour(null);
         voting2.setTimer(null);
         voting2.setVotersUsernames(new HashSet<>());
