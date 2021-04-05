@@ -92,10 +92,11 @@ public class VotingController {
         }
         //Can't restrict the vote of a client
         //Can't edit a voting if it's active or finished
-        ZoneId zoneId = ZoneId.of("Europe/Madrid");
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         if(!updatedVotingDTO.getVotersUsernames().isEmpty()
-        || voting.getOpeningHour().isBefore(zonedDateTime.toLocalDateTime())) {
+        || voting.getOpeningHour().isBefore(madridZoned.toLocalDateTime())) {
             return ResponseEntity.badRequest().build();
         }
         Voting updatedVoting = new Voting(updatedVotingDTO);
@@ -111,9 +112,10 @@ public class VotingController {
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-        ZoneId zoneId = ZoneId.of("Europe/Madrid");
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
-        voting.setClosingHour(zonedDateTime.toLocalDateTime());
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+        voting.setClosingHour(madridZoned.toLocalDateTime());
         votingService.createOrUpdateVoting(voting);
         return new ResponseEntity<>(HttpStatus.OK);
     }

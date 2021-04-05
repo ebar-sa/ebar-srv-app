@@ -60,9 +60,10 @@ public class OptionController {
             return ResponseEntity.notFound().build();
         }
         //Can't delete an option if the voting has started
-        ZoneId zoneId = ZoneId.of("Europe/Madrid");
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
-        if (voting.getOpeningHour().isBefore(zonedDateTime.toLocalDateTime())){
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+        if (voting.getOpeningHour().isBefore(madridZoned.toLocalDateTime())){
             return ResponseEntity.badRequest().build();
         }
         if(!voting.getOptions().contains(option)) {
@@ -103,10 +104,11 @@ public class OptionController {
         }
 
         //Clients can vote only when the voting is active
-        ZoneId zoneId = ZoneId.of("Europe/Madrid");
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now().toLocalDate(), LocalDateTime.now().toLocalTime(), zoneId);
-        if (voting.getOpeningHour().isAfter(zonedDateTime.toLocalDateTime()) ||
-        voting.getClosingHour() != null && voting.getClosingHour().isBefore(zonedDateTime.toLocalDateTime())){
+        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+        if (voting.getOpeningHour().isAfter(madridZoned.toLocalDateTime()) ||
+        voting.getClosingHour() != null && voting.getClosingHour().isBefore(madridZoned.toLocalDateTime())){
             return ResponseEntity.badRequest().build();
         }
         //A client can't vote twice
