@@ -1,0 +1,68 @@
+project:
+  name: 'eBar Back-End App'
+  owner: 'ebar-sa'
+  teamId: '15'
+  identities:
+    github:
+      url: 'https://github.com/ebar-sa/ebar-srv-app'
+    heroku:
+      url: 'https://ebar-srv-sprint2.herokuapp.com/'
+    travis:
+      url: 'https://www.travis-ci.com/github/ebar-sa/ebar-srv-app'
+  members:
+    member1:
+      name: 'Luis'
+      surname: 'Chacón'
+      githubUsername: 'luicharom10'
+    member2:
+      name: 'Amine'
+      surname: 'Chaghir'
+      githubUsername: 'achaghirc99'
+    member3:
+      name: 'Pablo'
+      surname: 'de los Santos'
+      githubUsername: 'pasanca7'
+    member4:
+      name: 'José Ramón'
+      surname: 'Fernández'
+      githubUsername: 'josferde5'
+    member5:
+      name: 'Álvaro'
+      surname: 'Frías'
+      githubUsername: 'AlvarofbUS'
+    member6:
+      name: 'José'
+      surname: 'Gamaza'
+      githubUsername: 'josgamdia1'
+    member7:
+      name: 'Álvaro Ezequiel'
+      surname: 'Martos'
+      githubUsername: 'alvez29'
+    member8:
+      name: 'Alberto'
+      surname: 'Murillo'
+      githubUsername: 'albmurjae'
+    member9:
+      name: 'Nicolás'
+      surname: 'Pazos'
+      githubUsername: 'nicpazsar'
+    member10:
+      name: 'Jorge'
+      surname: 'Raposo'
+      githubUsername: 'jorrapdia'
+    member11:
+      name: 'Pablo'
+      surname: 'Reneses'
+      githubUsername: 'Pabloreneses98'
+    member12:
+      name: 'Francisco Javier'
+      surname: 'Rosa'
+      githubUsername: 'frarosrod2'
+    member13:
+      name: 'Daniel'
+      surname: 'Sánchez'
+      githubUsername: 'danimilles'
+    member14:
+      name: 'Iván'
+      surname: 'Santos'
+      githubUsername: 'ivasandom'
