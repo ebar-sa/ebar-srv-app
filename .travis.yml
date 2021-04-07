@@ -15,15 +15,8 @@ before_install:
 - mysql -u root -e "GRANT ALL ON ebarbbdd.* TO 'ebar'@'localhost';"
 addons:
   sonarcloud:
-    organization: "ebar-sa"
+    organization: ebar-sa
     token:
       secure: IJNkamnwu3W6v0WarV6mKLpeMYg14xOGzEzaK4zGOHN70470rDzurpVpbsZdozER1agT63ULvdf2iPtmAxATEQYaD/mFCi0D/q4+jTXa4gUoOfj6HBYtMRyYy7ypZmKFjDHXnnsCwQv9k0JP8xE6G8Ce/QwEkE6bpAvIzKgUHOWLeWQJ7nqQuz7BV0L7U2q+CyHolu02ySXkiV8K/CJ0T8e7oR3xQb7z0Rr7Y+DKEsOB/PO4IuLh8mbzu9i6eJqR9zkUom61IFvBjou+7Zh/uOFpT+Opj7yFnqKxLW8Wz839wtyY6jV5I5WDZLNju9ox+f80hiWFfAPjvK61ONn05ClBjvHHDlYwudS/IlJpkXhrho0IXxgtbpyruY2AdZzx5RCr8+MXX5NLTVz8X3a3EQMvqhy6/ypSXiloIbpr+/3P5pfzeM0s8LuFlWjcR9M0r2tIoL5MZF1DcZoFXas2OzUVEeQphuXs2Z6sB9yGfqKtzsHLSEvpCCHZJ7Y1hbK5XJudkwPKN9l/0R/EybmuDbR4+UiZvmvEY3dC2EZT3wl+Py62wIHZ4l75ezUIGFPDTRDzvnaTfJKGTSIKa2o8En7Ki0t5FfUVd2sAS9cgnJnzXTg9KmCFpq898uvBPPf2gTgJ4d1z9GBTxVBlVxOynvXTbewrOxaMhQo8P+iAwls=
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ebar-sa_ebar-srv-app -Dspring-boot.run.profiles=dev
-deploy:
-  provider: heroku
-  app: ebar-srv-sprint1
-  api_key:
-    secure: GYZKKPKC9ZYwEjRyv2+pdzZJ2qR2NcowkYgxuH75LemFl6yAvGEVoJBcnAoAULsAlmGlVdXN72ZO38Toa1PJrai0Y0MKIxRz425X/FEC2Ofrr/2F8Hd3fVM9dpU4WEAuil4csif5jNC4U+loxE/ikRskayrmyIsNJD5KVkkUvGSqDalxzAHlkNj5mAGhkrYYZW55TX7ZbLs/Es9sugDzkj2rvomjNBo/h/EFMoTH1dJBTRfmUIXGrAjlYqqOHeTmPf1TpP9WsTGUcXCN1J7EYULvxN4JtLpY0aJXGtHb1BK4ZkaNHgJcnOQZ6DbGIAxIuRAamZ7Tu0f3B31IgCMmhF27i3LgSHmHAkcbsIxjlis8Am6IBU/xrDY/zfa46SR36VPdUy5M1Xc9R2R/6iRfpz7IZgpALxXhCUpqIhACivwD6JeSgohn188LOcoSENaltAFUJk7T5grsXzWrhfe+ZYid6SV260yCqnKpRhywOTYaG5CpKpvUWBGguNL7DYLal5LZ9MB4HlpGTk5vn7XJ5CW5Qqb6rxNetFbAo4CW0QJcx5BkClOkhL75IqqbNNgQjNsBEeX6qdMBbkGrFkF2/ia2rO7AU0I9uyK/Py9kjmdatAvZnKpjDMEFQUVKiQdRMiJsHcHPnHIRWcUTRVOmhkIwEjC9AKl8vV0VzoDy7wg=
-  on:
-    branch: master
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ebar-sa_ebar-srv-app -Dspring-boot.run.profiles=dev
