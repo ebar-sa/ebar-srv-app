@@ -3,6 +3,7 @@ package com.ebarapp.ebar.controller;
 import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.model.dtos.OptionDTO;
+import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import com.ebarapp.ebar.validators.OptionValidator;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -29,6 +31,9 @@ public class OptionController {
 
     @Autowired
     private VotingService votingService;
+
+    @Autowired
+    private BarTableService barTableService;
 
     @InitBinder("option")
     public void initOptionBider(final WebDataBinder dataBinder) { dataBinder.setValidator(new OptionValidator());}
@@ -86,12 +91,17 @@ public class OptionController {
         return new ResponseEntity<>(option, HttpStatus.OK);
     }
 
-    @PostMapping("/voting/{votingId}/option/{optionId}/vote")
+    @PostMapping("bar/{barId}/voting/{votingId}/option/{optionId}/vote")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<Option> vote(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId){
+    public ResponseEntity<Option> vote(@PathVariable("barId") Integer barId,@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId, @RequestBody String token){
         UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (ud == null){
             return ResponseEntity.notFound().build();
+        }
+        //The user must verify he is in the bar
+        List<String> allValidTokens = barTableService.getAllValidTokensByBarId(barId);
+        if (! allValidTokens.contains(token)) {
+            return ResponseEntity.badRequest().build();
         }
         String username = ud.getUsername();
         Option option = optionService.getOptionById(optionId);
@@ -102,8 +112,8 @@ public class OptionController {
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-
         //Clients can vote only when the voting is active
+        //Using Time Zone of Madrid
         ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
         ZoneId madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
@@ -122,6 +132,7 @@ public class OptionController {
 
         voting.addVoter(username);
         votingService.createOrUpdateVoting(voting);
+        String kk = "Esto es un string de preuba";
         return new ResponseEntity<>(HttpStatus.OK);
 
     }

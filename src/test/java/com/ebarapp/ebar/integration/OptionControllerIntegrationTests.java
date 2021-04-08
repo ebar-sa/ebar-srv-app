@@ -1,9 +1,11 @@
 package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import org.junit.jupiter.api.AfterEach;
@@ -52,6 +54,10 @@ class OptionControllerIntegrationTests {
     @Autowired
     private BarService barService;
     private Integer barId;
+
+    @Autowired
+    private BarTableService barTableService;
+    private Integer barTableId;
 
     @BeforeEach
     private void setUp(){
@@ -106,7 +112,19 @@ class OptionControllerIntegrationTests {
         votings.add(voting);
         votings.add(voting2);
 
+        BarTable barTable = new BarTable();
+        barTable.setName("Table 1");
+        barTable.setToken("aaa-111");
+        barTable.setSeats(4);
+        barTable.setBar(bar);
+
         bar.setVotings(votings);
+        this.barService.createBar(bar);
+
+        Set<BarTable> bts = new HashSet<>();
+        bts.add(barTable);
+        bar.setBarTables(bts);
+        this.barTableService.createBarTable(barTable);
         this.barService.createBar(bar);
 
         this.votingService.createOrUpdateVoting(voting);
@@ -120,11 +138,13 @@ class OptionControllerIntegrationTests {
         this.option2Id = option2.getId();
         this.votingService.createOrUpdateVoting(voting);
         this.votingService.createOrUpdateVoting(voting2);
+        this.barTableId = barTable.getId();
     }
 
     @AfterEach
     void tearDown() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+barId+"/voting/"+votingId));
+        this.barTableService.removeBarTable(barTableId);
         this.barService.removeBar(barId);
     }
 
@@ -167,15 +187,23 @@ class OptionControllerIntegrationTests {
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void successVote() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/"+voting2Id+"/option/"+option2Id+"/vote"))
+        String token = "aaa-111";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/"+barId+"/voting/"+voting2Id+"/option/"+option2Id+"/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void failureVote() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/9000/option/1/vote"))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+        String token = "aaa-112";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/"+barId+"/voting/"+voting2Id+"/option/"+option2Id+"/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
 }

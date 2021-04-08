@@ -1,8 +1,10 @@
 package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
+import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +28,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @ExtendWith(SpringExtension.class)
@@ -42,6 +46,8 @@ import java.util.Set;
     @MockBean
     private VotingService votingService;
 
+    @MockBean
+    private BarTableService barTableService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -95,16 +101,6 @@ import java.util.Set;
         votings.add(voting);
         votings.add(voting2);
 
-
-        BDDMockito.given(this.votingService.getVotingById(1)).willReturn(voting);
-        BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
-        BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
-        BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
-        BDDMockito.given(this.optionService.getOptionById(1)).willReturn(option1);
-        BDDMockito.given(this.optionService.getOptionById(2)).willReturn(null);
-        BDDMockito.given(this.optionService.getOptionById(3)).willReturn(option2);
-        BDDMockito.given(this.optionService.createOption(Mockito.any(Option.class))).willReturn(option1);
-
         Bar bar = new Bar();
         bar.setId(1);
         bar.setContact("test1@example.com");
@@ -115,6 +111,30 @@ import java.util.Set;
         bar.setName("Test 1");
         bar.setClosingTime(null);
         bar.setOpeningTime(null);
+
+        BarTable barTable = new BarTable();
+        barTable.setId(1);
+        barTable.setName("Table 1");
+        barTable.setToken("aaa-111");
+        barTable.setSeats(4);
+        barTable.setBar(bar);
+
+        Set<BarTable> bts = new HashSet<>();
+        bts.add(barTable);
+        bar.setBarTables(bts);
+
+        List<String> tokens = new ArrayList<>();
+        tokens.add("aaa-111");
+
+        BDDMockito.given(this.votingService.getVotingById(1)).willReturn(voting);
+        BDDMockito.given(this.votingService.getVotingById(2)).willReturn(null);
+        BDDMockito.given(this.votingService.getVotingById(3)).willReturn(voting2);
+        BDDMockito.given(this.votingService.createOrUpdateVoting(voting)).willReturn(voting);
+        BDDMockito.given(this.optionService.getOptionById(1)).willReturn(option1);
+        BDDMockito.given(this.optionService.getOptionById(2)).willReturn(null);
+        BDDMockito.given(this.optionService.getOptionById(3)).willReturn(option2);
+        BDDMockito.given(this.optionService.createOption(Mockito.any(Option.class))).willReturn(option1);
+        BDDMockito.given(this.barTableService.getAllValidTokensByBarId(1)).willReturn(tokens);
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
@@ -192,28 +212,55 @@ import java.util.Set;
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void successVote() throws Exception{
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/3/option/1/vote"))
+        String token = "aaa-111";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/3/option/1/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
+    void failureVoteBadToken() throws Exception{
+        String token = "aaa-112";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/voting/3/option/1/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
     void failureVoteVotingNotFound() throws Exception{
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/2/option/1/vote"))
+        String token = "aaa-111";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/2/option/1/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void failureVoteNotActive() throws Exception{
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/1/option/1/vote"))
+        String token = "aaa-111";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/1/option/1/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @WithMockUser(username="user1", roles={"CLIENT"})
     @Test
     void failureVoteCantVoteTwice() throws Exception{
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/3/option/1/vote"))
+        String token = "aaa-111";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/3/option/1/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 }
