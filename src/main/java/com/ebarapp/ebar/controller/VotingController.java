@@ -7,7 +7,6 @@ import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import com.ebarapp.ebar.validators.VotingValidator;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

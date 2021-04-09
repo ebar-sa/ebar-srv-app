@@ -167,6 +167,16 @@ import java.util.*;
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureCreateOptionNotStaff() throws Exception{
+        String json = "{\n\"description\": \"Option 1\",\n \"votes\": \"0\"\n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/1/option")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
 
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
@@ -184,6 +194,13 @@ import java.util.*;
     void successDeleteOption() throws Exception{
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/1/voting/1/option/3"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureDeleteOptionNotStaff() throws Exception{
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/1/voting/1/option/3"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
@@ -237,6 +254,17 @@ import java.util.*;
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(token))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void failureVoteOptionNotFound() throws Exception{
+        String token = "aaa-111";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/3/option/2/vote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(token))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @WithMockUser(username="user", roles={"CLIENT"})

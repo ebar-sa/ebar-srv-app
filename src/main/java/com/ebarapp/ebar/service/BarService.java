@@ -3,6 +3,7 @@ package com.ebarapp.ebar.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.ebarapp.ebar.model.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ public class BarService {
 	public Boolean isStaff(Integer id, String username) {
 		Boolean res = false;
 		Bar bar = findBarById(id);
-		List<String> employeesUsername = bar.getEmployees().stream().map(x -> x.getUsername()).collect(Collectors.toList());
+		List<String> employeesUsername = bar.getEmployees().stream().map(Employee::<String>getUsername).collect(Collectors.toList());
 		if (bar.getOwner().getUsername().equals(username) || employeesUsername.contains(username)) {
 			res = true;
 		}

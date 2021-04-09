@@ -158,6 +158,20 @@ class VotingControllerTests {
 
     @WithMockUser(username = "admin", roles = {"OWNER"})
     @Test
+    void successDeleteVoting() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/1/voting/3"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void failureDeleteVotingNotFoundInBar() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/1/voting/2"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
     void failureDeleteVotingBarNotFound() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/2/voting/1"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
@@ -170,10 +184,17 @@ class VotingControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @WithMockUser(username = "admin2", roles = {"OWNER"})
+    @Test
+    void failureFinishVotingNotStaff() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/3/finish"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
     @WithMockUser(username = "admin", roles = {"OWNER"})
     @Test
     void failureFinishVoting() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/voting/2/finish"))
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/2/finish"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
@@ -186,6 +207,28 @@ class VotingControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void failureUpdateVotingIsActive() throws Exception {
+        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 19:00:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/1/voting/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username = "admin2", roles = {"OWNER"})
+    @Test
+    void failureUpdateVotingNotStaff() throws Exception {
+        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 19:00:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/1/voting/3")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @WithMockUser(username = "admin", roles = {"OWNER"})
