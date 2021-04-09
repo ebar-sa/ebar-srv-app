@@ -1,8 +1,10 @@
 package com.ebarapp.ebar.controller;
 
+import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.model.dtos.OptionDTO;
+import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
@@ -35,12 +37,31 @@ public class OptionController {
     @Autowired
     private BarTableService barTableService;
 
+    @Autowired
+    private BarService barService;
+
+    private ResponseEntity<Option> validStaff(Integer barId) {
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ud.getUsername();
+        if(barService.isStaff(bar.getId(), username).equals(Boolean.FALSE)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return null;
+    }
+
     @InitBinder("option")
     public void initOptionBider(final WebDataBinder dataBinder) { dataBinder.setValidator(new OptionValidator());}
 
-    @PostMapping("/voting/{votingId}/option")
+    @PostMapping("/bar/{barId}/voting/{votingId}/option")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @RequestBody OptionDTO newOptionDTO) {
+    public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @PathVariable("barId") Integer barId, @RequestBody OptionDTO newOptionDTO) {
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
+        }
         Option newOption = new Option(newOptionDTO);
         Option option = optionService.createOption(newOption);
         Voting voting = votingService.getVotingById(votingId);
@@ -53,9 +74,12 @@ public class OptionController {
 
     }
 
-    @DeleteMapping("/voting/{votingId}/option/{optionId}")
+    @DeleteMapping("/bar/{barId}/voting/{votingId}/option/{optionId}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Option> deleteOption(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId) {
+    public ResponseEntity<Option> deleteOption(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId, @PathVariable("barId") Integer barId) {
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
+        }
         Voting voting = votingService.getVotingById(votingId);
         if(voting == null) {
             return ResponseEntity.notFound().build();
@@ -132,7 +156,6 @@ public class OptionController {
 
         voting.addVoter(username);
         votingService.createOrUpdateVoting(voting);
-        String kk = "Esto es un string de preuba";
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
