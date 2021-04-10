@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import javax.validation.constraints.NotNull;
 
+import com.ebarapp.ebar.model.dtos.BarTableDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -23,6 +24,16 @@ import lombok.Setter;
 })
 @Table(name = "bar_table")
 public class BarTable extends BaseEntity {
+	
+	public  BarTable() {}
+	
+	public BarTable(BarTableDTO barTableDTO) {
+		this.name  = barTableDTO.getName();
+		this.seats = barTableDTO.getSeats();
+		this.bill = barTableDTO.getBill();
+		this.client = barTableDTO.getClient();
+		this.bar = barTableDTO.getBar();
+	}
 
 	@NotNull
 	@Column(name = "name")

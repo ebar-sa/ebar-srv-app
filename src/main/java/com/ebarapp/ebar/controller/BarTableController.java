@@ -5,19 +5,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.Menu;
+import com.ebarapp.ebar.model.Voting;
+import com.ebarapp.ebar.model.dtos.BarTableDTO;
+import com.ebarapp.ebar.model.dtos.VotingDTO;
+import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 
@@ -28,6 +38,9 @@ public class BarTableController {
 
 	@Autowired
 	private BarTableService barTableService;
+	
+	@Autowired
+	private BarService barService;
 
 	@Autowired
 	private BillService billServie;
@@ -132,5 +145,25 @@ public class BarTableController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	@PostMapping("/createTable/{barId}")
+    @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+    public ResponseEntity<BarTable> createTable(@PathVariable("barId") Integer barId, @Valid @RequestBody BarTableDTO barTableDTO) {
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+         else {
+        	BarTable newTable = new BarTable(barTableDTO);
+        	String token = BarTableService.generarToken();
+        	newTable.setToken(token);
+        	BarTable table = barTableService.saveTable(newTable);
+        	bar.getBarTables().add(table);
+        	barService.createBar(bar);
+            return new ResponseEntity<>(table, HttpStatus.CREATED);
+        }
+    }
+	
+		
 
 }
