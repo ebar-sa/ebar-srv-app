@@ -17,7 +17,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
 import com.ebarapp.ebar.model.dtos.BarCreateDTO;
-import com.ebarapp.ebar.model.dtos.BarDTO;
 import lombok.Getter;
 import lombok.Setter;
 
