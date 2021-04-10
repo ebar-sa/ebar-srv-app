@@ -22,4 +22,13 @@ public class Owner extends User {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Bar> bar;
 
+    public Owner () {
+        //Empty
+    }
+
+    public Owner (String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password, Set<Bar> bar) {
+        super(username, firstName, lastName, dni, email, phoneNumber, password);
+        this.bar = bar;
+    }
+
 }

@@ -2,16 +2,25 @@ package com.ebarapp.ebar.controller;
 
 import java.util.*;
 
+import com.ebarapp.ebar.model.Owner;
+import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.model.dtos.BarCapacity;
 import com.ebarapp.ebar.model.BarTable;
+import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
+import com.ebarapp.ebar.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.service.BarService;
+
+import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -20,6 +29,31 @@ public class BarController {
 
 	@Autowired
 	private BarService barService;
+
+	@Autowired
+	private UserService userService;
+
+
+	@PostMapping("create")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<Bar> createBar (@Valid @RequestBody BarCreateDTO newBarCreateDTO) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Optional<User> optionalUser = this.userService.getUserByUsername(username);
+		if (! optionalUser.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		Set<Bar> bars = new HashSet<>();
+		User user = optionalUser.get();
+		Owner owner = new Owner(user.getUsername(), user.getFirstName(), user.getLastName(), user.getDni(), user.getEmail(), user.getPhoneNumber(), user.getPassword(), bars);
+		Bar newBar = new Bar(newBarCreateDTO);
+		newBar.setOwner(owner);
+		bars.add(newBar);
+		owner.setBar(bars);
+
+		this.barService.createBar(newBar);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
 
 	@GetMapping("/capacity")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")

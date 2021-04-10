@@ -2,7 +2,10 @@ package com.ebarapp.ebar.integration;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BarTable;
+import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.repository.BarRepository;
+import com.ebarapp.ebar.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,15 +43,40 @@ class BarControllerIntegrationTests {
     private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
 
+    private static final String TEST_USER_FIRST_NAME = "John";
+    private static final String TEST_USER_LAST_NAME = "Doe";
+    private static final String TEST_USER_DNI = "11111111K";
+    private static final String TEST_USER_EMAIL = "johndoe1@email.com";
+    private static final String TEST_USER_PHONE_NUMBER = "666333999";
+    private static final String TEST_USER_USERNAME = "admin";
+    private static final String TEST_USER_PASSWORD = "johndoe1";
+
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private BarRepository barRepository;
 
+    @MockBean
+    private UserRepository userRepository;
+
     @BeforeEach
     void setUp() {
         Set<BarTable> barTables = new HashSet<>();
+
+        Set<RoleType> roles = new HashSet<>();
+        RoleType rol = RoleType.ROLE_OWNER;
+        roles.add(rol);
+
+        User user = new User();
+        user.setFirstName(TEST_USER_FIRST_NAME);
+        user.setLastName(TEST_USER_LAST_NAME);
+        user.setDni(TEST_USER_DNI);
+        user.setEmail(TEST_USER_EMAIL);
+        user.setPhoneNumber(TEST_USER_PHONE_NUMBER);
+        user.setUsername(TEST_USER_USERNAME);
+        user.setPassword(TEST_USER_PASSWORD);
+        user.setRoles(roles);
 
         BarTable barTable = new BarTable();
         barTable.setName("Mesa 1");
@@ -68,6 +96,20 @@ class BarControllerIntegrationTests {
 
         given(this.barRepository.getBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barRepository.findAll()).willReturn(bars);
+
+        given(this.userRepository.findByUsername("admin")).willReturn(Optional.of(user));
+
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void successCreateBar() throws Exception {
+        String json = "{ \n \"name\": \"Pizza by Alfredo\",\n \"description\": \"Restaurant\",\n \"contact\": \"alfredo@gmail.com\",\n \"openingHour\": \"01-01-1970 13:00:00\",\n \"closingHour\": \"01-01-1970 22:30:00\", \n \"images\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")

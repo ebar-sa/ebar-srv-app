@@ -1,7 +1,9 @@
 
 package com.ebarapp.ebar.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -15,6 +17,8 @@ import javax.persistence.Table;
 
 import javax.validation.constraints.NotEmpty;
 
+import com.ebarapp.ebar.model.dtos.BarCreateDTO;
+import com.ebarapp.ebar.model.dtos.BarDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +27,22 @@ import lombok.Setter;
 @Setter
 @Table(name = "bar")
 public class Bar extends BaseEntity {
+
+	public Bar() {}
+
+	public Bar(BarCreateDTO barCreateDTO) {
+		this.name = barCreateDTO.getName();
+		this.description = barCreateDTO.getDescription();
+		this.contact = barCreateDTO.getContact();
+		this.location = barCreateDTO.getLocation();
+		this.openingTime = barCreateDTO.getOpeningTime();
+		this.closingTime = barCreateDTO.getClosingTime();
+		this.images = barCreateDTO.getImages();
+		this.votings = new HashSet<>();
+		this.barTables = new HashSet<>();
+		this.employees = new HashSet<>();
+		this.owner = null;
+	}
 
 	@NotEmpty
 	@Column(name = "name")
