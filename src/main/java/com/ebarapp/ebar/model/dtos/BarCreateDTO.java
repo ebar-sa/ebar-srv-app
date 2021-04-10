@@ -24,7 +24,7 @@ public class BarCreateDTO {
     }
 
     public BarCreateDTO(String name, String description, String contact, String location, Date openingTime,
-                        Date closingTime, Set<DBImage> images, String ownerUsername) {
+                        Date closingTime, Set<DBImage> images) {
         this.name = name;
         this.description = description;
         this.contact = contact;
