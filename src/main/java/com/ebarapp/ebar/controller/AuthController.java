@@ -72,19 +72,22 @@ public class AuthController {
         if (userService.existsUserByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
-        if (userService.existsUserByEmail(signUpRequest.getEmail())) {
+                    .body(new MessageResponse("Username is already taken!"));
+        } else if (userService.existsUserByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Email is already in use!"));
+        }
+
+        String dni = signUpRequest.getDni();
+        if (dni != null && dni.equals("")) {
+            dni = null;
         }
 
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
-                signUpRequest.getDni(),
+                dni,
                 signUpRequest.getEmail(),
                 signUpRequest.getPhoneNumber(),
                 encoder.encode(signUpRequest.getPassword()));
@@ -97,7 +100,9 @@ public class AuthController {
         try {
             userService.saveUser(user);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(e.getMessage()));
         }
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
