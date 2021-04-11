@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +17,7 @@ import lombok.Setter;
 public class Employee extends User {
 
 	private static final long serialVersionUID = 8632504696241787808L;
-	
+	@JsonIgnore
     @ManyToOne
     private Bar bar;
 

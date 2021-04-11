@@ -1,3 +1,4 @@
+
 package com.ebarapp.ebar.service;
 
 import java.util.List;
@@ -18,13 +19,20 @@ public class BarService {
 		return this.barRepository.findAll();
 	}
 
-	public Bar findBarById(Integer id) {
+	public Bar findBarById(final Integer id) {
 		return this.barRepository.getBarById(id);
 	}
 
-	public Bar createBar (Bar newBar) { return barRepository.save(newBar);}
+	public Bar saveBar(final Bar bar) {
+		return this.barRepository.save(bar);
+	}
 
-	public void removeBar(Integer id) { barRepository.deleteById(id);}
+	public Bar createBar(final Bar newBar) {
+		return this.barRepository.save(newBar);
+	}
+
+	public void removeBar(final Integer id) {
+		this.barRepository.deleteById(id);
+	}
 
 }
-
