@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -49,7 +50,6 @@ public class BarTableController {
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<List<BarTable>> getAllTables() {
 		List<BarTable> tables = this.barTableService.findAllBarTable();
-
 		if (!tables.isEmpty()) {
 			return new ResponseEntity<>(tables, HttpStatus.OK);
 		} else {
@@ -157,8 +157,13 @@ public class BarTableController {
         	BarTable newTable = new BarTable(barTableDTO);
         	String token = BarTableService.generarToken();
         	newTable.setToken(token);
+        	newTable.setBar(bar);
+        	newTable.setFree(true);
+        	bar.getBarTables().add(newTable);
+        	Bill b = new Bill();
+        	billServie.createBill(b);
+        	newTable.setBill(b);
         	BarTable table = barTableService.saveTable(newTable);
-        	bar.getBarTables().add(table);
         	barService.createBar(bar);
             return new ResponseEntity<>(table, HttpStatus.CREATED);
         }

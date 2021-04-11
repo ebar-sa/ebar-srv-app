@@ -29,7 +29,7 @@ public class BarTable extends BaseEntity {
 	
 	public BarTable(BarTableDTO barTableDTO) {
 		this.name  = barTableDTO.getName();
-		this.seats = barTableDTO.getSeats();
+		this.seats = Integer.parseInt(barTableDTO.getSeats());
 		this.bill = barTableDTO.getBill();
 		this.client = barTableDTO.getClient();
 		this.bar = barTableDTO.getBar();

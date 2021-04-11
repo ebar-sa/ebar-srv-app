@@ -17,19 +17,13 @@ import lombok.Setter;
 @Setter
 public class BarTableDTO {
 
-	@NotNull
 	@Column(name = "name")
 	private String	name;
 
-	@NotNull
-	@Column(name = "free")
-	private boolean	free;
 
-	@NotNull
 	@Column(name = "seats")
-	private Integer	seats;
+	private String	seats;
 
-	@NotNull
 	@ManyToOne
 	private Bar		bar;
 
