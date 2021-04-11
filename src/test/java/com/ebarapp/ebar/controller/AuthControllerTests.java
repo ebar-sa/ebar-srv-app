@@ -155,7 +155,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Error: Username is already taken!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Username is already taken!")));
     }
 
     @Test
@@ -176,7 +176,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Error: Email is already in use!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Email is already in use!")));
     }
 
 }
