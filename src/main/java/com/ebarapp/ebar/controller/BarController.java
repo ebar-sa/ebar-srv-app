@@ -1,5 +1,6 @@
 package com.ebarapp.ebar.controller;
 
+import java.net.URI;
 import java.util.*;
 
 import com.ebarapp.ebar.model.Owner;
@@ -10,7 +11,6 @@ import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
 import com.ebarapp.ebar.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +22,7 @@ import com.ebarapp.ebar.service.BarService;
 
 import javax.validation.Valid;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600, exposedHeaders = "location")
 @RestController
 @RequestMapping("/api/bar")
 public class BarController {
@@ -52,7 +52,7 @@ public class BarController {
 		owner.setBar(bars);
 
 		this.barService.createBar(newBar);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		return ResponseEntity.created(URI.create("/bares/" + newBar.getId())).build();
 	}
 
 	@GetMapping("/capacity")
