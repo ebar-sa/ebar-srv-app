@@ -17,4 +17,7 @@ public interface BarTableRepository extends JpaRepository<BarTable, Integer> {
 	
 	@Query("SELECT b.barTables from Bar b WHERE b.id = :id")
 	Set<BarTable> getBarTablesByBarId(@Param("id") int id);
+	
+	@Query("SELECT c.table from Client c WHERE c.username = :username")
+	BarTable getBarTableByUsername(@Param("username") String username);
 }

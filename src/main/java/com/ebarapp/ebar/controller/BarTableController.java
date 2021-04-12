@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,8 +47,30 @@ public class BarTableController {
 
 	}
 
+	@GetMapping("/tableDetails")
+	@PreAuthorize("hasRole('CLIENT')")
+	public ResponseEntity<Map<Integer, Object>> getClientTableDetails() {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ud.getUsername();
+		
+		Map<Integer, Object> res = new HashMap<>();
+		BarTable barTable = this.barTableService.getBarTableByUsername(username);
+		if (barTable != null) {
+			Menu menu = barTable.getBar().getMenu();
+			Bill bill = this.barTableService.getBillByTableId(barTable.getId());
+			this.barTableService.saveTable(barTable);
+			res.put(0, barTable);
+			res.put(1, menu);
+			res.put(2, bill);
+			return new ResponseEntity<>(res, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+
+	}
+	
 	@GetMapping("/tableDetails/{id}")
-	@PreAuthorize("permitAll()")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Map<Integer, Object>> getTableDetails(@PathVariable("id") final Integer id) {
 		Map<Integer, Object> res = new HashMap<>();
 		BarTable barTable = this.barTableService.findbyId(id);

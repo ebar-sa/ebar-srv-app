@@ -35,6 +35,10 @@ public class BarTableService {
 		}
 	}
 	
+	public BarTable getBarTableByUsername(final String username) {
+		return this.barTableRepository.getBarTableByUsername(username);
+	}
+	
 	public Set<BarTable> getBarTablesByBarId(final Integer id){
 		return this.barTableRepository.getBarTablesByBarId(id);
 	}

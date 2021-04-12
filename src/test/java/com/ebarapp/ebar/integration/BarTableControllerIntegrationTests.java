@@ -106,6 +106,7 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.findById(22)).willReturn(Optional.of(table3));
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
 		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
+		given(this.barTableRepository.getBarTableByUsername("client1")).willReturn(table2);
 
 
 	}
@@ -117,7 +118,7 @@ class BarTableControllerIntegrationTests {
 				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
 	}
 
-	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@WithMockUser(username = "user", roles = { "OWNER" })
 	@Test
 	void testGetTableById() throws Exception {
 		String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false},\"1\":{\"id\":1,\"items\":[],\"categories\":[],\"new\":false},\"2\":{\"id\":1,\"itemBill\":null,\"itemOrder\":null,\"new\":false}}";
@@ -125,6 +126,13 @@ class BarTableControllerIntegrationTests {
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
 	}
 
+	@WithMockUser(username = "client1", roles = { "CLIENT" })
+	@Test
+	void testGetTableByUsername() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails")
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("{0={id=21, name=mesa2, token=ihv-58f, free=false, seats=4, new=false}, 1={id=1, items=[], categories=[], new=false}, 2={id=1, itemBill=null, itemOrder=null, new=false}}")));
+	}
+	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
 	void testBusyTable() throws Exception {
