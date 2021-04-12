@@ -2,8 +2,8 @@ package com.ebarapp.ebar.controller;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,10 +32,10 @@ public class BarTableController {
 	@Autowired
 	private BillService billServie;
 
-	@GetMapping("")
+	@GetMapping("{id}")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<BarTable>> getAllTables() {
-		List<BarTable> tables = this.barTableService.findAllBarTable();
+	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
+		Set<BarTable> tables = this.barTableService.getBarTablesByBarId(barId);
 
 		if (!tables.isEmpty()) {
 			return new ResponseEntity<>(tables, HttpStatus.OK);
