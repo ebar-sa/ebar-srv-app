@@ -9,10 +9,15 @@ import org.springframework.data.repository.query.Param;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
+import com.ebarapp.ebar.model.Client;
+import com.ebarapp.ebar.model.User;
 
 public interface BarTableRepository extends JpaRepository<BarTable, Integer> {
 
 	@Query("SELECT bt.bill from BarTable bt WHERE bt.id = :id")
 	Bill getBillByTableId(@Param("id") int id);
+
+	@Query("SELECT us from User us WHERE us.username = :userName")
+	User getClientByPrincipalUserName(@Param("userName") String userName);
 
 }

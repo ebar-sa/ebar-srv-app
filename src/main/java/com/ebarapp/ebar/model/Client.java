@@ -18,4 +18,22 @@ public class Client extends User {
 		
 	@OneToOne(fetch = FetchType.LAZY)
     private BarTable table;
+
+	public Client(User user, BarTable barTable) {
+		super();
+		this.username = user.username;
+		this.dni = user.dni;
+		this.email = user.email;
+		this.firstName = user.firstName;
+		this.lastName = user.lastName;
+		this.password = user.password;
+		this.phoneNumber = user.phoneNumber;
+		this.table = barTable;
+	}
+	
+	public Client() {
+		super();
+	}
+	
+	
 }

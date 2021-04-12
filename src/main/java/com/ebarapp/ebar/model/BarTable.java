@@ -1,6 +1,7 @@
 
 package com.ebarapp.ebar.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,10 +30,7 @@ public class BarTable extends BaseEntity {
 	
 	public BarTable(BarTableDTO barTableDTO) {
 		this.name  = barTableDTO.getName();
-		this.seats = Integer.parseInt(barTableDTO.getSeats());
-		this.bill = barTableDTO.getBill();
-		this.client = barTableDTO.getClient();
-		this.bar = barTableDTO.getBar();
+		this.seats = barTableDTO.getSeats();
 	}
 
 	@NotNull
@@ -58,7 +56,10 @@ public class BarTable extends BaseEntity {
 	@OneToOne(fetch = FetchType.LAZY)
 	private Bill	bill;
 
+	
 	@OneToOne(fetch = FetchType.LAZY)
 	private Client	client;
+	
+	
 
 }

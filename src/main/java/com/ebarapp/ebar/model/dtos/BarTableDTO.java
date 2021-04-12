@@ -22,14 +22,6 @@ public class BarTableDTO {
 
 
 	@Column(name = "seats")
-	private String	seats;
+	private Integer	seats;
 
-	@ManyToOne
-	private Bar		bar;
-
-	@OneToOne(fetch = FetchType.LAZY)
-	private Bill	bill;
-
-	@OneToOne(fetch = FetchType.LAZY)
-	private Client	client;
 }

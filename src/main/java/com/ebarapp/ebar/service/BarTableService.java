@@ -2,6 +2,8 @@ package com.ebarapp.ebar.service;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
+import com.ebarapp.ebar.model.Client;
+import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,14 @@ public class BarTableService {
 	
 	public List<BarTable> findAllBarTable(){
 		return this.barTableRepository.findAll();
+	}
+	
+	public void removeTable(Integer id) {
+        barTableRepository.deleteById(id);
+    }
+	
+	public User getClientByPrincipalUserName(String userName) {
+		return this.barTableRepository.getClientByPrincipalUserName(userName);
 	}
 
 
