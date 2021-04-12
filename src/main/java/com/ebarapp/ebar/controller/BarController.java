@@ -34,7 +34,7 @@ public class BarController {
 	private UserService userService;
 
 
-	@PostMapping("create")
+	@PostMapping("")
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Bar> createBar (@Valid @RequestBody BarCreateDTO newBarCreateDTO) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -53,6 +53,63 @@ public class BarController {
 
 		this.barService.createBar(newBar);
 		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	/*
+	@PostMapping("update/{id}")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<Bar> updateBar(@Valid @RequestBody Bar updatedBar, @PathVariable("id") Integer id) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Optional<User> optionalUser = this.userService.getUserByUsername(username);
+		if (! optionalUser.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		try {
+			Bar bar = barService.findBarById(id);
+			if(bar == null) {
+				return ResponseEntity.notFound().build();
+			}
+			if(bar.getOwner().getUsername() != username) {
+				return ResponseEntity.badRequest().build();
+			}
+
+			barService.updateBar(updatedBar);
+			return new ResponseEntity<>(HttpStatus.OK);
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	*/
+
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<Bar> deleteBar(@PathVariable("id") Integer id) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Optional<User> optionalUser = this.userService.getUserByUsername(username);
+		if (! optionalUser.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Bar bar = barService.findBarById(id);
+
+		if (bar == null) {
+			return ResponseEntity.notFound().build();
+		}
+		try {
+			if (!bar.getOwner().getUsername().equals(username)) {
+				return ResponseEntity.badRequest().build();
+			}
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		barService.removeBar(id);
+
+		return new ResponseEntity<>(HttpStatus.OK);
+
+
 	}
 
 	@GetMapping("/capacity")
