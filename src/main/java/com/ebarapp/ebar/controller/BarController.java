@@ -11,6 +11,7 @@ import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
 import com.ebarapp.ebar.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,34 +55,6 @@ public class BarController {
 		this.barService.createBar(newBar);
 		return ResponseEntity.created(URI.create("/bares/" + newBar.getId())).build();
 	}
-
-	/*
-	@PostMapping("update/{id}")
-	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<Bar> updateBar(@Valid @RequestBody Bar updatedBar, @PathVariable("id") Integer id) {
-		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String username = ud.getUsername();
-		Optional<User> optionalUser = this.userService.getUserByUsername(username);
-		if (! optionalUser.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-		try {
-			Bar bar = barService.findBarById(id);
-			if(bar == null) {
-				return ResponseEntity.notFound().build();
-			}
-			if(bar.getOwner().getUsername() != username) {
-				return ResponseEntity.badRequest().build();
-			}
-
-			barService.updateBar(updatedBar);
-			return new ResponseEntity<>(HttpStatus.OK);
-
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	*/
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('OWNER')")
