@@ -86,8 +86,8 @@ public class Bar extends BaseEntity {
 
 	public void deleteVoting(Voting oldVoting) { getVotings().remove(oldVoting); }
 
-	public void addImages(Set<DBImage> newImages) { getImages().addAll(images); }
-
+	public void addImages(Set<DBImage> newImages) { getImages().addAll(newImages); }
+tomas?
 	public void deleteImage(DBImage oldImage) {getImages().remove(oldImage); }
 }
 
