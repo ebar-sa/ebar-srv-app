@@ -58,6 +58,9 @@ public class User implements UserDetails {
 	
 	@NotBlank
 	protected String	password;
+
+	@Column(name = "stripe_id")
+	protected String	stripeId;
 	
 	@NotNull
 	@ElementCollection(targetClass=RoleType.class, fetch = FetchType.EAGER)

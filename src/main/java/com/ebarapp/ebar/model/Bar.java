@@ -1,6 +1,7 @@
 
 package com.ebarapp.ebar.model;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 
@@ -64,9 +65,17 @@ public class Bar extends BaseEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private Set<Employee> employees;
 
+	@Column(name = "paid_until")
+	private Date paidUntil;
+
 	public void addVoting(Voting newVoting) { getVotings().add(newVoting); }
 
 	public void deleteVoting(Voting oldVoting) { getVotings().remove(oldVoting); }
+
+	public boolean isSubscriptionActive() {
+		if (paidUntil == null) return false;
+		return paidUntil.after(Date.from(Instant.now()));
+	}
 
 }
 

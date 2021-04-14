@@ -24,6 +24,8 @@ public class BarService {
 
 	public Bar createBar (Bar newBar) { return barRepository.save(newBar);}
 
+	public Bar save (Bar bar) { return barRepository.save(bar); }
+
 	public void removeBar(Integer id) { barRepository.deleteById(id);}
 
 }

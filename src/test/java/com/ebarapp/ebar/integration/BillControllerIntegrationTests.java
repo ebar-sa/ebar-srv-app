@@ -51,7 +51,6 @@ class BillControllerIntegrationTests {
 
     @BeforeEach
     void setUp() {
-
         Bill bill = new Bill();
         bill.setId(TEST_BILL_ID);
 
