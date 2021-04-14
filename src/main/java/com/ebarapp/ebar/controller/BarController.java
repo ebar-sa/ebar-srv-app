@@ -3,12 +3,11 @@ package com.ebarapp.ebar.controller;
 import java.net.URI;
 import java.util.*;
 
-import com.ebarapp.ebar.model.Owner;
-import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.BarCapacity;
-import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
+import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.service.BarService;
 
 import javax.validation.Valid;
@@ -30,6 +28,9 @@ public class BarController {
 
 	@Autowired
 	private BarService barService;
+
+	@Autowired
+	private DBImageService dbImageService;
 
 	@Autowired
 	private UserService userService;
@@ -81,8 +82,6 @@ public class BarController {
 		barService.removeBar(id);
 
 		return new ResponseEntity<>(HttpStatus.OK);
-
-
 	}
 
 	@GetMapping("/capacity")
@@ -135,4 +134,61 @@ public class BarController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<BarCreateDTO> updateBar(@Valid @RequestBody BarCreateDTO barDTO, @PathVariable("id") Integer id) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Optional<User> optionalUser = this.userService.getUserByUsername(username);
+		if (! optionalUser.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Bar updatedBar = this.barService.findBarById(id);
+
+		if (! username.equals(updatedBar.getOwner().getUsername())){
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+
+		updatedBar.setName(barDTO.getName());
+		updatedBar.setDescription(barDTO.getDescription());
+		updatedBar.setContact(barDTO.getContact());
+		updatedBar.setLocation(barDTO.getLocation());
+		updatedBar.setOpeningTime(barDTO.getOpeningTime());
+		updatedBar.setClosingTime(barDTO.getClosingTime());
+		if (!barDTO.getImages().isEmpty()){
+			updatedBar.addImages(barDTO.getImages());
+		}
+
+		this.barService.createBar(updatedBar);
+		return ResponseEntity.ok(barDTO);
+	}
+
+	@DeleteMapping("/{id}/image/{imageId}")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<Bar> deleteImage(@PathVariable("id") Integer id, @PathVariable("imageId") Integer imageId) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Optional<User> optionalUser = this.userService.getUserByUsername(username);
+		if (! optionalUser.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		Bar bar = barService.findBarById(id);
+		if (bar == null || bar.getImages().isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		Set<DBImage> images = bar.getImages();
+		DBImage imageToDelete = this.dbImageService.getimageById(imageId);
+		if (imageToDelete == null){
+			return ResponseEntity.notFound().build();
+		}
+		if (! images.contains(imageToDelete)){
+			return ResponseEntity.badRequest().build();
+		}
+		bar.deleteImage(imageToDelete);
+		barService.createBar(bar);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
 }

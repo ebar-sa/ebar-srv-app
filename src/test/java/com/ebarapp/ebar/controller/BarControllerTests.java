@@ -1,11 +1,9 @@
 package com.ebarapp.ebar.controller;
 
-import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.BarTable;
-import com.ebarapp.ebar.model.Owner;
-import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,9 +65,10 @@ class BarControllerTests {
     @MockBean
     private UserService userService;
 
-    private Bar bar;
+    @MockBean
+    private DBImageService dbImageService;
 
-    private Bar bar2;
+    private Bar bar;
 
     @BeforeEach
     void setUp() {
@@ -107,7 +106,7 @@ class BarControllerTests {
         barTables.add(barTable);
 
         bar = new Bar();
-        bar.setId(10);
+        bar.setId(TEST_BAR_ID);
         bar.setName("Pizza by Alfredo");
         bar.setDescription("Restaurant");
         bar.setContact("alfredo@gmail.com");
@@ -120,15 +119,28 @@ class BarControllerTests {
 
         allBares.add(bar);
 
-        bar2 = new Bar();
-        bar2.setId(11);
+        DBImage image = new DBImage();
+        image.setId(1);
+        image.setFileName("pizzeria_paco");
+        image.setFileType("png");
+        Set<DBImage> images = new HashSet<>();
+        images.add(image);
+
+        DBImage image2 = new DBImage();
+        image2.setId(2);
+        image2.setFileName("pizzeria_alfredo");
+        image2.setFileType("png");
+
+        Bar bar2 = new Bar();
+        bar2.setId(TEST_BAR2_ID);
         bar2.setName("Pizza by Paco");
         bar2.setDescription("Restaurant");
-        bar2.setContact("alfredo@gmail.com");
+        bar2.setContact("paco@gmail.com");
         bar2.setLocation("Pennsylvania");
         bar2.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar2.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar2.setBarTables(barTables);
+        bar2.setImages(images);
         bar2.setVotings(new HashSet<>());
         bar2.setEmployees(new HashSet<>());
         bar2.setOwner(owner);
@@ -139,6 +151,11 @@ class BarControllerTests {
 
         given(this.userService.getUserByUsername("admin")).willReturn(Optional.of(user));
         given(this.userService.getUserByUsername("admin2")).willReturn(Optional.of(owner));
+
+        given(this.dbImageService.getimageById(1)).willReturn(image);
+        given(this.dbImageService.getimageById(2)).willReturn(image2);
+        given(this.dbImageService.getimageById(3)).willReturn(null);
+
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
@@ -201,4 +218,47 @@ class BarControllerTests {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void successUpdateBar() throws Exception {
+        String json = "{ \n \"name\": \"Pizza by Paco2\",\n \"description\": \"Restaurant\",\n \"contact\": \"alfredo@gmail.com\",\n \"openingHour\": \"01-01-1970 13:00:00\",\n \"closingHour\": \"01-01-1970 22:30:00\", \n \"images\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/"+ TEST_BAR2_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureUpdateBar() throws Exception {
+        String json = "{ \n \"name\": \"Pizza by Paco2\",\n \"description\": \"Restaurant\",\n \"contact\": \"alfredo@gmail.com\",\n \"openingHour\": \"01-01-1970 13:00:00\",\n \"closingHour\": \"01-01-1970 22:30:00\", \n \"images\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/"+ TEST_BAR2_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void successDeleteBarImage() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureDeleteBarImageNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/3"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureDeleteImageInNotInBar() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/2"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
 }

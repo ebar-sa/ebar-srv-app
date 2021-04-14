@@ -3,6 +3,7 @@ package com.ebarapp.ebar.repository;
 
 import java.util.Set;
 
+import com.ebarapp.ebar.model.DBImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
