@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,67 +35,75 @@ import com.ebarapp.ebar.service.UserService;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-	@Autowired
-	AuthenticationManager authenticationManager;
+    @Autowired
+    AuthenticationManager authenticationManager;
 
-	@Autowired
-	UserService userService;
+    @Autowired
+    UserService userService;
 
-	@Autowired
-	PasswordEncoder encoder;
+    @Autowired
+    PasswordEncoder encoder;
 
-	@Autowired
-	JwtUtils jwtUtils;
+    @Autowired
+    JwtUtils jwtUtils;
 
-	@PostMapping("/signin")
-	public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    @PostMapping("/signin")
+    public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String jwt = jwtUtils.generateJwtToken(authentication);
-		
-		User userDetails = (User) authentication.getPrincipal();		
-		List<String> roles = userDetails.getAuthorities().stream()
-				.map(GrantedAuthority::getAuthority)
-				.collect(Collectors.toList());
-		
-		return ResponseEntity.ok(new LoginResponse(jwt, 
-												 userDetails.getUsername(), 
-												 userDetails.getEmail(), 
-												 roles));
-	}
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
 
-	@PostMapping("/signup")
-	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userService.existsUserByUsername(signUpRequest.getUsername())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: Username is already taken!"));
-		}
+        User userDetails = (User) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
 
-		if (userService.existsUserByEmail(signUpRequest.getEmail())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: Email is already in use!"));
-		}
+        return ResponseEntity.ok(new LoginResponse(jwt,
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
+    }
 
-		User user = new User(signUpRequest.getUsername(),
-				signUpRequest.getFirstName(),
-				signUpRequest.getLastName(),
-				signUpRequest.getDni(),
-				signUpRequest.getEmail(),
-				signUpRequest.getPhoneNumber(),
-				encoder.encode(signUpRequest.getPassword()));
+    @PostMapping("/signup")
+    public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userService.existsUserByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Username is already taken!"));
+        } else if (userService.existsUserByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Email is already in use!"));
+        }
 
-		Set<String> strRoles = signUpRequest.getRoles();
-		
-		Set<RoleType> roles = new HashSet<>();
-		strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-		user.setRoles(roles);
-		userService.saveUser(user);
+        String dni = signUpRequest.getDni();
+        if (dni != null && dni.equals("")) {
+            dni = null;
+        }
 
-		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-	}
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                dni,
+                signUpRequest.getEmail(),
+                signUpRequest.getPhoneNumber(),
+                encoder.encode(signUpRequest.getPassword()));
+
+        Set<String> strRoles = signUpRequest.getRoles();
+
+        Set<RoleType> roles = new HashSet<>();
+        strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
+        user.setRoles(roles);
+        try {
+            userService.saveUser(user);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(e.getMessage()));
+        }
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
 }
