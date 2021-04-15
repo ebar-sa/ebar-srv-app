@@ -178,8 +178,8 @@ public class BarController {
 		if (bar == null || bar.getImages().isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		if (! optionalUser.isPresent()) {
-			return ResponseEntity.notFound().build();
+		if (! username.equals(bar.getOwner().getUsername())){
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 		Set<DBImage> images = bar.getImages();
 		DBImage imageToDelete = this.dbImageService.getimageById(imageId);
