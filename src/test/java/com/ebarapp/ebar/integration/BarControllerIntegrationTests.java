@@ -140,6 +140,7 @@ class BarControllerIntegrationTests {
         bar.setOpeningTime(TEST_BAR_OPENING_TIME);
         bar.setClosingTime(TEST_BAR_CLOSING_TIME);
         bar.setBarTables(barTables);
+        bar.setOwner(owner);
 
         Bar bar2 = new Bar();
         bar2.setId(TEST_BAR2_ID);
@@ -186,7 +187,7 @@ class BarControllerIntegrationTests {
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
-    @WithMockUser(username="admin2", roles={"OWNER"})
+    @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void failureDeleteBar() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/" + TEST_BAR_ID))

@@ -128,7 +128,7 @@ public class BarController {
 
 			BarDTO barDTO = new BarDTO(bar.getId(), bar.getName(), bar.getDescription(), bar.getContact(),
 					bar.getLocation(), bar.getOpeningTime(), bar.getClosingTime(), bar.getImages(),
-					bar.getBarTables().size(), freeTables);
+					bar.getBarTables().size(), freeTables, bar.getOwner().getUsername());
 			return ResponseEntity.ok(barDTO);
 		}else {
 			return ResponseEntity.notFound().build();

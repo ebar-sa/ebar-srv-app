@@ -116,6 +116,7 @@ class BarControllerTests {
         bar.setBarTables(barTables);
         bar.setVotings(new HashSet<>());
         bar.setEmployees(new HashSet<>());
+        bar.setOwner(owner);
 
         allBares.add(bar);
 
@@ -176,7 +177,7 @@ class BarControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
-    @WithMockUser(username="admin2", roles={"OWNER"})
+    @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void failureDeleteBar() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/" + TEST_BAR_ID))
