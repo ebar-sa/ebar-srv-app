@@ -119,16 +119,29 @@ class EmployeeControllerTests {
 		BDDMockito.given(this.userService.existsUserByEmail(TAKENEMAIL)).willReturn(true);
 
 		BDDMockito.given(this.employeeService.findbyUsername("employeeTest1")).willReturn(employeeOpt);
+		BDDMockito.given(this.userService.existsUserByEmail("example@mail.com")).willReturn(true);
+		
+		
+		
 	}
 
 	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
 	@Test
-	void testAllEmployees() throws Exception {
+	void successGetAllEmployees() throws Exception {
 		this.mockMvc
 				.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID + "/employees")
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+	}
+	
+	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
+	@Test
+	void failureGetAllEmployees() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bar/33/employees")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
@@ -141,13 +154,13 @@ class EmployeeControllerTests {
 	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
 	@Test
 	void failureGetEmployee() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID + "/employees/employeeTest22"))
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2/employees/employeeTest1"))
 				.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
 	@Test
-	void successCreateVoting() throws Exception {
+	void successCreateEmployee() throws Exception {
 		String json = "{ \"username\": \"employee12\",\r\n" + "    \"password\": \"123456\",\r\n"
 				+ "    \"firstName\":\"nombre\",\r\n" + "    \"lastName\":\"apellido\",\r\n"
 				+ "    \"email\": \"employee12@email.es\",\r\n" + "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
@@ -160,7 +173,7 @@ class EmployeeControllerTests {
 
 	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
 	@Test
-	void failureCreateVoting() throws Exception {
+	void failureCreateEmployee() throws Exception {
 		String json = "{ \"username\": \"pepediaz\",\r\n" + "    \"password\": \"123456\",\r\n"
 				+ "    \"firstName\":\"nombre\",\r\n" + "    \"lastName\":\"apellido\",\r\n"
 				+ "    \"email\": \"employee12@email.es\",\r\n" + "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
@@ -170,4 +183,76 @@ class EmployeeControllerTests {
 						.contentType(MediaType.APPLICATION_JSON).content(json))
 				.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
+	
+	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
+	@Test
+	void failureCreateEmployeeEmail() throws Exception {
+		String json = "{ \"username\": \"pepediaz2\",\r\n" + "    \"password\": \"123456\",\r\n"
+				+ "    \"firstName\":\"nombre\",\r\n" + "    \"lastName\":\"apellido\",\r\n"
+				+ "    \"email\": \"example@mail.com\",\r\n" + "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
+
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.post("/api/bar/" + TEST_BAR_ID + "/employees/create")
+						.contentType(MediaType.APPLICATION_JSON).content(json))
+				.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@WithMockUser(username = "pepediaz", roles = { "OWNER" })
+	@Test
+	void failureCreateEmployeeNotFound() throws Exception {
+		String json = "{ \"username\": \"pepediaz2\",\r\n" + "    \"password\": \"123456\",\r\n"
+				+ "    \"firstName\":\"nombre\",\r\n" + "    \"lastName\":\"apellido\",\r\n"
+				+ "    \"email\": \"employee12@email.es\",\r\n" + "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
+
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.post("/api/bar/2/employees/create")
+						.contentType(MediaType.APPLICATION_JSON).content(json))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
+    @WithMockUser(username = "pepediaz", roles = {"OWNER"})
+    @Test
+    void successUpdateEmployee() throws Exception {
+        String json = "{ \"username\": \"pepediaz\",\r\n" + "    \"password\": \"123456\",\r\n"
+				+ "    \"firstName\":\"Pablo\",\r\n" + "    \"lastName\":\"Reneses\",\r\n"
+				+ "    \"email\": \"employee12@email.es\",\r\n" + "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/1/employees/update/employeeTest1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "pepediaz", roles = {"OWNER"})
+    @Test
+    void failureUpdateEmployee() throws Exception {
+        String json = "{ \"username\": \"pepediaz\",\r\n" + "    \"password\": \"123456\",\r\n"
+				+ "    \"firstName\":\"Pablo\",\r\n" + "    \"lastName\":\"Reneses\",\r\n"
+				+ "    \"email\": \"employee@12email.es\",\r\n" + "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/99/employees/update/employeeTest1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+    
+    @WithMockUser(username = "pepediaz", roles = {"OWNER"})
+    @Test
+    void successDeleteEmployee() throws Exception {
+        
+
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/1/employees/delete/employeeTest1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+    
+    @WithMockUser(username = "pepediaz", roles = {"OWNER"})
+    @Test
+    void failureDeleteEmployee() throws Exception {
+        
+
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/2/employees/delete/employeeTest1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
 }

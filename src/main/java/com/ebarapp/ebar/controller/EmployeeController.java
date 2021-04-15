@@ -8,13 +8,16 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,19 +62,15 @@ public class EmployeeController {
 
 	}
 
-	@GetMapping("/{idBar}/employees/{username}")
+	@GetMapping("/{idBar}/employees/{user}")
 	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<Employee> getEmployeeById(@PathVariable("username") final String username,
+	public ResponseEntity<Employee> getEmployeeById(@PathVariable("user") final String user,
 			@PathVariable("idBar") final Integer idBar) {
-		Optional<Employee> empOpt = this.employeeService.findbyUsername(username);
+		Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
 		Bar bar = this.barService.findBarById(idBar);
-		if (empOpt.isPresent() && bar != null) {
-			Employee emp = empOpt.get();
-			if (bar.getEmployees().contains(emp)) {
-				return ResponseEntity.ok(emp);
-			} else {
-				return ResponseEntity.notFound().build();
-			}
+		Employee emp = empOpt.get();
+		if (empOpt.isPresent() && bar != null && bar.getEmployees().contains(emp)) {
+			return ResponseEntity.ok(emp);
 		} else {
 			return ResponseEntity.notFound().build();
 		}
@@ -112,8 +111,68 @@ public class EmployeeController {
 			semp.add(emp);
 			bar.setEmployees(semp);
 			this.barService.saveBar(bar);
+			return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
+		} else {
+			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
+
+	}
+
+	@PutMapping("/{idBar}/employees/update/{user}")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<MessageResponse> updateEmployee(@Valid @RequestBody final SignupRequest signUpRequest,
+			@PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
+
+		Bar bar = this.barService.findBarById(idBar);
+		if (bar != null) {
+			Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
+			Employee emp = empOpt.get();
+			emp.setUsername(signUpRequest.getUsername());
+			emp.setFirstName(signUpRequest.getFirstName());
+			emp.setLastName(signUpRequest.getLastName());
+			emp.setDni(signUpRequest.getDni());
+			emp.setEmail(signUpRequest.getEmail());
+			emp.setPhoneNumber(signUpRequest.getPhoneNumber());
+			emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
+			emp.setBar(bar);
+			Set<String> strRoles = signUpRequest.getRoles();
+			Set<RoleType> roles = new HashSet<>();
+			strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
+			emp.setRoles(roles);
+			this.employeeService.saveEmployee(emp);
+			Set<Employee> semp = new HashSet<>();
+			if (bar.getEmployees() != null) {
+				semp = bar.getEmployees();
+			}
+			semp.add(emp);
+			bar.setEmployees(semp);
+			this.barService.saveBar(bar);
+			return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+
+	}
+
+	@DeleteMapping("/{idBar}/employees/delete/{user}")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<Employee> deleteEmployee(@PathVariable("user") final String user,
+			@PathVariable("idBar") final Integer idBar) {
+		Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
+		Bar bar = this.barService.findBarById(idBar);
+		Employee emp = empOpt.get();
+		if (empOpt.isPresent() && bar != null && bar.getEmployees().contains(emp)) {
+			Set<Employee> employees = new HashSet<Employee>();
+			employees = bar.getEmployees();
+			employees.remove(emp);
+			bar.setEmployees(employees);
+			this.barService.saveBar(bar);
+			this.employeeService.removeEmployee(emp);
+			return new ResponseEntity<>(HttpStatus.OK);
+
+		} else {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 }

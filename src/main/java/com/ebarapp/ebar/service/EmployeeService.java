@@ -31,4 +31,9 @@ public class EmployeeService {
 	public Set<Employee> getEmployeeByBarId(final Integer id) {
 		return this.employeeRepository.getEmployeeByBarId(id);
 	}
+
+	public void removeEmployee(Employee employee) {
+		this.employeeRepository.delete(employee);
+
+	}
 }
