@@ -146,7 +146,7 @@ public class BarController {
 		}
 
 		Bar updatedBar = this.barService.findBarById(id);
-		if(updatedBar.equals(null)){
+		if(updatedBar == null){
 			return ResponseEntity.notFound().build();
 		}
 
