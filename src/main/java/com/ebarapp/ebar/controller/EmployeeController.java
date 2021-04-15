@@ -37,16 +37,17 @@ import com.ebarapp.ebar.service.UserService;
 public class EmployeeController {
 
 	@Autowired
-	private EmployeeService employeeService;
+	private EmployeeService	employeeService;
 
 	@Autowired
-	private BarService barService;
+	private BarService		barService;
 
 	@Autowired
-	private PasswordEncoder encoder;
+	private PasswordEncoder	encoder;
 
 	@Autowired
-	private UserService userService;
+	private UserService		userService;
+
 
 	// Falta validar que el owner este mirando el empleado de su bar y no de otro
 	@GetMapping("/{idBar}/employees")
@@ -64,13 +65,16 @@ public class EmployeeController {
 
 	@GetMapping("/{idBar}/employees/{user}")
 	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<Employee> getEmployeeById(@PathVariable("user") final String user,
-			@PathVariable("idBar") final Integer idBar) {
+	public ResponseEntity<Employee> getEmployeeById(@PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
 		Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
 		Bar bar = this.barService.findBarById(idBar);
-		Employee emp = empOpt.get();
-		if (empOpt.isPresent() && bar != null && bar.getEmployees().contains(emp)) {
-			return ResponseEntity.ok(emp);
+		if (empOpt.isPresent() && bar != null) {
+			Employee emp = empOpt.get();
+			if (bar.getEmployees().contains(emp)) {
+				return ResponseEntity.ok(emp);
+			} else {
+				return ResponseEntity.notFound().build();
+			}
 		} else {
 			return ResponseEntity.notFound().build();
 		}
@@ -78,8 +82,7 @@ public class EmployeeController {
 
 	@PostMapping("/{idBar}/employees/create")
 	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<MessageResponse> registerEmployee(@Valid @RequestBody final SignupRequest signUpRequest,
-			@PathVariable("idBar") final Integer idBar) {
+	public ResponseEntity<MessageResponse> registerEmployee(@Valid @RequestBody final SignupRequest signUpRequest, @PathVariable("idBar") final Integer idBar) {
 		if (this.userService.existsUserByUsername(signUpRequest.getUsername())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
 		}
@@ -120,34 +123,37 @@ public class EmployeeController {
 
 	@PutMapping("/{idBar}/employees/update/{user}")
 	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<MessageResponse> updateEmployee(@Valid @RequestBody final SignupRequest signUpRequest,
-			@PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
+	public ResponseEntity<MessageResponse> updateEmployee(@Valid @RequestBody final SignupRequest signUpRequest, @PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
 
 		Bar bar = this.barService.findBarById(idBar);
 		if (bar != null) {
 			Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
 			Employee emp = empOpt.get();
-			emp.setUsername(signUpRequest.getUsername());
-			emp.setFirstName(signUpRequest.getFirstName());
-			emp.setLastName(signUpRequest.getLastName());
-			emp.setDni(signUpRequest.getDni());
-			emp.setEmail(signUpRequest.getEmail());
-			emp.setPhoneNumber(signUpRequest.getPhoneNumber());
-			emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
-			emp.setBar(bar);
-			Set<String> strRoles = signUpRequest.getRoles();
-			Set<RoleType> roles = new HashSet<>();
-			strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-			emp.setRoles(roles);
-			this.employeeService.saveEmployee(emp);
-			Set<Employee> semp = new HashSet<>();
-			if (bar.getEmployees() != null) {
-				semp = bar.getEmployees();
+			if (empOpt.isPresent()) {
+				emp.setUsername(signUpRequest.getUsername());
+				emp.setFirstName(signUpRequest.getFirstName());
+				emp.setLastName(signUpRequest.getLastName());
+				emp.setDni(signUpRequest.getDni());
+				emp.setEmail(signUpRequest.getEmail());
+				emp.setPhoneNumber(signUpRequest.getPhoneNumber());
+				emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
+				emp.setBar(bar);
+				Set<String> strRoles = signUpRequest.getRoles();
+				Set<RoleType> roles = new HashSet<>();
+				strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
+				emp.setRoles(roles);
+				this.employeeService.saveEmployee(emp);
+				Set<Employee> semp = new HashSet<>();
+				if (bar.getEmployees() != null) {
+					semp = bar.getEmployees();
+				}
+				semp.add(emp);
+				bar.setEmployees(semp);
+				this.barService.saveBar(bar);
+				return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
+			} else {
+				return ResponseEntity.notFound().build();
 			}
-			semp.add(emp);
-			bar.setEmployees(semp);
-			this.barService.saveBar(bar);
-			return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
 		} else {
 			return ResponseEntity.notFound().build();
 		}
@@ -156,20 +162,21 @@ public class EmployeeController {
 
 	@DeleteMapping("/{idBar}/employees/delete/{user}")
 	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<Employee> deleteEmployee(@PathVariable("user") final String user,
-			@PathVariable("idBar") final Integer idBar) {
+	public ResponseEntity<Employee> deleteEmployee(@PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
 		Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
 		Bar bar = this.barService.findBarById(idBar);
-		Employee emp = empOpt.get();
-		if (empOpt.isPresent() && bar != null && bar.getEmployees().contains(emp)) {
-			Set<Employee> employees = new HashSet<Employee>();
-			employees = bar.getEmployees();
-			employees.remove(emp);
-			bar.setEmployees(employees);
-			this.barService.saveBar(bar);
-			this.employeeService.removeEmployee(emp);
-			return new ResponseEntity<>(HttpStatus.OK);
-
+		if (empOpt.isPresent() && bar != null) {
+			Employee emp = empOpt.get();
+			if (bar.getEmployees().contains(emp)) {
+				Set<Employee> employees = bar.getEmployees();
+				employees.remove(emp);
+				bar.setEmployees(employees);
+				this.barService.saveBar(bar);
+				this.employeeService.removeEmployee(emp);
+				return new ResponseEntity<>(HttpStatus.OK);
+			} else {
+				return ResponseEntity.notFound().build();
+			}
 		} else {
 			return ResponseEntity.notFound().build();
 		}
