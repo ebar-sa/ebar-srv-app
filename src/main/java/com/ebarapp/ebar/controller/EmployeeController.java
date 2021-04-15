@@ -94,31 +94,35 @@ public class EmployeeController {
 		Bar bar = this.barService.findBarById(idBar);
 		if (bar != null) {
 			Employee emp = new Employee();
-			emp.setUsername(signUpRequest.getUsername());
-			emp.setFirstName(signUpRequest.getFirstName());
-			emp.setLastName(signUpRequest.getLastName());
-			emp.setDni(signUpRequest.getDni());
-			emp.setEmail(signUpRequest.getEmail());
-			emp.setPhoneNumber(signUpRequest.getPhoneNumber());
-			emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
-			emp.setBar(bar);
-			Set<String> strRoles = signUpRequest.getRoles();
-			Set<RoleType> roles = new HashSet<>();
-			strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-			emp.setRoles(roles);
-			this.employeeService.saveEmployee(emp);
-			Set<Employee> semp = new HashSet<>();
-			if (bar.getEmployees() != null) {
-				semp = bar.getEmployees();
-			}
-			semp.add(emp);
-			bar.setEmployees(semp);
-			this.barService.saveBar(bar);
+			createEmployeeUser(signUpRequest, bar, emp);
 			return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
 		} else {
 			return ResponseEntity.notFound().build();
 		}
 
+	}
+
+	protected void createEmployeeUser(final SignupRequest signUpRequest, Bar bar, Employee emp) {
+		emp.setUsername(signUpRequest.getUsername());
+		emp.setFirstName(signUpRequest.getFirstName());
+		emp.setLastName(signUpRequest.getLastName());
+		emp.setDni(signUpRequest.getDni());
+		emp.setEmail(signUpRequest.getEmail());
+		emp.setPhoneNumber(signUpRequest.getPhoneNumber());
+		emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
+		emp.setBar(bar);
+		Set<String> strRoles = signUpRequest.getRoles();
+		Set<RoleType> roles = new HashSet<>();
+		strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
+		emp.setRoles(roles);
+		this.employeeService.saveEmployee(emp);
+		Set<Employee> semp = new HashSet<>();
+		if (bar.getEmployees() != null) {
+			semp = bar.getEmployees();
+		}
+		semp.add(emp);
+		bar.setEmployees(semp);
+		this.barService.saveBar(bar);
 	}
 
 	@PutMapping("/{idBar}/employees/update/{user}")
@@ -130,26 +134,7 @@ public class EmployeeController {
 			Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
 			if (empOpt.isPresent()) {
 				Employee emp = empOpt.get();
-				emp.setUsername(signUpRequest.getUsername());
-				emp.setFirstName(signUpRequest.getFirstName());
-				emp.setLastName(signUpRequest.getLastName());
-				emp.setDni(signUpRequest.getDni());
-				emp.setEmail(signUpRequest.getEmail());
-				emp.setPhoneNumber(signUpRequest.getPhoneNumber());
-				emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
-				emp.setBar(bar);
-				Set<String> strRoles = signUpRequest.getRoles();
-				Set<RoleType> roles = new HashSet<>();
-				strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-				emp.setRoles(roles);
-				this.employeeService.saveEmployee(emp);
-				Set<Employee> semp = new HashSet<>();
-				if (bar.getEmployees() != null) {
-					semp = bar.getEmployees();
-				}
-				semp.add(emp);
-				bar.setEmployees(semp);
-				this.barService.saveBar(bar);
+				createEmployeeUser(signUpRequest, bar, emp);
 				return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
 			} else {
 				return ResponseEntity.notFound().build();
