@@ -81,7 +81,7 @@ public class BarController {
 		}
 		barService.removeBar(id);
 
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@GetMapping("/capacity")
@@ -178,6 +178,9 @@ public class BarController {
 		if (bar == null || bar.getImages().isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
+		if (! optionalUser.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
 		Set<DBImage> images = bar.getImages();
 		DBImage imageToDelete = this.dbImageService.getimageById(imageId);
 		if (imageToDelete == null){
@@ -188,7 +191,7 @@ public class BarController {
 		}
 		bar.deleteImage(imageToDelete);
 		barService.createBar(bar);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 }

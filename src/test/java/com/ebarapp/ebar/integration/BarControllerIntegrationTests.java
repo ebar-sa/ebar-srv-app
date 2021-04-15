@@ -183,7 +183,7 @@ class BarControllerIntegrationTests {
     @Test
     void successDeleteBar() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/" + TEST_BAR2_ID))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @WithMockUser(username="admin2", roles={"OWNER"})
@@ -254,7 +254,7 @@ class BarControllerIntegrationTests {
     @Test
     void successDeleteBarImage() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/" + TEST_DBIMAGE_ID))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @WithMockUser(username="admin2", roles={"OWNER"})
