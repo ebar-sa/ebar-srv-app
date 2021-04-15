@@ -128,8 +128,8 @@ public class EmployeeController {
 		Bar bar = this.barService.findBarById(idBar);
 		if (bar != null) {
 			Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
-			Employee emp = empOpt.get();
 			if (empOpt.isPresent()) {
+				Employee emp = empOpt.get();
 				emp.setUsername(signUpRequest.getUsername());
 				emp.setFirstName(signUpRequest.getFirstName());
 				emp.setLastName(signUpRequest.getLastName());
