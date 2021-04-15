@@ -52,7 +52,7 @@ public class Bar extends BaseEntity {
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Menu menu = new Menu();
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<BarTable>	barTables;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
