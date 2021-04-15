@@ -16,6 +16,8 @@ public class BarService {
 	@Autowired
 	private BarRepository barRepository;
 
+
+
 	public List<Bar> findAllBar() {
 		return this.barRepository.findAll();
 	}
@@ -37,5 +39,6 @@ public class BarService {
 		}
 		return res;
 	}
+
 }
 
