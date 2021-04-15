@@ -146,6 +146,9 @@ public class BarController {
 		}
 
 		Bar updatedBar = this.barService.findBarById(id);
+		if(updatedBar.equals(null)){
+			return ResponseEntity.notFound().build();
+		}
 
 		if (! username.equals(updatedBar.getOwner().getUsername())){
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
