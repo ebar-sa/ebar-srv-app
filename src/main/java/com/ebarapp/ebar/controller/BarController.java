@@ -41,6 +41,7 @@ public class BarController {
 
 			ba.setId(b.getId());
 			ba.setName(b.getName());
+			ba.setLocation(b.getLocation());
 			ba.setCapacity(capacity);
 
 			res.add(ba);
