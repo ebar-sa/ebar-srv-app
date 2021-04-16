@@ -65,12 +65,12 @@ public class User implements UserDetails {
 	@NotNull
 	@ElementCollection(targetClass=RoleType.class, fetch = FetchType.EAGER)
 	@Column(name = "role")
-	private Set<RoleType> roles;
+	protected Set<RoleType> roles;
 	
 	public User() {
 	}
 
-	public User(String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password) {
+	public User(String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password, Set<RoleType> roles) {
 		this.username = username;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -78,6 +78,7 @@ public class User implements UserDetails {
 		this.email = email;
 		this.phoneNumber = phoneNumber;
 		this.password = password;
+		this.roles = roles;
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities(){

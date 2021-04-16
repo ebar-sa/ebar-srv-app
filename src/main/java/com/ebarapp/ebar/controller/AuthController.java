@@ -1,8 +1,6 @@
 package com.ebarapp.ebar.controller;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -27,7 +25,11 @@ import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
 import com.ebarapp.ebar.configuration.security.payload.request.SignupRequest;
 import com.ebarapp.ebar.configuration.security.payload.response.LoginResponse;
 import com.ebarapp.ebar.configuration.security.payload.response.MessageResponse;
+import com.ebarapp.ebar.model.Client;
+import com.ebarapp.ebar.model.Employee;
+import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.mapper.UserDataMapper;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.UserService;
 
@@ -84,21 +86,19 @@ public class AuthController {
             dni = null;
         }
 
-        User user = new User(signUpRequest.getUsername(),
+        UserDataMapper userData = new UserDataMapper(signUpRequest.getUsername(),
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
                 dni,
                 signUpRequest.getEmail(),
                 signUpRequest.getPhoneNumber(),
-                encoder.encode(signUpRequest.getPassword()));
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getRoles().stream().map(rol -> RoleType.valueOf(rol)).collect(Collectors.toSet()));
 
-        Set<String> strRoles = signUpRequest.getRoles();
-
-        Set<RoleType> roles = new HashSet<>();
-        strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-        user.setRoles(roles);
+        User userWithRole = generateUserWithRole(userData);
+        
         try {
-            userService.saveUser(user);
+            userService.saveUser(userWithRole);
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity
                     .badRequest()
@@ -106,4 +106,15 @@ public class AuthController {
         }
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
+	private User generateUserWithRole(UserDataMapper userData) {
+		if (userData.getRoles().contains(RoleType.ROLE_OWNER)) {
+			return new Owner(userData);
+		} else if (userData.getRoles().contains(RoleType.ROLE_EMPLOYEE)) {
+			return new Employee(userData);
+		} else if (userData.getRoles().contains(RoleType.ROLE_CLIENT)) {
+			return new Client(userData);
+		}
+		return null;
+	}
 }
