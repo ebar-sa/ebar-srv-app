@@ -12,6 +12,7 @@ import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
+import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.ItemBillService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +63,13 @@ class BarTableControllerTest {
 	private static final int TEST_TABLE4_ID = 23;
 	private static final int TEST_TABLE5_ID = 24;
 	private static final int TEST_BAR_ID = 10;
-	private static final String TOKEN_TEST = "ihv-58k";
+	private static final String TOKEN_TEST_TABLE1 = "ihv-51k";
+	private static final String TOKEN_TEST_TABLE2 = "ihv-52f";
+	private static final String TOKEN_TEST_TABLE3 = "ihv-53f";
+	private static final String TOKEN_TEST_TABLE4 = "ihv-54f";
+	private static final String TOKEN_TEST_TABLE5 = "ihv-55f";
+	private static final String TOKEN_TEST_ERROR = "ihv-ERR";
+	
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -75,6 +82,8 @@ class BarTableControllerTest {
 	private BillService billService;
 	@MockBean
 	private ItemBillService itemBillService;
+	@MockBean
+	private ClientService clientService;
 
 	private BarTable table5;
 	private BarTable table4;
@@ -82,7 +91,7 @@ class BarTableControllerTest {
 	private BarTable table2;
 	private BarTable table;
 	private Bar bar;
-	private Bar bar2;
+
 
 	@BeforeEach
 	void setUp() {
@@ -124,7 +133,7 @@ class BarTableControllerTest {
 		table = new BarTable();
 		table.setId(20);
 		table.setBar(bar);
-		table.setToken("ihv-57f");
+		table.setToken("ihv-51k");
 		table.setName("mesa1");
 		table.setSeats(4);
 		table.setFree(true);
@@ -132,7 +141,7 @@ class BarTableControllerTest {
 		table2 = new BarTable();
 		table2.setId(21);
 		table2.setBar(bar);
-		table2.setToken("ihv-58f");
+		table2.setToken("ihv-52k");
 		table2.setName("mesa2");
 		table2.setSeats(4);
 		table2.setFree(false);
@@ -141,7 +150,7 @@ class BarTableControllerTest {
 
 		table3 = new BarTable();
 		table3.setId(22);
-		table3.setToken("ihv-58k");
+		table3.setToken("ihv-53k");
 		table3.setName("mesa3");
 		table3.setSeats(4);
 		table3.setFree(true);
@@ -149,7 +158,7 @@ class BarTableControllerTest {
 		table4 = new BarTable();
 		table4.setId(23);
 		table4.setBar(bar);
-		table4.setToken("ihv-58f");
+		table4.setToken("ihv-54k");
 		table4.setName("mesa2");
 		table4.setSeats(4);
 		table4.setFree(true);
@@ -158,7 +167,7 @@ class BarTableControllerTest {
 		table5 = new BarTable();
 		table5.setId(24);
 		table5.setBar(bar);
-		table5.setToken("ihv-58f");
+		table5.setToken("ihv-55k");
 		table5.setName("mesa2");
 		table5.setSeats(4);
 		table5.setFree(false);
@@ -182,6 +191,11 @@ class BarTableControllerTest {
 		given(this.tableService.findbyId(22)).willReturn(table3);
 		given(this.tableService.findbyId(23)).willReturn(table4);
 		given(this.tableService.findbyId(24)).willReturn(table5);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE1)).willReturn(table);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE2)).willReturn(table2);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
 		given(this.tableService.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
 		given(this.tableService.createBarTable(table)).willReturn(table);
@@ -242,7 +256,7 @@ class BarTableControllerTest {
 	@Test
 	void testOcupateBarTableByToken() throws Exception {
 		this.mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE3_ID + "/" + TOKEN_TEST)
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE3)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
@@ -250,29 +264,29 @@ class BarTableControllerTest {
 	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
-	void testOcupateBarTableByTokenDiferent() throws Exception {
+	void testOcupateBarTableByBadToken() throws Exception {
 		this.mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE_ID + "/" + TOKEN_TEST)
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_ERROR)
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().is4xxClientError());
 	}
 	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
 	void testOcupateBarTableNotFreeByToken() throws Exception {
 		this.mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE2_ID + "/" + TOKEN_TEST)
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE5)
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().is4xxClientError());
 	}
 
-	@Disabled
-	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
-	@Test
-	void testGetAllTables() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
-	}
+//	@Disabled
+//	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
+//	@Test
+//	void testGetAllTables() throws Exception {
+//		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/").contentType(MediaType.APPLICATION_JSON))
+//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+//	}
 	
 	@WithMockUser(username="admin", roles={"OWNER"})
 	@Test

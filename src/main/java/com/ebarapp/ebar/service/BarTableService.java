@@ -2,6 +2,7 @@ package com.ebarapp.ebar.service;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
+import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
@@ -12,6 +13,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class BarTableService {
@@ -26,6 +28,10 @@ public class BarTableService {
 		return this.barTableRepository.findAll();
 	}
 	
+	public BarTable findBarTableByToken(String token) { 
+		return this.barTableRepository.findByToken(token);
+	}
+	
 	public void removeTable(Integer id) {
         barTableRepository.deleteById(id);
     }
@@ -37,8 +43,14 @@ public class BarTableService {
 	public User getClientByPrincipalUserName(String userName) {
 		return this.barTableRepository.getClientByPrincipalUserName(userName);
 	}
+	public BarTable getBarTableByClientUsername(String username) {
+		return this.barTableRepository.getBarTableByClientUsername(username);
+	}
 
-
+	public Set<BarTable> getBarTablesByBarId(final Integer id){
+		return this.barTableRepository.getBarTablesByBarId(id);
+	}
+	
 	public BarTable findbyId(Integer id) {
 		Optional<BarTable> barTableOpt =  this.barTableRepository.findById(id);
 		if(barTableOpt.isPresent()) {

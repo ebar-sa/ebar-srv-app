@@ -54,12 +54,26 @@ public class BarTableController {
 	@Autowired
 	private ClientService clientService;
 
-	@GetMapping("")
+	@GetMapping("{id}")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<BarTable>> getAllTables() {
-		List<BarTable> tables = this.barTableService.findAllBarTable();
+	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
+		Set<BarTable> tables = this.barTableService.getBarTablesByBarId(barId);
+
 		if (!tables.isEmpty()) {
 			return new ResponseEntity<>(tables, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+	}
+	
+	@GetMapping("tableClient/{username}")
+	@PreAuthorize("permitAll()")
+	public ResponseEntity<BarTable> getBarTableForClient(@PathVariable("username") final String username) {
+		BarTable table = this.barTableService.getBarTableByClientUsername(username);
+
+		if (table != null) {
+			return new ResponseEntity<>(table, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -161,27 +175,22 @@ public class BarTableController {
 
 	}
 
-	@GetMapping("/autoOccupateTable/{id}/{token}")
+	@GetMapping("/autoOccupateTable/{token}")
 	@PreAuthorize("hasRole('CLIENT')")
-	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("id") Integer id,
-			@PathVariable("token") String token) {
+	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("token") String token) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		BarTable barTable = this.barTableService.findbyId(id);
+		BarTable barTable = this.barTableService.findBarTableByToken(token);
 		if (barTable != null) {
 			if (barTable.isFree()) {
 				User user = barTableService.getClientByPrincipalUserName(ud.getUsername());
-				if (barTable.getToken().equals(token)) {
-					Client cliente = new Client(user, barTable);
-					this.clientService.modifyClientTable(barTable.getId(), ud.getUsername());
-					barTable.setClient(cliente);
-					barTable.setFree(false);
-					this.barTableService.saveTable(barTable);
-					return new ResponseEntity<>(barTable, HttpStatus.OK);
-				} else {
-					return new ResponseEntity<>(barTable, HttpStatus.OK);
-				}
-			} else {
+				Client cliente = new Client(user, barTable);
+				this.clientService.modifyClientTable(barTable.getId(), ud.getUsername());
+				barTable.setClient(cliente);
+				barTable.setFree(false);
+				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(barTable, HttpStatus.CONFLICT);
 			}
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -201,6 +210,7 @@ public class BarTableController {
         	newTable.setToken(token);
         	newTable.setBar(bar);
         	newTable.setFree(true);
+        	newTable.setBar(bar);
         	bar.getBarTables().add(newTable);
         	Bill b = new Bill();
         	billServie.createBill(b);
