@@ -23,7 +23,13 @@ public class BarTableService {
 
 	@Autowired
 	private BarTableRepository barTableRepository;
-	
+
+	public BarTable createBarTable(BarTable newBarTable) { 
+		return barTableRepository.save(newBarTable); 
+	}
+
+	public void removeBarTable(Integer id) { barTableRepository.deleteById(id); }
+
 	public List<BarTable> findAllBarTable(){
 		return this.barTableRepository.findAll();
 	}
@@ -36,9 +42,6 @@ public class BarTableService {
         barTableRepository.deleteById(id);
     }
 	
-	public BarTable createBarTable(BarTable barTable) {
-        return barTableRepository.save(barTable);
-    }
 	
 	public User getClientByPrincipalUserName(String userName) {
 		return this.barTableRepository.getClientByPrincipalUserName(userName);
@@ -51,6 +54,11 @@ public class BarTableService {
 		return this.barTableRepository.getBarTablesByBarId(id);
 	}
 	
+	public List<String> getAllValidTokensByBarId(Integer id) { 
+		return barTableRepository.getAllValidTokenByBarId(id); 
+	}
+
+
 	public BarTable findbyId(Integer id) {
 		Optional<BarTable> barTableOpt =  this.barTableRepository.findById(id);
 		if(barTableOpt.isPresent()) {

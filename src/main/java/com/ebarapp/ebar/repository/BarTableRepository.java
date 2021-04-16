@@ -12,6 +12,8 @@ import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.User;
 
+import java.util.List;
+
 public interface BarTableRepository extends JpaRepository<BarTable, Integer> {
 	
 	@Query("SELECT bt.bill from BarTable bt WHERE bt.id = :id")
@@ -30,4 +32,6 @@ public interface BarTableRepository extends JpaRepository<BarTable, Integer> {
 	@Query("SELECT bt from BarTable bt INNER JOIN User u on u.username = bt.client.username WHERE u.username = :username")
 	public BarTable getBarTableByClientUsername(@Param("username") String username);
 
+	@Query("SELECT bt.token FROM BarTable bt WHERE bt.bar.id = :id AND bt.free=false")
+	List<String> getAllValidTokenByBarId(@Param("id") int id);
 }
