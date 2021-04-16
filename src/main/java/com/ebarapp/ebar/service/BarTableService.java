@@ -2,7 +2,6 @@ package com.ebarapp.ebar.service;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
-import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
@@ -29,6 +28,10 @@ public class BarTableService {
 	
 	public void removeTable(Integer id) {
         barTableRepository.deleteById(id);
+    }
+	
+	public BarTable createBarTable(BarTable barTable) {
+        return barTableRepository.save(barTable);
     }
 	
 	public User getClientByPrincipalUserName(String userName) {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +28,7 @@ import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.Client;
+import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.model.dtos.BarTableDTO;
@@ -79,8 +82,8 @@ public class BarTableController {
 			res.put(2, bill);
 			return new ResponseEntity<>(res, HttpStatus.OK);
 		} else if(!barTable.isFree()) {
-			String nameClient = barTable.getClient().getUsername();
 			String nameLogged = ud.getUsername();
+			String nameClient = barTable.getClient().getUsername();
 			if(nameClient.equals(nameLogged)) {
 				Menu menu = barTable.getBar().getMenu();
 				Bill bill = this.barTableService.getBillByTableId(id);
@@ -208,12 +211,14 @@ public class BarTableController {
         }
     }
 	
-	@PostMapping("/deleteTable/{barId}/{tableId}")
-//    @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<List<BarTable>> deleteTable(@PathVariable("barId") Integer barId,@PathVariable("tableId") Integer tableId) {
+	@DeleteMapping("/deleteTable/{barId}/{tableId}")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<List<BarTable>> deleteTable(@PathVariable("barId") final Integer barId, @PathVariable("tableId") final Integer tableId) {
         Bar bar = this.barService.findBarById(barId);
 		BarTable table = barTableService.findbyId(tableId);
-        table.getBill().getItemBill().removeAll(table.getBill().getItemBill());
+		Set<ItemBill> ib = table.getBill().getItemBill();
+		Bill b = table.getBill();
+        b.getItemBill().removeAll(ib);
         if (tableId == null) {
             return ResponseEntity.notFound().build();
         }
@@ -222,7 +227,7 @@ public class BarTableController {
           	barService.createBar(bar);
         	barTableService.removeTable(tableId);
     		List<BarTable> tables = this.barTableService.findAllBarTable();
-            return new ResponseEntity<>(tables, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(tables, HttpStatus.OK);
         }
     }
 	
@@ -238,7 +243,7 @@ public class BarTableController {
         	table.setSeats(barTableDTO.getSeats());
             Bar bar = table.getBar();
         	barService.createBar(bar);
-            return new ResponseEntity<>(table, HttpStatus.CREATED);
+            return new ResponseEntity<>(table, HttpStatus.OK);
         }
     }
 		
