@@ -15,6 +15,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -58,6 +60,9 @@ public class User implements UserDetails {
 	
 	@NotBlank
 	protected String	password;
+
+	@Column(name = "stripe_id")
+	protected String	stripeId;
 	
 	@NotNull
 	@ElementCollection(targetClass=RoleType.class, fetch = FetchType.EAGER)

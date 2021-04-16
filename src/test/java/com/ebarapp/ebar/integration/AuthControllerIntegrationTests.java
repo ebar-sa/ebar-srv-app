@@ -77,6 +77,7 @@ class AuthControllerIntegrationTests {
         this.user.setPhoneNumber("722345789");
         this.user.setPassword(ENC_PASSWORD);
         this.user.setRoles(this.roles);
+        this.user.setStripeId("id");
 
         this.userService.saveUser(this.user);
     }

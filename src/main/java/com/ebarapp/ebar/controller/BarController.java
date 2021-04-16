@@ -66,9 +66,7 @@ public class BarController {
 		if (! optionalUser.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
-
 		Bar bar = barService.findBarById(id);
-
 		if (bar == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -91,7 +89,9 @@ public class BarController {
 		List<BarCapacity> res = new ArrayList<>();
 
 		for(Bar b : bares) {
-			Integer numeroMesasLibres = 0;
+			if (!b.isSubscriptionActive()) continue;
+
+			int numeroMesasLibres = 0;
 			for(BarTable bt : b.getBarTables()) {
 				if (bt.isFree()) {
 					numeroMesasLibres += 1;
@@ -117,8 +117,9 @@ public class BarController {
 	public ResponseEntity<BarDTO> getBarById(@PathVariable("id") Integer id) {
 
 		Bar bar = barService.findBarById(id);
-
 		if (bar != null) {
+			// Check if bar subscription is active otherwise return payment required response (HTTP 402)
+			if (!bar.isSubscriptionActive()) return new ResponseEntity<>(HttpStatus.PAYMENT_REQUIRED);
 
 			Integer freeTables = 0;
 			for(BarTable bt : bar.getBarTables()) {
@@ -145,12 +146,13 @@ public class BarController {
 		if (! optionalUser.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
-
 		Bar updatedBar = this.barService.findBarById(id);
 		if(updatedBar == null){
 			return ResponseEntity.notFound().build();
 		}
-
+		if (!updatedBar.isSubscriptionActive()){
+			return ResponseEntity.badRequest().build();
+		}
 		if (! username.equals(updatedBar.getOwner().getUsername())){
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
@@ -181,6 +183,9 @@ public class BarController {
 		Bar bar = barService.findBarById(id);
 		if (bar == null || bar.getImages().isEmpty()) {
 			return ResponseEntity.notFound().build();
+		}
+		if (!bar.isSubscriptionActive()){
+			return ResponseEntity.badRequest().build();
 		}
 		if (! username.equals(bar.getOwner().getUsername())){
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
