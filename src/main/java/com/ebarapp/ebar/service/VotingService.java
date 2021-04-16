@@ -36,4 +36,5 @@ public class VotingService {
     public List<Voting> getVotingsByBarId(Integer barId) {
         return votingRepository.getVotingsByBarId(barId);
     }
+
 }

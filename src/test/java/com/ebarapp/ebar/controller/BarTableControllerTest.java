@@ -1,6 +1,5 @@
 package com.ebarapp.ebar.controller;
 
-import com.ebarapp.ebar.controller.BarTableController;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
@@ -9,6 +8,7 @@ import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -68,7 +69,6 @@ class BarTableControllerTest {
 		bar.setDescription("Restaurant");
 		bar.setContact("alfredo@gmail.com");
 		bar.setLocation("Pennsylvania");
-		bar.setBarTables(new HashSet<>());
 		bar.setMenu(m);
 
 		Bill b = new Bill();
@@ -100,12 +100,17 @@ class BarTableControllerTest {
 
 		List<BarTable> tableList = new ArrayList<BarTable>();
 		tableList.add(table);
-
+		
+		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
+		tablesForBar1.add(table);
+		bar.setBarTables(tablesForBar1);
+		
 		given(this.tableService.findAllBarTable()).willReturn(tableList);
 		given(this.tableService.findbyId(20)).willReturn(table);
 		given(this.tableService.findbyId(21)).willReturn(table2);
 		given(this.tableService.findbyId(22)).willReturn(table3);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
+		given(this.tableService.getBarTablesByBarId(10)).willReturn(tablesForBar1);
 
 	}
 
@@ -116,7 +121,7 @@ class BarTableControllerTest {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
 	}
-
+	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
 	void testBusyTable() throws Exception {
@@ -177,8 +182,8 @@ class BarTableControllerTest {
 	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
 	@Test
 	void testGetAllTables() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
 	}
 
 }

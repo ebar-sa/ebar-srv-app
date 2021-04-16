@@ -6,6 +6,7 @@ import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,19 +96,25 @@ class BarTableControllerIntegrationTests {
 
 		List<BarTable> tableList = Collections.singletonList(table);
 
+		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
+		tablesForBar1.add(table);
+		bar.setBarTables(tablesForBar1);
+		
 		given(this.barTableRepository.findAll()).willReturn(tableList);
 		given(this.barTableRepository.findById(20)).willReturn(Optional.of(table));
 		given(this.barTableRepository.findById(21)).willReturn(Optional.of(table2));
 		given(this.barTableRepository.findById(22)).willReturn(Optional.of(table3));
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
+		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
+
 
 	}
 //
 	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
 	@Test
 	void testGetAllTables() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
 	}
 
 	@WithMockUser(username = "user", roles = { "CLIENT" })
@@ -117,7 +124,7 @@ class BarTableControllerIntegrationTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
 	}
-
+	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
 	void testBusyTable() throws Exception {
