@@ -5,6 +5,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.ebarapp.ebar.model.mapper.UserDataMapper;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,9 +15,16 @@ import lombok.Setter;
 @Entity
 @Table(name="client")
 public class Client extends User {
- 
+
 	private static final long serialVersionUID = -2215436288198955857L;
 		
 	@OneToOne(fetch = FetchType.LAZY)
     private BarTable table;
+	
+    public Client () {
+    }
+    
+    public Client (UserDataMapper userData) {
+        super(userData.getUsername(), userData.getFirstName(), userData.getLastName(), userData.getDni(), userData.getEmail(), userData.getPhoneNumber(), userData.getPassword(), userData.getRoles());
+    }
 }

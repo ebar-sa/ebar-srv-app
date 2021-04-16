@@ -1,8 +1,11 @@
 package com.ebarapp.ebar.controller;
 
+import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.model.dtos.OptionDTO;
+import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.OptionService;
 import com.ebarapp.ebar.service.VotingService;
 import com.ebarapp.ebar.validators.OptionValidator;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -30,12 +34,34 @@ public class OptionController {
     @Autowired
     private VotingService votingService;
 
+    @Autowired
+    private BarTableService barTableService;
+
+    @Autowired
+    private BarService barService;
+
+    private ResponseEntity<Option> validStaff(Integer barId) {
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ud.getUsername();
+        if(barService.isStaff(bar.getId(), username).equals(Boolean.FALSE)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return null;
+    }
+
     @InitBinder("option")
     public void initOptionBider(final WebDataBinder dataBinder) { dataBinder.setValidator(new OptionValidator());}
 
-    @PostMapping("/voting/{votingId}/option")
+    @PostMapping("/bar/{barId}/voting/{votingId}/option")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @RequestBody OptionDTO newOptionDTO) {
+    public ResponseEntity<Option> createOption(@PathVariable("votingId") Integer votingId, @PathVariable("barId") Integer barId, @RequestBody OptionDTO newOptionDTO) {
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
+        }
         Option newOption = new Option(newOptionDTO);
         Option option = optionService.createOption(newOption);
         Voting voting = votingService.getVotingById(votingId);
@@ -48,9 +74,12 @@ public class OptionController {
 
     }
 
-    @DeleteMapping("/voting/{votingId}/option/{optionId}")
+    @DeleteMapping("/bar/{barId}/voting/{votingId}/option/{optionId}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Option> deleteOption(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId) {
+    public ResponseEntity<Option> deleteOption(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId, @PathVariable("barId") Integer barId) {
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
+        }
         Voting voting = votingService.getVotingById(votingId);
         if(voting == null) {
             return ResponseEntity.notFound().build();
@@ -86,12 +115,17 @@ public class OptionController {
         return new ResponseEntity<>(option, HttpStatus.OK);
     }
 
-    @PostMapping("/voting/{votingId}/option/{optionId}/vote")
+    @PostMapping("bar/{barId}/voting/{votingId}/option/{optionId}/vote")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<Option> vote(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId){
+    public ResponseEntity<Option> vote(@PathVariable("barId") Integer barId,@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId, @RequestBody String token){
         UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (ud == null){
             return ResponseEntity.notFound().build();
+        }
+        //The user must verify he is in the bar
+        List<String> allValidTokens = barTableService.getAllValidTokensByBarId(barId);
+        if (! allValidTokens.contains(token)) {
+            return ResponseEntity.badRequest().build();
         }
         String username = ud.getUsername();
         Option option = optionService.getOptionById(optionId);
@@ -102,8 +136,8 @@ public class OptionController {
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-
         //Clients can vote only when the voting is active
+        //Using Time Zone of Madrid
         ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
         ZoneId madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);

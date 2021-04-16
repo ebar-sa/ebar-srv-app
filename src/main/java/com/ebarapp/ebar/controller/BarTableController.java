@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ebarapp.ebar.service.BarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class BarTableController {
 	@Autowired
 	private BillService billServie;
 
-	@GetMapping("{id}")
+  @GetMapping("{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
 		Set<BarTable> tables = this.barTableService.getBarTablesByBarId(barId);
@@ -49,6 +50,7 @@ public class BarTableController {
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Map<Integer, Object>> getTableDetails(@PathVariable("id") final Integer id) {
 		Map<Integer, Object> res = new HashMap<>();
+
 		BarTable barTable = this.barTableService.findbyId(id);
 		if (barTable != null) {
 			Menu menu = barTable.getBar().getMenu();

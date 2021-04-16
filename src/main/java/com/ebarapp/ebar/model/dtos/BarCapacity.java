@@ -10,5 +10,6 @@ public class BarCapacity {
     private Integer id;
     private String name;
     private String capacity;
+    private String location;
 
 }
