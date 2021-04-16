@@ -68,7 +68,7 @@ public class PaymentController {
 
     }
 
-    @PostMapping("/cards/remove")
+    @DeleteMapping("/cards/remove")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> removeCard(@Valid @RequestBody SubscriptionRequest subscriptionRequest) {
         String customerId = getCurrentCustomerId();
@@ -105,7 +105,7 @@ public class PaymentController {
 
     }
 
-    @PostMapping("/cancel/{id}")
+    @DeleteMapping("/cancel/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> cancelSubscription(@PathVariable("id") Integer id) {
         Bar bar = barService.findBarById(id);
