@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.UserRepository;
 
+import java.util.Optional;
+
 @Service
 public class UserService implements UserDetailsService {
 
@@ -26,6 +28,10 @@ public class UserService implements UserDetailsService {
 
 	public User getByUsername(String username) throws UsernameNotFoundException {
 		return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+  }
+  
+	public Optional<User> getUserByUsername(String username) {
+		return this.userRepository.findByUsername(username);
 	}
 
 	public void saveUser(User user) {

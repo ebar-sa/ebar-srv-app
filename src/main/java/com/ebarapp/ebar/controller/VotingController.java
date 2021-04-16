@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +36,19 @@ public class VotingController {
     @Autowired
     private OptionService optionService;
 
+    private ResponseEntity<Voting> validStaff(Integer barId) {
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ud.getUsername();
+        if(barService.isStaff(bar.getId(), username).equals(Boolean.FALSE)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return null;
+    }
+
     @InitBinder("voting")
     public void initVotingBinder(final WebDataBinder dataBinder) {
         dataBinder.setValidator(new VotingValidator());
@@ -42,9 +57,8 @@ public class VotingController {
     @PostMapping("/bar/{barId}/voting")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> createVoting(@PathVariable("barId") Integer barId,@Valid @RequestBody VotingDTO newVotingDTO) {
-        Bar bar = barService.findBarById(barId);
-        if (bar == null) {
-            return ResponseEntity.notFound().build();
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
         }
         //Can't restrict the vote of a client
         if (!newVotingDTO.getVotersUsernames().isEmpty()) {
@@ -52,6 +66,7 @@ public class VotingController {
         } else {
             Voting newVoting = new Voting(newVotingDTO);
             Voting voting = votingService.createOrUpdateVoting(newVoting);
+            Bar bar = barService.findBarById(barId);
             bar.addVoting(voting);
             barService.createBar(bar);
             return new ResponseEntity<>(voting, HttpStatus.CREATED);
@@ -71,24 +86,29 @@ public class VotingController {
     @DeleteMapping("/bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> deleteVoting(@PathVariable("barId") Integer barId, @PathVariable("id") Integer id) {
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
+        }
         Voting voting = votingService.getVotingById(id);
         Bar bar = barService.findBarById(barId);
-        if (bar == null || voting == null || ! bar.getVotings().contains(voting)) {
+        if (voting == null || ! bar.getVotings().contains(voting)) {
             return ResponseEntity.notFound().build();
         }
-        voting.getOptions().stream()
-                .forEach(x->optionService.removeOption(x.getId()));
+        voting.getOptions().forEach(x->optionService.removeOption(x.getId()));
         bar.deleteVoting(voting);
         votingService.removeVoting(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("voting/{id}")
+    @PutMapping("bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> updateVoting(@Valid @RequestBody VotingDTO updatedVotingDTO, @PathVariable("id") Integer id) {
+    public ResponseEntity<Voting> updateVoting(@Valid @RequestBody VotingDTO updatedVotingDTO, @PathVariable("id") Integer id, @PathVariable("barId") Integer barId) {
         Voting voting = votingService.getVotingById(id);
         if(voting == null) {
             return ResponseEntity.notFound().build();
+        }
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
         }
         //Can't restrict the vote of a client
         //Can't edit a voting if it's active or finished
@@ -105,9 +125,12 @@ public class VotingController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/voting/{id}/finish")
+    @PostMapping("/bar/{barId}/voting/{id}/finish")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<Voting> finishVoting(@PathVariable("id") Integer id) {
+    public ResponseEntity<Voting> finishVoting(@PathVariable("id") Integer id, @PathVariable("barId") Integer barId) {
+        if(validStaff(barId) != null) {
+            return validStaff(barId);
+        }
         Voting voting = votingService.getVotingById(id);
         if(voting == null) {
             return ResponseEntity.notFound().build();

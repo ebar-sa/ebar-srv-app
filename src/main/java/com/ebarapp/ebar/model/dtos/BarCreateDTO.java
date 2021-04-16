@@ -9,9 +9,8 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class BarDTO {
+public class BarCreateDTO {
 
-    private Integer id;
     private String name;
     private String description;
     private String contact;
@@ -19,17 +18,13 @@ public class BarDTO {
     private Date openingTime;
     private Date closingTime;
     private Set<DBImage> images;
-    private Integer tables;
-    private Integer freeTables;
-    private String owner;
 
-    public BarDTO() {
+    public BarCreateDTO() {
         //Empty
     }
 
-    public BarDTO(Integer id, String name, String description, String contact, String location, Date openingTime, Date closingTime, Set<DBImage> images,
-                  Integer tables, Integer freeTables, String ownerUsername) {
-        this.id = id;
+    public BarCreateDTO(String name, String description, String contact, String location, Date openingTime,
+                        Date closingTime, Set<DBImage> images) {
         this.name = name;
         this.description = description;
         this.contact = contact;
@@ -37,8 +32,5 @@ public class BarDTO {
         this.openingTime = openingTime;
         this.closingTime = closingTime;
         this.images = images;
-        this.tables = tables;
-        this.freeTables = freeTables;
-        this.owner = ownerUsername;
     }
 }
