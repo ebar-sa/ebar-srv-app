@@ -11,6 +11,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class BarTableService {
@@ -40,7 +41,9 @@ public class BarTableService {
 		}
 	}
 	
-	
+	public Set<BarTable> getBarTablesByBarId(final Integer id){
+		return this.barTableRepository.getBarTablesByBarId(id);
+	}
 
 	public static String generateNewToken() {
 	    byte[] randomBytes = new byte[4];
