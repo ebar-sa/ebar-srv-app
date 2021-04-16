@@ -111,11 +111,10 @@ class BarTableControllerTest {
 		given(this.tableService.findbyId(22)).willReturn(table3);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
 		given(this.tableService.getBarTablesByBarId(10)).willReturn(tablesForBar1);
-		given(this.tableService.getBarTableByUsername("client1")).willReturn(table2);
 
 	}
 
-	@WithMockUser(username = "user", roles = { "OWNER" })
+	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
 	void testGetTableById() throws Exception {
 		String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false},\"1\":{\"id\":1,\"items\":[],\"categories\":[],\"new\":false},\"2\":{\"id\":1,\"itemBill\":null,\"itemOrder\":null,\"new\":false}}";
@@ -123,13 +122,6 @@ class BarTableControllerTest {
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
 	}
 	
-	@WithMockUser(username = "client1", roles = { "CLIENT" })
-	@Test
-	void testGetTableByUsername() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails")
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("{0={id=21, name=mesa2, token=ihv-58f, free=false, seats=4, new=false}, 1={id=1, items=[], categories=[], new=false}, 2={id=1, itemBill=null, itemOrder=null, new=false}}")));
-	}
-
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
 	void testBusyTable() throws Exception {
