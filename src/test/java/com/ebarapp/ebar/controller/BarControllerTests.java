@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
@@ -114,6 +115,7 @@ class BarControllerTests {
         bar.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar.setBarTables(barTables);
+        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setVotings(new HashSet<>());
         bar.setEmployees(new HashSet<>());
         bar.setOwner(owner);

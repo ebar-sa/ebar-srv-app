@@ -91,7 +91,9 @@ public class BarController {
 		List<BarCapacity> res = new ArrayList<>();
 
 		for(Bar b : bares) {
-			Integer numeroMesasLibres = 0;
+			if (!b.isSubscriptionActive()) continue;
+
+			int numeroMesasLibres = 0;
 			for(BarTable bt : b.getBarTables()) {
 				if (bt.isFree()) {
 					numeroMesasLibres += 1;
@@ -117,8 +119,9 @@ public class BarController {
 	public ResponseEntity<BarDTO> getBarById(@PathVariable("id") Integer id) {
 
 		Bar bar = barService.findBarById(id);
-
 		if (bar != null) {
+			// Check if bar subscription is active otherwise return payment required response (HTTP 402)
+			if (!bar.isSubscriptionActive()) return new ResponseEntity<>(HttpStatus.PAYMENT_REQUIRED);
 
 			Integer freeTables = 0;
 			for(BarTable bt : bar.getBarTables()) {
