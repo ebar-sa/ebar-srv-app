@@ -49,6 +49,7 @@ class VotingControllerIntegrationTests {
     private static final String TEST_BAR_LOCATION = "Avenida de Finlandia, 24, Sevilla";
     private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
+    private static final Date TEST_BAR_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
     private static final Set<Employee> TEST_BAR_EMPLOYEES = new HashSet<>();
 
     private static final String TEST_OWNER_FIRST_NAME = "John";
@@ -89,6 +90,7 @@ class VotingControllerIntegrationTests {
         bar.setOpeningTime(TEST_BAR_OPENING_TIME);
         bar.setClosingTime(TEST_BAR_CLOSING_TIME);
         bar.setEmployees(TEST_BAR_EMPLOYEES);
+        bar.setPaidUntil(TEST_BAR_PAID_UNTIL);
         bar.setOwner(owner);
 
         Voting voting = new Voting();

@@ -24,9 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -107,6 +105,7 @@ class VotingControllerTests {
         bar.setVotings(votings);
         bar.setBarTables(null);
         bar.setName("Test 1");
+        bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
         bar.setClosingTime(null);
         bar.setOpeningTime(null);
         bar.setOwner(owner);

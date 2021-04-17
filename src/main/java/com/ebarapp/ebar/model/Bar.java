@@ -90,14 +90,13 @@ public class Bar extends BaseEntity {
 
 	public void deleteVoting(Voting oldVoting) { getVotings().remove(oldVoting); }
 
+	public void addImages(Set<DBImage> newImages) { getImages().addAll(newImages); }
+
+	public void deleteImage(DBImage oldImage) {getImages().remove(oldImage); }
+
 	public boolean isSubscriptionActive() {
 		if (paidUntil == null) return false;
 		return paidUntil.after(Date.from(Instant.now()));
 	}
-
-	public void addImages(Set<DBImage> newImages) { getImages().addAll(newImages); }
-
-	public void deleteImage(DBImage oldImage) {getImages().remove(oldImage); }
-  
 }
 

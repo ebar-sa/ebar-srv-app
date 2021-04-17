@@ -66,9 +66,7 @@ public class BarController {
 		if (! optionalUser.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
-
 		Bar bar = barService.findBarById(id);
-
 		if (bar == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -148,12 +146,13 @@ public class BarController {
 		if (! optionalUser.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
-
 		Bar updatedBar = this.barService.findBarById(id);
 		if(updatedBar == null){
 			return ResponseEntity.notFound().build();
 		}
-
+		if (!updatedBar.isSubscriptionActive()){
+			return ResponseEntity.badRequest().build();
+		}
 		if (! username.equals(updatedBar.getOwner().getUsername())){
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
@@ -184,6 +183,9 @@ public class BarController {
 		Bar bar = barService.findBarById(id);
 		if (bar == null || bar.getImages().isEmpty()) {
 			return ResponseEntity.notFound().build();
+		}
+		if (!bar.isSubscriptionActive()){
+			return ResponseEntity.badRequest().build();
 		}
 		if (! username.equals(bar.getOwner().getUsername())){
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);

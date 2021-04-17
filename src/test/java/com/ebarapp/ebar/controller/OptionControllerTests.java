@@ -124,6 +124,7 @@ import java.util.*;
         bar.setOwner(owner);
         bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
+        bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
 
         Set<Bar> bars = new HashSet<>();
         bars.add(bar);
@@ -272,7 +273,7 @@ import java.util.*;
     void failureVoteBadToken() throws Exception{
         String token = "aaa-112";
 
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/voting/3/option/1/vote")
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/3/option/1/vote")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(token))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
