@@ -114,7 +114,7 @@ public class EmployeeController {
 			}
 			semp.add(emp);
 			bar.setEmployees(semp);
-			this.barService.saveBar(bar);
+			this.barService.save(bar);
 			return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
 		} else {
 			return ResponseEntity.notFound().build();
@@ -149,7 +149,7 @@ public class EmployeeController {
 				}
 				semp.add(emp);
 				bar.setEmployees(semp);
-				this.barService.saveBar(bar);
+				this.barService.save(bar);
 				return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
 			} else {
 				return ResponseEntity.notFound().build();
@@ -171,7 +171,7 @@ public class EmployeeController {
 				Set<Employee> employees = bar.getEmployees();
 				employees.remove(emp);
 				bar.setEmployees(employees);
-				this.barService.saveBar(bar);
+				this.barService.save(bar);
 				this.employeeService.removeEmployee(emp);
 				return new ResponseEntity<>(HttpStatus.OK);
 			} else {

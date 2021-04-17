@@ -4,11 +4,11 @@ package com.ebarapp.ebar.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.ebarapp.ebar.model.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.Employee;
 import com.ebarapp.ebar.repository.BarRepository;
 
 @Service
@@ -16,7 +16,6 @@ public class BarService {
 
 	@Autowired
 	private BarRepository barRepository;
-
 
 
 	public List<Bar> findAllBar() {
@@ -27,18 +26,22 @@ public class BarService {
 		return this.barRepository.getBarById(id);
 	}
 
-	public Bar saveBar(final Bar bar) {
+	public Bar createBar(final Bar newBar) {
+		return this.barRepository.save(newBar);
+	}
+
+	public Bar save(final Bar bar) {
 		return this.barRepository.save(bar);
 	}
 
-	public Bar save (Bar bar) { return barRepository.save(bar); }
+	public void removeBar(final Integer id) {
+		this.barRepository.deleteById(id);
+	}
 
-	public void removeBar(Integer id) { barRepository.deleteById(id);}
-
-	public Boolean isStaff(Integer id, String username) {
+	public Boolean isStaff(final Integer id, final String username) {
 		Boolean res = false;
-		Bar bar = findBarById(id);
-		List<String> employeesUsername = bar.getEmployees().stream().map(Employee::<String>getUsername).collect(Collectors.toList());
+		Bar bar = this.findBarById(id);
+		List<String> employeesUsername = bar.getEmployees().stream().map(Employee::<String> getUsername).collect(Collectors.toList());
 		if (bar.getOwner().getUsername().equals(username) || employeesUsername.contains(username)) {
 			res = true;
 		}
