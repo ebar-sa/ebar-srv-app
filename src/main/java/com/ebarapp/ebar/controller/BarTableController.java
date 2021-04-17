@@ -84,11 +84,11 @@ public class BarTableController {
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Map<Integer, Object>> getTableDetails(@PathVariable("id") final Integer id) {
  		Map<Integer, Object> res = new HashMap<>();
-		BarTable barTable = this.barTableService.findbyId(id);
+ 		BarTable barTable = this.barTableService.findbyId(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(x -> x.getAuthority()).collect(Collectors.toList());
 		
-		if (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE") || barTable.isFree()) {
+		if (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE")) {
 			Menu menu = barTable.getBar().getMenu();
 			Bill bill = this.barTableService.getBillByTableId(id);
 			res.put(0, barTable);
@@ -101,7 +101,6 @@ public class BarTableController {
 			if(nameClient.equals(nameLogged)) {
 				Menu menu = barTable.getBar().getMenu();
 				Bill bill = this.barTableService.getBillByTableId(id);
-				this.barTableService.saveTable(barTable);
 				res.put(0, barTable);
 				res.put(1, menu);
 				res.put(2, bill);
@@ -111,11 +110,28 @@ public class BarTableController {
 				return new ResponseEntity<>(res,HttpStatus.CONFLICT);	
 			}
 			
+		}else if(barTable.isFree() && authorities.contains("ROLE_CLIENT")) {
+			res.put(0, "No tienes acceso a esta mesa");
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);	
 		}else { 
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);	
 		}
-
 	}
+	
+	@GetMapping("/tableBillRefresh/{id}")
+	@PreAuthorize("permitAll()")
+	public ResponseEntity<Bill> refreshBillAndOrder(@PathVariable("id") final Integer id) {
+		Bill bill = this.barTableService.getBillByTableId(id);
+		
+		if(bill != null) { 
+			return new ResponseEntity<Bill>(bill, HttpStatus.OK);
+		}else { 
+			return new ResponseEntity<Bill>(new Bill(), HttpStatus.NO_CONTENT);
+		}
+	}
+	
+	
+	
 	
 	@GetMapping("/busyTable/{id}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")

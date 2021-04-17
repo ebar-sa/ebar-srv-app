@@ -231,7 +231,7 @@ class BarTableControllerTest {
 	@Test
 	void testGetTableByIdFree() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE4_ID)
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().is2xxSuccessful());
 	}
 	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
