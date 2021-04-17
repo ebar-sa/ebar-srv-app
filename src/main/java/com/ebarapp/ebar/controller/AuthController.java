@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,7 @@ import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.Employee;
 import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.dtos.ProfileUpdateDTO;
 import com.ebarapp.ebar.model.mapper.UserDataMapper;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.UserService;
@@ -107,6 +109,41 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    @PostMapping("/updateProfile")
+    public ResponseEntity<MessageResponse> editUser(@Valid @RequestBody ProfileUpdateDTO userData) {
+    	User user = userService.getByUsername(userData.getUsername());
+        if (user == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("User not exist"));
+        } 
+
+        if (!encoder.matches(userData.getOldPassword(), user.getPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Incorrect password"));
+        } 
+        
+        if (!userData.getPassword().equals(userData.getConfirmPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Passwords not match"));
+        } 
+
+
+        user.setPassword(encoder.encode(userData.getPassword()));
+        user.setEmail(userData.getEmail());
+        
+        try {
+            userService.saveUser(user);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(e.getMessage()));
+        }
+        return ResponseEntity.ok(new MessageResponse("Data updated successfully!"));
+    }
+    
 	private User generateUserWithRole(UserDataMapper userData) {
 		if (userData.getRoles().contains(RoleType.ROLE_OWNER)) {
 			return new Owner(userData);
