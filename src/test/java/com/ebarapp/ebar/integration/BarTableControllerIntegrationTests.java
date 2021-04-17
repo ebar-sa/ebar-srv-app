@@ -49,6 +49,8 @@ class BarTableControllerIntegrationTests {
 	private static final String TOKEN_TEST_TABLE4 = "ihv-54f";
 	private static final String TOKEN_TEST_TABLE5 = "ihv-55f";
 	private static final String TOKEN_TEST_ERROR = "ihv-ERR";
+	private static final String TEST_USER = "user";
+	private static final String TEST_USER_ERROR="userError";
 	private static final int TEST_BAR_ID = 10;
 
 	@Autowired
@@ -177,6 +179,8 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
+		given(this.barTableRepository.getBarTableByClientUsername("user")).willReturn(table2);
+		given(this.barTableRepository.getBarTableByClientUsername("userError")).willReturn(null);
 		
 		given(this.barTableRepository.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
@@ -191,6 +195,20 @@ class BarTableControllerIntegrationTests {
 		String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false,\"client_username\":\"user\"},\"1\":{\"id\":1,\"items\":[],\"categories\":[],\"new\":false},\"2\":{\"id\":1,\"itemBill\":null,\"itemOrder\":null,\"new\":false}}";
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testBarTableForClient() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableClient/" + TEST_USER)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testBarTableForClientError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableClient/" + TEST_USER_ERROR)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
 	}
 
 	@WithMockUser(username = "admin", roles = { "OWNER" })

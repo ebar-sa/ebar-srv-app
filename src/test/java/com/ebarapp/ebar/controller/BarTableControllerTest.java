@@ -69,6 +69,8 @@ class BarTableControllerTest {
 	private static final String TOKEN_TEST_TABLE4 = "ihv-54f";
 	private static final String TOKEN_TEST_TABLE5 = "ihv-55f";
 	private static final String TOKEN_TEST_ERROR = "ihv-ERR";
+	private static final String TEST_USER = "user";
+	private static final String TEST_USER_ERROR="userError";
 	
 
 	@Autowired
@@ -199,6 +201,8 @@ class BarTableControllerTest {
 		given(this.tableService.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
 		given(this.tableService.createBarTable(table)).willReturn(table);
+		given(this.tableService.getBarTableByClientUsername("user")).willReturn(table2);
+		given(this.tableService.getBarTableByClientUsername("userError")).willReturn(null);
 
 	}
 	
@@ -207,6 +211,20 @@ class BarTableControllerTest {
 	void testGetTableById() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testBarTableForClient() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableClient/" + TEST_USER)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testBarTableForClientError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableClient/" + TEST_USER_ERROR)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
 	}
 	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
