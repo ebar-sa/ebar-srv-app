@@ -164,7 +164,7 @@ class BarTableControllerIntegrationTests {
 		List<BarTable> tableList = Collections.singletonList(table);
 
 		given(this.barTableRepository.findAll()).willReturn(tableList);
-		given(this.barRepository.findById(10)).willReturn(Optional.of(bar));
+		given(this.barRepository.getBarById(10)).willReturn(bar);
 		given(this.barRepository.findById(11)).willReturn(Optional.of(bar2));
 		given(this.barTableRepository.findById(20)).willReturn(Optional.of(table));
 		given(this.barTableRepository.findById(21)).willReturn(Optional.of(table2));
@@ -245,7 +245,6 @@ class BarTableControllerIntegrationTests {
 
 	@WithMockUser(username="admin", roles={"OWNER"})
 	@Test
-	@Disabled
 	void testDeleteTable() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/tables/deleteTable/"+ TEST_BAR_ID + "/" + TEST_TABLE2_ID).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -263,7 +262,6 @@ class BarTableControllerIntegrationTests {
 	
 	@WithMockUser(username="admin", roles={"OWNER"})
 	@Test
-	@Disabled
 	void testCreateTable() throws Exception {
 		String json = "{\"name\":\"mesa4\",\"seats\":4}";
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/tables/createTable/" + TEST_BAR_ID)
