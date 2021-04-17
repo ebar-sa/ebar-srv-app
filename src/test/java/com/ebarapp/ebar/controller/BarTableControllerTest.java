@@ -15,6 +15,7 @@ import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.ItemBillService;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.TreeSet;
 
 import static org.hamcrest.Matchers.*;
@@ -119,7 +121,6 @@ class BarTableControllerTest {
 		bar.setDescription("Restaurant");
 		bar.setContact("alfredo@gmail.com");
 		bar.setLocation("Pennsylvania");
-		bar.setBarTables(new HashSet<>());
 		bar.setMenu(m);
 		
 		Bill b = new Bill();
@@ -185,6 +186,11 @@ class BarTableControllerTest {
 		tableListDelete.add(table);
 		tableListDelete.add(table3);
 
+		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
+		tablesForBar1.add(table);
+		bar.setBarTables(tablesForBar1);
+		
+
 		given(this.tableService.findAllBarTable()).willReturn(tableList);
 		given(this.tableService.findAllBarTable()).willReturn(tableListDelete);
 		given(this.barService.findBarById(10)).willReturn(bar);
@@ -203,6 +209,8 @@ class BarTableControllerTest {
 		given(this.tableService.createBarTable(table)).willReturn(table);
 		given(this.tableService.getBarTableByClientUsername("user")).willReturn(table2);
 		given(this.tableService.getBarTableByClientUsername("userError")).willReturn(null);
+		given(this.tableService.getBarTablesByBarId(10)).willReturn(tablesForBar1);
+
 
 	}
 	
@@ -240,7 +248,7 @@ class BarTableControllerTest {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE5_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
 	}
-
+	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
 	void testBusyTable() throws Exception {
@@ -321,6 +329,11 @@ class BarTableControllerTest {
 				contentType(MediaType.APPLICATION_JSON)
 				.content(json))
 				.andExpect(status().isOk());
+
+	void testGetAllTables() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
+
 	}
 	
 	@WithMockUser(username="admin", roles={"OWNER"})

@@ -23,6 +23,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.Instant;
 import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -113,7 +120,9 @@ class BarControllerTests {
         bar.setLocation("Pennsylvania");
         bar.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
+        bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
         bar.setBarTables(barTables);
+        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setVotings(new HashSet<>());
         bar.setEmployees(new HashSet<>());
         bar.setOwner(owner);
@@ -140,6 +149,7 @@ class BarControllerTests {
         bar2.setLocation("Pennsylvania");
         bar2.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar2.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
+        bar2.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
         bar2.setBarTables(barTables);
         bar2.setImages(images);
         bar2.setVotings(new HashSet<>());

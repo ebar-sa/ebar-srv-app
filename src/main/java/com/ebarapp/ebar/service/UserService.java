@@ -26,6 +26,10 @@ public class UserService implements UserDetailsService {
 		return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 	}
 
+	public User getByUsername(String username) throws UsernameNotFoundException {
+		return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+  }
+  
 	public Optional<User> getUserByUsername(String username) {
 		return this.userRepository.findByUsername(username);
 	}
@@ -33,6 +37,8 @@ public class UserService implements UserDetailsService {
 	public void saveUser(User user) {
 		this.userRepository.save(user);
 	}
+
+
 	
 	public boolean existsUserByUsername(String username) {
 		return this.userRepository.existsByUsername(username);

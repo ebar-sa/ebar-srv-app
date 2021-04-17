@@ -12,6 +12,7 @@ import com.ebarapp.ebar.repository.BarRepository;
 import com.ebarapp.ebar.repository.BarTableRepository;
 import com.ebarapp.ebar.service.BarService;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -165,6 +166,10 @@ class BarTableControllerIntegrationTests {
 		
 		List<BarTable> tableList = Collections.singletonList(table);
 
+		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
+		tablesForBar1.add(table);
+		bar.setBarTables(tablesForBar1);
+		
 		given(this.barTableRepository.findAll()).willReturn(tableList);
 		given(this.barRepository.getBarById(10)).willReturn(bar);
 		given(this.barRepository.findById(11)).willReturn(Optional.of(bar2));
@@ -187,7 +192,17 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.save(table)).willReturn(table);
 
 	}
+		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
 
+
+	}
+//
+	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
+	@Test
+	void testGetAllTables() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
+	}
 
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
@@ -197,6 +212,7 @@ class BarTableControllerIntegrationTests {
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
 	}
 	
+
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
 	void testBarTableForClient() throws Exception {
@@ -259,7 +275,6 @@ class BarTableControllerIntegrationTests {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().is4xxClientError());
 	}
-
 
 	@WithMockUser(username="admin", roles={"OWNER"})
 	@Test

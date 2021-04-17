@@ -1,6 +1,7 @@
 
 package com.ebarapp.ebar.model;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -82,6 +83,9 @@ public class Bar extends BaseEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private Set<Employee> employees;
 
+	@Column(name = "paid_until")
+	private Date paidUntil;
+
 	public void addVoting(Voting newVoting) { getVotings().add(newVoting); }
 
 	public void deleteVoting(Voting oldVoting) { getVotings().remove(oldVoting); }
@@ -89,5 +93,10 @@ public class Bar extends BaseEntity {
 	public void addImages(Set<DBImage> newImages) { getImages().addAll(newImages); }
 
 	public void deleteImage(DBImage oldImage) {getImages().remove(oldImage); }
+
+	public boolean isSubscriptionActive() {
+		if (paidUntil == null) return false;
+		return paidUntil.after(Date.from(Instant.now()));
+	}
 }
 

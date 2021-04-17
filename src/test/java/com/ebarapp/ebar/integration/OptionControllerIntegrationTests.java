@@ -52,6 +52,7 @@ class OptionControllerIntegrationTests {
     private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
     private static final Set<Employee> TEST_BAR_EMPLOYEES = new HashSet<>();
+    private static final Date TEST_BAR_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
 
     private static final int TEST_VOTING_ID = 1;
     private static final String TEST_VOTING_TITLE = "¿Qué canción quieres escuchar?";
@@ -115,6 +116,7 @@ class OptionControllerIntegrationTests {
         bar.setLocation(TEST_BAR_LOCATION);
         bar.setOpeningTime(TEST_BAR_OPENING_TIME);
         bar.setClosingTime(TEST_BAR_CLOSING_TIME);
+        bar.setPaidUntil(TEST_BAR_PAID_UNTIL);
         bar.setEmployees(TEST_BAR_EMPLOYEES);
         bar.setOwner(owner);
 

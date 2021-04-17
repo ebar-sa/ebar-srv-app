@@ -8,6 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.ebarapp.ebar.model.mapper.UserDataMapper;
+import com.ebarapp.ebar.model.type.RoleType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,11 +26,14 @@ public class Owner extends User {
     private Set<Bar> bar;
 
     public Owner () {
-        //Empty
     }
 
-    public Owner (String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password, Set<Bar> bar) {
-        super(username, firstName, lastName, dni, email, phoneNumber, password);
+    public Owner (UserDataMapper userData) {
+        super(userData.getUsername(), userData.getFirstName(), userData.getLastName(), userData.getDni(), userData.getEmail(), userData.getPhoneNumber(), userData.getPassword(), userData.getRoles());
+    }
+    
+    public Owner (String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password, Set<RoleType> roles, Set<Bar> bar) {
+        super(username, firstName, lastName, dni, email, phoneNumber, password, roles);
         this.bar = bar;
     }
 

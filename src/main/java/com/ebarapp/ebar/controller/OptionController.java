@@ -62,6 +62,13 @@ public class OptionController {
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
+        Bar updatedBar = this.barService.findBarById(barId);
+        if(updatedBar == null){
+            return ResponseEntity.notFound().build();
+        }
+        if (!updatedBar.isSubscriptionActive()){
+            return ResponseEntity.badRequest().build();
+        }
         Option newOption = new Option(newOptionDTO);
         Option option = optionService.createOption(newOption);
         Voting voting = votingService.getVotingById(votingId);
@@ -79,6 +86,13 @@ public class OptionController {
     public ResponseEntity<Option> deleteOption(@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId, @PathVariable("barId") Integer barId) {
         if(validStaff(barId) != null) {
             return validStaff(barId);
+        }
+        Bar updatedBar = this.barService.findBarById(barId);
+        if(updatedBar == null){
+            return ResponseEntity.notFound().build();
+        }
+        if (!updatedBar.isSubscriptionActive()){
+            return ResponseEntity.badRequest().build();
         }
         Voting voting = votingService.getVotingById(votingId);
         if(voting == null) {
@@ -121,6 +135,13 @@ public class OptionController {
         UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (ud == null){
             return ResponseEntity.notFound().build();
+        }
+        Bar updatedBar = this.barService.findBarById(barId);
+        if(updatedBar == null){
+            return ResponseEntity.notFound().build();
+        }
+        if (!updatedBar.isSubscriptionActive()){
+            return ResponseEntity.badRequest().build();
         }
         //The user must verify he is in the bar
         List<String> allValidTokens = barTableService.getAllValidTokensByBarId(barId);

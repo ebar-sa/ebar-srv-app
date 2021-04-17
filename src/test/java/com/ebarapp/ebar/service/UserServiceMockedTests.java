@@ -46,6 +46,7 @@ class UserServiceMockedTests {
         this.user.setPhoneNumber("654321678");
         this.user.setPassword(PASSWORD);
         this.user.setRoles(this.roles);
+        this.user.setStripeId("id");
 
         this.userServiceMocked = new UserService(userRepositoryMocked);
     }

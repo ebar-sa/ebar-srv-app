@@ -68,7 +68,9 @@ public class BarTableService {
 		}
 	}
 	
-	
+	public Set<BarTable> getBarTablesByBarId(final Integer id){
+		return this.barTableRepository.getBarTablesByBarId(id);
+	}
 
 	public static String generateNewToken() {
 	    byte[] randomBytes = new byte[4];

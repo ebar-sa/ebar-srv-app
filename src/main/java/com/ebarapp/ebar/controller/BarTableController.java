@@ -2,11 +2,9 @@ package com.ebarapp.ebar.controller;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +52,7 @@ public class BarTableController {
 	@Autowired
 	private ClientService clientService;
 
+
 	@GetMapping("{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
@@ -67,6 +66,7 @@ public class BarTableController {
 
 	}
 	
+
 	@GetMapping("tableClient/{username}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<BarTable> getBarTableForClient(@PathVariable("username") final String username) {

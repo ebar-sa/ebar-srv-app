@@ -67,6 +67,12 @@ public class VotingController {
             Voting newVoting = new Voting(newVotingDTO);
             Voting voting = votingService.createOrUpdateVoting(newVoting);
             Bar bar = barService.findBarById(barId);
+            if (bar == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!bar.isSubscriptionActive()){
+                return ResponseEntity.badRequest().build();
+            }
             bar.addVoting(voting);
             barService.createBar(bar);
             return new ResponseEntity<>(voting, HttpStatus.CREATED);
@@ -91,6 +97,12 @@ public class VotingController {
         }
         Voting voting = votingService.getVotingById(id);
         Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!bar.isSubscriptionActive()){
+            return ResponseEntity.badRequest().build();
+        }
         if (voting == null || ! bar.getVotings().contains(voting)) {
             return ResponseEntity.notFound().build();
         }
@@ -110,6 +122,13 @@ public class VotingController {
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!bar.isSubscriptionActive()){
+            return ResponseEntity.badRequest().build();
+        }
         //Can't restrict the vote of a client
         //Can't edit a voting if it's active or finished
         ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
@@ -128,6 +147,13 @@ public class VotingController {
     @PostMapping("/bar/{barId}/voting/{id}/finish")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> finishVoting(@PathVariable("id") Integer id, @PathVariable("barId") Integer barId) {
+        Bar bar = barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!bar.isSubscriptionActive()){
+            return ResponseEntity.badRequest().build();
+        }
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }

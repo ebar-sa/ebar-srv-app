@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -41,6 +42,7 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR_LOCATION = "Avenida de Finlandia, 24, Sevilla";
     private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
+    private static final Date TEST_BAR_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
 
     private static final String TEST_USER_FIRST_NAME = "John";
     private static final String TEST_USER_LAST_NAME = "Doe";
@@ -65,6 +67,7 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR2_LOCATION = "Pennsylvania";
     private static final Date TEST_BAR2_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR2_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
+    private static final Date TEST_BAR2_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
 
     private static final int TEST_DBIMAGE_ID = 1;
     private static final String TEST_DBIMAGE_NAME = "pizzeria_alfredo";
@@ -139,7 +142,9 @@ class BarControllerIntegrationTests {
         bar.setLocation(TEST_BAR_LOCATION);
         bar.setOpeningTime(TEST_BAR_OPENING_TIME);
         bar.setClosingTime(TEST_BAR_CLOSING_TIME);
+        bar.setPaidUntil(TEST_BAR_PAID_UNTIL);
         bar.setBarTables(barTables);
+        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setOwner(owner);
 
         Bar bar2 = new Bar();
@@ -150,8 +155,10 @@ class BarControllerIntegrationTests {
         bar2.setLocation(TEST_BAR2_LOCATION);
         bar2.setOpeningTime(TEST_BAR2_OPENING_TIME);
         bar2.setClosingTime(TEST_BAR2_CLOSING_TIME);
+        bar2.setPaidUntil(TEST_BAR2_PAID_UNTIL);
         bar2.setOwner(owner);
         bar2.setBarTables(barTables);
+        bar2.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar2.setImages(images);
 
         List<Bar> bars = Collections.singletonList(bar);
