@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -121,10 +122,10 @@ class BarControllerTests {
         bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
         bar.setBarTables(barTables);
+        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setVotings(new HashSet<>());
         bar.setEmployees(new HashSet<>());
         bar.setOwner(owner);
-        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 
         allBares.add(bar);
 

@@ -29,6 +29,8 @@ public class PaymentController {
 
     private final StripeService stripeService;
 
+    private static final String BAR_ID = "bar_id";
+
     @Value("${stripe.webhooks.endpoint_secret}")
     private String endpointSecret;
 
@@ -138,7 +140,7 @@ public class PaymentController {
         activeSubscriptions.forEach(sub -> {
             Map<String, Object> subscriptionData = new HashMap<>();
             subscriptionData.put("bar_name", sub.getMetadata().get("bar_name"));
-            subscriptionData.put("bar_id", sub.getMetadata().get("bar_id"));
+            subscriptionData.put(BAR_ID, sub.getMetadata().get(BAR_ID));
             subscriptionData.put("period_end", sub.getCurrentPeriodEnd());
             subscriptionData.put("status", sub.getStatus());
             subscriptionData.put("cancel_at_period_end", sub.getCancelAtPeriodEnd());
@@ -206,7 +208,7 @@ public class PaymentController {
 
                 if (stripeObject.isPresent()) {
                     Subscription subscription = (Subscription) stripeObject.get();
-                    Integer barId = Integer.valueOf(subscription.getMetadata().get("bar_id"));
+                    Integer barId = Integer.valueOf(subscription.getMetadata().get(BAR_ID));
                     Bar bar = barService.findBarById(barId);
                     if (bar != null) {
                         bar.setPaidUntil(new Date(subscription.getCurrentPeriodEnd()*1000));

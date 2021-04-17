@@ -47,7 +47,7 @@ public class BarController {
 		}
 		Set<Bar> bars = new HashSet<>();
 		User user = optionalUser.get();
-		Owner owner = new Owner(user.getUsername(), user.getFirstName(), user.getLastName(), user.getDni(), user.getEmail(), user.getPhoneNumber(), user.getPassword(), bars);
+		Owner owner = new Owner(user.getUsername(), user.getFirstName(), user.getLastName(), user.getDni(), user.getEmail(), user.getPhoneNumber(), user.getPassword(), user.getRoles(), bars);
 		Bar newBar = new Bar(newBarCreateDTO);
 		newBar.setOwner(owner);
 		bars.add(newBar);

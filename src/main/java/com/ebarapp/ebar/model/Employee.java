@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.ebarapp.ebar.model.mapper.UserDataMapper;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +21,10 @@ public class Employee extends User {
     @ManyToOne
     private Bar bar;
 
+    public Employee () {
+    }
+    
+    public Employee (UserDataMapper userData) {
+        super(userData.getUsername(), userData.getFirstName(), userData.getLastName(), userData.getDni(), userData.getEmail(), userData.getPhoneNumber(), userData.getPassword(), userData.getRoles());
+    }
 }

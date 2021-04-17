@@ -144,6 +144,7 @@ class BarControllerIntegrationTests {
         bar.setClosingTime(TEST_BAR_CLOSING_TIME);
         bar.setPaidUntil(TEST_BAR_PAID_UNTIL);
         bar.setBarTables(barTables);
+        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setOwner(owner);
 
         Bar bar2 = new Bar();
@@ -157,8 +158,8 @@ class BarControllerIntegrationTests {
         bar2.setPaidUntil(TEST_BAR2_PAID_UNTIL);
         bar2.setOwner(owner);
         bar2.setBarTables(barTables);
+        bar2.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar2.setImages(images);
-        bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 
         List<Bar> bars = Collections.singletonList(bar);
 

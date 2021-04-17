@@ -21,6 +21,9 @@ public class StripeService {
 	@Value("${stripe.price.id}")
 	private String priceId;
 
+	private static final String PRICE = "price";
+	private static final String BAR_ID = "bar_id";
+
 
 	public String createCustomer(String email) {
 		Stripe.apiKey = apiSecretKey;
@@ -109,13 +112,13 @@ public class StripeService {
 			Map<String, Object> params = new HashMap<>();
 
 			params.put("customer", customerId);
-			params.put("price", priceId);
+			params.put(PRICE, priceId);
 			params.put("status", "all");
 
 			SubscriptionCollection subscriptions = Subscription.list(params);
 			Optional<Subscription> existsSub = subscriptions.getData()
 					.stream()
-					.filter(sub -> sub.getMetadata().get("bar_id").equals(bar.getId().toString()))
+					.filter(sub -> sub.getMetadata().get(BAR_ID).equals(bar.getId().toString()))
 					.findFirst();
 
 			if (existsSub.isPresent()) {
@@ -124,9 +127,9 @@ public class StripeService {
 				updateParams.put("cancel_at_period_end", false);
 				return subscription.update(updateParams);
 			} else {
-				itemParams.put("price", priceId);
+				itemParams.put(PRICE, priceId);
 
-				metadata.put("bar_id", bar.getId());
+				metadata.put(BAR_ID, bar.getId());
 				metadata.put("bar_name", bar.getName());
 
 				subscriptionParams.put("customer", customerId);
@@ -146,12 +149,12 @@ public class StripeService {
 		try {
 			Map<String, Object> params = new HashMap<>();
 			params.put("customer", customerId);
-			params.put("price", priceId);
+			params.put(PRICE, priceId);
 
 			SubscriptionCollection subscriptions = Subscription.list(params);
 			List<Subscription> barSubscriptions = subscriptions.getData()
 					.stream()
-					.filter(sub -> sub.getMetadata().get("bar_id").equals(barId.toString()))
+					.filter(sub -> sub.getMetadata().get(BAR_ID).equals(barId.toString()))
 					.collect(Collectors.toList());
 			for (Subscription barSubscription : barSubscriptions) {
 				Map<String, Object> updateParams = new HashMap<>();
@@ -172,7 +175,7 @@ public class StripeService {
 
 			periodEnd.put("gt", Instant.now().getEpochSecond()/1000);
 			params.put("customer", customerId);
-			params.put("price", priceId);
+			params.put(PRICE, priceId);
 			params.put("current_period_end", periodEnd);
 			params.put("status", "all");
 

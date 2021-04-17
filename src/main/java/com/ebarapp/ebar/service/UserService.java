@@ -26,12 +26,12 @@ public class UserService implements UserDetailsService {
 		return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 	}
 
-	public Optional<User> getUserByUsername(String username) {
-		return this.userRepository.findByUsername(username);
-	}
-
 	public User getByUsername(String username) throws UsernameNotFoundException {
 		return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+  }
+  
+	public Optional<User> getUserByUsername(String username) {
+		return this.userRepository.findByUsername(username);
 	}
 
 	public void saveUser(User user) {

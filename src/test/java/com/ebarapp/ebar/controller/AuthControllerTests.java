@@ -117,7 +117,7 @@ class AuthControllerTests {
     }
 
     @Test
-    void testRegisterNewUser() throws Exception {
+    void testRegisterNewClient() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         Set<String> roles = new HashSet<>();
         roles.add(RoleType.ROLE_CLIENT.toString());
@@ -137,6 +137,48 @@ class AuthControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
     }
 
+    @Test
+    void testRegisterNewOwner() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<String> roles = new HashSet<>();
+        roles.add(RoleType.ROLE_EMPLOYEE.toString());
+        SignupRequest request = new SignupRequest();
+        request.setUsername(USERNAME);
+        request.setEmail(EMAIL);
+        request.setDni(DNI);
+        request.setFirstName(FIRSTNAME);
+        request.setLastName(SECONDNAME);
+        request.setPhoneNumber(PHONENUMBER);
+        request.setRoles(roles);
+        request.setPassword(PASSWORD);
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+    }
+    
+    @Test
+    void testRegisterNewEmployee() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<String> roles = new HashSet<>();
+        roles.add(RoleType.ROLE_OWNER.toString());
+        SignupRequest request = new SignupRequest();
+        request.setUsername(USERNAME);
+        request.setEmail(EMAIL);
+        request.setDni(DNI);
+        request.setFirstName(FIRSTNAME);
+        request.setLastName(SECONDNAME);
+        request.setPhoneNumber(PHONENUMBER);
+        request.setRoles(roles);
+        request.setPassword(PASSWORD);
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+    }
+    
     @Test
     void testRegisterTakenUsername() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
