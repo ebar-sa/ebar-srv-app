@@ -333,4 +333,25 @@ class BarControllerTests {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/2"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureDeleteBarImage() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/3/image/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureDeleteBarImageNotActive() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR3_ID +"/image/1"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureDeleteBarImageNotOwner() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/1"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
 }
