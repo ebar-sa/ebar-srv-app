@@ -1,5 +1,6 @@
 package com.ebarapp.ebar.controller;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemMenuService;
 
 @ExtendWith(SpringExtension.class)			
@@ -43,6 +45,7 @@ class ItemMenuControllerTests {
 	private static final int TEST_ITEM_MENU_ID = 1;
 	private static final int TEST_ITEM_MENU_2_ID = 53;
 	private static final int TEST_INCORRECT_ITEM_MENU_ID = 3;
+	private static final int TEST_BILL = 43;
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -52,6 +55,9 @@ class ItemMenuControllerTests {
 
 	@MockBean
 	private BarService barService;
+	
+	@MockBean
+	private BillService billService;
 
 	@BeforeEach
 	void setUp() {
@@ -95,9 +101,11 @@ class ItemMenuControllerTests {
 		s.add(i2);
 		m.setItems(s);
 		
+		
 		BDDMockito.given(this.barService.findBarById(TEST_BAR_ID)).willReturn(b);
 		BDDMockito.given(this.itemMenuService.getById(TEST_ITEM_MENU_ID)).willReturn(i1);
 		BDDMockito.given(this.itemMenuService.getById(TEST_ITEM_MENU_2_ID)).willReturn(i2);
+		BDDMockito.given(this.billService.findAll()).willReturn(new ArrayList<>());
 		
 		BDDMockito.given(this.itemMenuService.save(Mockito.any(ItemMenu.class))).willReturn(i1);
 		
