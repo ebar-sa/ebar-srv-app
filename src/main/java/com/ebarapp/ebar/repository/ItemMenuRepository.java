@@ -9,4 +9,6 @@ import com.ebarapp.ebar.model.ItemMenu;
 @Repository
 public interface ItemMenuRepository extends JpaRepository<ItemMenu, Integer> {
 
+	ItemMenu getItemById(Integer idItemMenu);
+
 }

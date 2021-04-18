@@ -1,6 +1,7 @@
 
 package com.ebarapp.ebar.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,5 +50,9 @@ public class BillService {
 
 	public Set<ItemMenu> getItemMenuByBillId(final Integer id) {
 		return this.billRepository.getItemMenuByBillId(id);
+	}
+
+	public List<Bill> findAll() {
+		return this.billRepository.findAll();
 	}
 }
