@@ -67,9 +67,6 @@ public class VotingController {
             Voting newVoting = new Voting(newVotingDTO);
             Voting voting = votingService.createOrUpdateVoting(newVoting);
             Bar bar = barService.findBarById(barId);
-            if (bar == null) {
-                return ResponseEntity.notFound().build();
-            }
             if (!bar.isSubscriptionActive()){
                 return ResponseEntity.badRequest().build();
             }
@@ -97,9 +94,7 @@ public class VotingController {
         }
         Voting voting = votingService.getVotingById(id);
         Bar bar = barService.findBarById(barId);
-        if (bar == null) {
-            return ResponseEntity.notFound().build();
-        }
+
         if (!bar.isSubscriptionActive()){
             return ResponseEntity.badRequest().build();
         }
