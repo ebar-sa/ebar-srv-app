@@ -30,6 +30,7 @@ import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemMenuService;
+import com.ebarapp.ebar.service.MenuService;
 
 @ExtendWith(SpringExtension.class)			
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -45,13 +46,15 @@ class ItemMenuControllerTests {
 	private static final int TEST_ITEM_MENU_ID = 1;
 	private static final int TEST_ITEM_MENU_2_ID = 53;
 	private static final int TEST_INCORRECT_ITEM_MENU_ID = 3;
-	private static final int TEST_BILL = 43;
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
 	private ItemMenuService itemMenuService;
+	
+	@MockBean
+	private MenuService menuService;
 
 	@MockBean
 	private BarService barService;
@@ -107,6 +110,7 @@ class ItemMenuControllerTests {
 		BDDMockito.given(this.itemMenuService.getById(TEST_ITEM_MENU_2_ID)).willReturn(i2);
 		BDDMockito.given(this.billService.findAll()).willReturn(new ArrayList<>());
 		
+		BDDMockito.given(this.menuService.createMenu(Mockito.any(Menu.class))).willReturn(m);
 		BDDMockito.given(this.itemMenuService.save(Mockito.any(ItemMenu.class))).willReturn(i1);
 		
 	}
