@@ -134,7 +134,7 @@ class ItemMenuControllerTests {
 			"OWNER"
 	})
 	void testSuccessCreateItemMenu() throws Exception {
-		String json = "{\"id\":12,\"name\":\"Coca cola\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
+		String json = "{\"id\":12,\"name\":\"Fanta Naranja\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
 		
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bares/"+ TEST_BAR_ID+"/menu/itemMenu")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,7 @@ class ItemMenuControllerTests {
 			"OWNER"
 	})
 	void testBarNullCreateItemMenu() throws Exception {
-		String json = "{\"id\":12,\"name\":\"Coca cola\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
+		String json = "{\"id\":12,\"name\":\"Fanta Naranja\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
 		
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bares/"+ TEST_INCORRECT_BAR_ID + "/menu/itemMenu")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +160,7 @@ class ItemMenuControllerTests {
 			"CLIENT"
 	})
 	void testFailClientCreateItemMenu() throws Exception {
-		String json = "{\"id\":12,\"name\":\"Coca cola\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
+		String json = "{\"id\":12,\"name\":\"Fanta Naranja\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
 		
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bares/"+ TEST_BAR_ID + "/menu/itemMenu")
 				.contentType(MediaType.APPLICATION_JSON)
