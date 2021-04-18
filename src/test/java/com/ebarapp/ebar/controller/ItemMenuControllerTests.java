@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,7 @@ class ItemMenuControllerTests {
 	private static final int TEST_INCORRECT_BAR_ID = 2;
 	private static final int TEST_MENU_ID = 1;
 	private static final int TEST_ITEM_MENU_ID = 1;
+	private static final int TEST_ITEM_MENU_2_ID = 53;
 	private static final int TEST_INCORRECT_ITEM_MENU_ID = 3;
 
 	@Autowired
@@ -81,7 +83,7 @@ class ItemMenuControllerTests {
 		i1.setPrice(15.5);
 
 		ItemMenu i2 = new ItemMenu();
-		i2.setId(2);
+		i2.setId(TEST_ITEM_MENU_2_ID);
 		i2.setName("Ensaladilla");
 		i2.setCategory("Entrantes");
 		i2.setDescription("Especialidad de la casa");
@@ -95,7 +97,10 @@ class ItemMenuControllerTests {
 		
 		BDDMockito.given(this.barService.findBarById(TEST_BAR_ID)).willReturn(b);
 		BDDMockito.given(this.itemMenuService.getById(TEST_ITEM_MENU_ID)).willReturn(i1);
-
+		BDDMockito.given(this.itemMenuService.getById(TEST_ITEM_MENU_2_ID)).willReturn(i2);
+		
+		BDDMockito.given(this.itemMenuService.save(Mockito.any(ItemMenu.class))).willReturn(i1);
+		
 	}
 
 	@Test
@@ -227,7 +232,7 @@ class ItemMenuControllerTests {
 	})
 	void testSuccessDeleteItemMenu() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders
-				.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_ID + "/delete"))
+				.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_2_ID + "/delete"))
 				.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 	
@@ -247,7 +252,7 @@ class ItemMenuControllerTests {
 	})
 	void testNotFoundBarDeleteItemMenu() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders
-				.delete("/api/bares/" + TEST_INCORRECT_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_ID + "/delete"))
+				.delete("/api/bares/" + TEST_INCORRECT_BAR_ID + "/menu/itemMenu/" + TEST_INCORRECT_ITEM_MENU_ID + "/delete"))
 				.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 	
@@ -257,7 +262,7 @@ class ItemMenuControllerTests {
 	})
 	void testFailClientDeleteItemMenu() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders
-				.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_ID + "/delete"))
+				.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_2_ID + "/delete"))
 				.andExpect(MockMvcResultMatchers.status().isForbidden());
 	}
 }
