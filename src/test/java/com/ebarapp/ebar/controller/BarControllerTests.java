@@ -280,9 +280,31 @@ class BarControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureUpdateBarNotFound() throws Exception {
+        String json = "{ \n \"name\": \"Pizza by Paco2\",\n \"description\": \"Restaurant\",\n \"contact\": \"alfredo@gmail.com\",\n \"openingHour\": \"01-01-1970 13:00:00\",\n \"closingHour\": \"01-01-1970 22:30:00\", \n \"images\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/3")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureUpdateBarNotActive() throws Exception {
+        String json = "{ \n \"name\": \"Pizza by Paco2\",\n \"description\": \"Restaurant\",\n \"contact\": \"alfredo@gmail.com\",\n \"openingHour\": \"01-01-1970 13:00:00\",\n \"closingHour\": \"01-01-1970 22:30:00\", \n \"images\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/"+ TEST_BAR3_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
-    void failureUpdateBar() throws Exception {
+    void failureUpdateBarNotOwner() throws Exception {
         String json = "{ \n \"name\": \"Pizza by Paco2\",\n \"description\": \"Restaurant\",\n \"contact\": \"alfredo@gmail.com\",\n \"openingHour\": \"01-01-1970 13:00:00\",\n \"closingHour\": \"01-01-1970 22:30:00\", \n \"images\": [] \n}";
 
         this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/"+ TEST_BAR2_ID)
@@ -290,7 +312,6 @@ class BarControllerTests {
                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
-
 
     @WithMockUser(username="admin2", roles={"OWNER"})
     @Test
