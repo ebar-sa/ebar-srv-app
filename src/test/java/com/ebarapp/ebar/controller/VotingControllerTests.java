@@ -110,13 +110,29 @@ class VotingControllerTests {
         bar.setOpeningTime(null);
         bar.setOwner(owner);
 
+        Bar bar2 = new Bar();
+        bar2.setId(3);
+        bar2.setContact("test2@example.com");
+        bar2.setLocation("Right There");
+        bar2.setDescription("Lorem Ipsum");
+        bar2.setVotings(votings);
+        bar2.setBarTables(null);
+        bar2.setName("Test 2");
+        bar2.setPaidUntil(Date.from(Instant.parse("2020-01-01T22:30:00.00Z")));
+        bar2.setClosingTime(null);
+        bar2.setOpeningTime(null);
+        bar2.setOwner(owner);
+
         Set<Bar> bars = new HashSet<>();
         bars.add(bar);
+        bars.add(bar2);
         owner.setBar(bars);
 
         BDDMockito.given(this.barService.findBarById(1)).willReturn(bar);
+        BDDMockito.given(this.barService.findBarById(3)).willReturn(bar2);
         BDDMockito.given(this.barService.findBarById(2)).willReturn(null);
         BDDMockito.given(this.barService.isStaff(1, "admin")).willReturn(true);
+        BDDMockito.given(this.barService.isStaff(3, "admin")).willReturn(true);
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
@@ -128,6 +144,28 @@ class VotingControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureCreateVotingBarNotActive() throws Exception{
+        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 19:00:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/3/voting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="admin", roles={"OWNER"})
+    @Test
+    void failureCreateVotingBarNotFound() throws Exception{
+        String json = "{ \n \"title\": \"Voting Test\",\n \"description\": \"Lorem Ipsum\",\n \"openingHour\": \"30-12-2021 19:00:00\",\n \"closingHour\": \"30-12-2021 20:00:00\",\n \"timer\": null,\n \"options\": [],\n \"votersUsernames\": [] \n}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/voting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @WithMockUser(username="admin", roles={"OWNER"})
@@ -164,6 +202,13 @@ class VotingControllerTests {
 
     @WithMockUser(username = "admin", roles = {"OWNER"})
     @Test
+    void failureDeleteVotingNotActive() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/3/voting/3"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
     void failureDeleteVotingNotFoundInBar() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/1/voting/2"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
@@ -181,6 +226,13 @@ class VotingControllerTests {
     void successFinishVoting() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/1/voting/3/finish"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "admin", roles = {"OWNER"})
+    @Test
+    void failureFinishVotingBarNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/voting/3/finish"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @WithMockUser(username = "admin2", roles = {"OWNER"})
