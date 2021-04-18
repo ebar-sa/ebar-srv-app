@@ -67,8 +67,8 @@ public class AuthController {
 
         return ResponseEntity.ok(new LoginResponse(jwt,
                 userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+                userDetails.getDni(),
+                userDetails.getEmail(), userDetails.getFirstName(), userDetails.getLastName(), roles));
     }
 
     @PostMapping("/signup")
@@ -117,19 +117,21 @@ public class AuthController {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Incorrect password"));
-        }
-
+        } 
+        
+        
         if(userData.getPassword()!=null) {
-            if (!userData.getPassword().equals(userData.getConfirmPassword())) {
-                return ResponseEntity
-                        .badRequest()
-                        .body(new MessageResponse("Passwords not match"));
-            }
-            user.setPassword(encoder.encode(userData.getPassword()));
+	        if (!userData.getPassword().equals(userData.getConfirmPassword())) {
+	            return ResponseEntity
+	                    .badRequest()
+	                    .body(new MessageResponse("Passwords not match"));
+	        } 
+	        user.setPassword(encoder.encode(userData.getPassword()));
         }
-
+        
+        
         user.setEmail(userData.getEmail());
-
+        
         try {
             userService.saveUser(user);
         } catch (DataIntegrityViolationException e) {
