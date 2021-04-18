@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -100,7 +101,7 @@ public class BarTableController {
  		Map<Integer, Object> res = new HashMap<>();
  		BarTable barTable = this.barTableService.findbyId(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		List<String> authorities = ud.getAuthorities().stream().map(x -> x.getAuthority()).collect(Collectors.toList());
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
 		if (!barTable.getBar().isSubscriptionActive()) {
 			if (barTable.getBar().getOwner().getUsername().equals(ud.getUsername())) {
@@ -147,9 +148,9 @@ public class BarTableController {
 		Bill bill = this.barTableService.getBillByTableId(id);
 		
 		if(bill != null) { 
-			return new ResponseEntity<Bill>(bill, HttpStatus.OK);
+			return new ResponseEntity<>(bill, HttpStatus.OK);
 		}else { 
-			return new ResponseEntity<Bill>(new Bill(), HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(new Bill(), HttpStatus.NO_CONTENT);
 		}
 	}
 	
@@ -161,7 +162,7 @@ public class BarTableController {
 	public ResponseEntity<BarTable> busyTable(@PathVariable("id") final Integer id) {
 		BarTable barTable = this.barTableService.findbyId(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		List<String> authorities = ud.getAuthorities().stream().map(x -> x.getAuthority()).collect(Collectors.toList());
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 		if (barTable != null) {
 			User user = barTableService.getClientByPrincipalUserName(ud.getUsername());
 			if (barTable.isFree() && authorities.contains("ROLE_CLIENT")) {
