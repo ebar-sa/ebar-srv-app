@@ -23,6 +23,7 @@ public class StripeService {
 
 	private static final String PRICE = "price";
 	private static final String BAR_ID = "bar_id";
+	private static final String CUSTOMER = "customer";
 
 
 	public String createCustomer(String email) {
@@ -42,7 +43,7 @@ public class StripeService {
 		try {
 			PaymentMethod method = PaymentMethod.retrieve(paymentMethod);
 			Map<String, Object> params = new HashMap<>();
-			params.put("customer", customerId);
+			params.put(CUSTOMER, customerId);
 			method.attach(params);
 			setDefaultCard(customerId, paymentMethod);
 			return true;
@@ -94,7 +95,7 @@ public class StripeService {
 		try {
 			Map<String, Object> paymentFilterParams = new HashMap<>();
 			paymentFilterParams.put("type", "card");
-			paymentFilterParams.put("customer", customerId);
+			paymentFilterParams.put(CUSTOMER, customerId);
 			PaymentMethodCollection methods = PaymentMethod.list(paymentFilterParams);
 			return methods.getData();
 		} catch (Exception e) {
@@ -111,7 +112,7 @@ public class StripeService {
 			Map<String, Object> metadata = new HashMap<>();
 			Map<String, Object> params = new HashMap<>();
 
-			params.put("customer", customerId);
+			params.put(CUSTOMER, customerId);
 			params.put(PRICE, priceId);
 			params.put("status", "all");
 
@@ -132,7 +133,7 @@ public class StripeService {
 				metadata.put(BAR_ID, bar.getId());
 				metadata.put("bar_name", bar.getName());
 
-				subscriptionParams.put("customer", customerId);
+				subscriptionParams.put(CUSTOMER, customerId);
 				subscriptionParams.put("items", Collections.singletonList(itemParams));
 				subscriptionParams.put("metadata", metadata);
 
@@ -148,7 +149,7 @@ public class StripeService {
 		Stripe.apiKey = apiSecretKey;
 		try {
 			Map<String, Object> params = new HashMap<>();
-			params.put("customer", customerId);
+			params.put(CUSTOMER, customerId);
 			params.put(PRICE, priceId);
 
 			SubscriptionCollection subscriptions = Subscription.list(params);
@@ -174,7 +175,7 @@ public class StripeService {
 			Map<String, Object> periodEnd = new HashMap<>();
 
 			periodEnd.put("gt", Instant.now().getEpochSecond()/1000);
-			params.put("customer", customerId);
+			params.put(CUSTOMER, customerId);
 			params.put(PRICE, priceId);
 			params.put("current_period_end", periodEnd);
 			params.put("status", "all");
