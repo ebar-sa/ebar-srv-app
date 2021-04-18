@@ -117,9 +117,18 @@ public class BarController {
 	public ResponseEntity<BarDTO> getBarById(@PathVariable("id") Integer id) {
 
 		Bar bar = barService.findBarById(id);
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+
 		if (bar != null) {
 			// Check if bar subscription is active otherwise return payment required response (HTTP 402)
-			if (!bar.isSubscriptionActive()) return new ResponseEntity<>(HttpStatus.PAYMENT_REQUIRED);
+			if (!bar.isSubscriptionActive()) {
+				if (bar.getOwner().getUsername().equals(username)) {
+					return new ResponseEntity<>(HttpStatus.PAYMENT_REQUIRED);
+				} else {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}
+			}
 
 			Integer freeTables = 0;
 			for(BarTable bt : bar.getBarTables()) {
