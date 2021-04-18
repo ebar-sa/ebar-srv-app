@@ -3,6 +3,7 @@ package com.ebarapp.ebar.integration;
 import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
 import com.ebarapp.ebar.configuration.security.payload.request.SignupRequest;
 import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.dtos.ProfileUpdateDTO;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.repository.UserRepository;
 import com.ebarapp.ebar.service.UserService;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,12 +24,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasToString;
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -41,14 +39,20 @@ class AuthControllerIntegrationTests {
 
     private static final String USERNAME = "pepediaz";
     private static final String USERNAME2 = "pepodiaz";
+    private static final String USERNAME3 = "pepokdiaz";
+    private static final String USERNAME4 = "peposdiaz";
     private static final String PASSWORD = "12345678";
     private static final String ENC_PASSWORD = "$2a$10$VcdzH8Q.o4KEo6df.XesdOmXdXQwT5ugNQvu1Pl0390rmfOeA1bhS";
     private static final String WRONGUSER = "pepedz";
     private static final String WRONGPASS = "wrongpass";
     private static final String EMAIL = "pepediaz@outlook.com";
     private static final String EMAIL2 = "pepodiaz@outlook.com";
+    private static final String EMAIL3 = "pepodiaz@gmail.com";
+    private static final String EMAIL4 = "pepodiaz@hotmail.com";
     private static final String DNI = "27485322W";
     private static final String DNI2 = "27485321W";
+    private static final String DNI3 = "27481221W";
+    private static final String DNI4 = "27488321W";
 
 
     @Autowired
@@ -126,7 +130,7 @@ class AuthControllerIntegrationTests {
     }
 
     @Test
-    void testRegisterUser() throws Exception {
+    void testRegisterClient() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         SignupRequest request = new SignupRequest();
         request.setUsername(USERNAME2);
@@ -136,6 +140,48 @@ class AuthControllerIntegrationTests {
         request.setLastName(this.user.getLastName());
         request.setPhoneNumber(this.user.getPhoneNumber());
         request.setRoles(this.roles.stream().map(RoleType::toString).collect(Collectors.toSet()));
+        request.setPassword(PASSWORD);
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+    }
+
+    @Test
+    void testRegisterEmployee() throws Exception {
+        Set<String> employeeRol = new HashSet<>();
+        employeeRol.add(RoleType.ROLE_EMPLOYEE.toString());
+        ObjectMapper objectMapper = new ObjectMapper();
+        SignupRequest request = new SignupRequest();
+        request.setUsername(USERNAME3);
+        request.setEmail(EMAIL3);
+        request.setDni(DNI3);
+        request.setFirstName(this.user.getFirstName());
+        request.setLastName(this.user.getLastName());
+        request.setPhoneNumber(this.user.getPhoneNumber());
+        request.setRoles(employeeRol);
+        request.setPassword(PASSWORD);
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+    }
+
+    @Test
+    void testRegisterOwner() throws Exception {
+        Set<String> ownerRol = new HashSet<>();
+        ownerRol.add(RoleType.ROLE_OWNER.toString());
+        ObjectMapper objectMapper = new ObjectMapper();
+        SignupRequest request = new SignupRequest();
+        request.setUsername(USERNAME4);
+        request.setEmail(EMAIL4);
+        request.setDni(DNI4);
+        request.setFirstName(this.user.getFirstName());
+        request.setLastName(this.user.getLastName());
+        request.setPhoneNumber(this.user.getPhoneNumber());
+        request.setRoles(ownerRol);
         request.setPassword(PASSWORD);
         String requestJson = objectMapper.writeValueAsString(request);
 
@@ -180,6 +226,69 @@ class AuthControllerIntegrationTests {
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Email is already in use!")));
+    }
+
+    @Test
+    void testEditUserEmailAndPassword() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProfileUpdateDTO request = new ProfileUpdateDTO();
+        request.setUsername(USERNAME);
+        request.setOldPassword(PASSWORD);
+        request.setPassword("testing");
+        request.setConfirmPassword("testing");
+        request.setEmail("testing@new.com");
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Data updated successfully!")));
+    }
+
+    @Test
+    void testEditUserWrongPassword() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProfileUpdateDTO request = new ProfileUpdateDTO();
+        request.setUsername(USERNAME);
+        request.setOldPassword(WRONGPASS);
+        request.setPassword("testing");
+        request.setConfirmPassword("testing");
+        request.setEmail("testing@new.com");
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Incorrect password")));
+    }
+
+    @Test
+    void testEditUserNotExists() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProfileUpdateDTO request = new ProfileUpdateDTO();
+        request.setUsername(USERNAME2);
+        request.setOldPassword(PASSWORD);
+        request.setPassword("testing");
+        request.setConfirmPassword("testing");
+        request.setEmail("testing@new.com");
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testEditUserPasswordsDoesntMatch() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProfileUpdateDTO request = new ProfileUpdateDTO();
+        request.setUsername(USERNAME);
+        request.setOldPassword(PASSWORD);
+        request.setPassword("testing");
+        request.setConfirmPassword("testin");
+        request.setEmail("testing@new.com");
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Passwords not match")));
     }
 
 }

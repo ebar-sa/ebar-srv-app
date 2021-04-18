@@ -44,7 +44,8 @@ public class User implements UserDetails {
 	@Column(name = "last_name")
 	protected String	lastName;
 
-	@Column(name = "dni", unique = true)
+    @Column(name = "dni", unique = true)
+    @Pattern(regexp = "^[0-9]{8}[A-Z]$", message = "Must be a valid dni")
 	protected String	dni;
 
 	@NotBlank
