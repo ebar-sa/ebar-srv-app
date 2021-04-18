@@ -3,7 +3,12 @@ package com.ebarapp.ebar.integration;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
+import com.ebarapp.ebar.model.Client;
+import com.ebarapp.ebar.model.ItemBill;
+import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.model.Menu;
+import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.repository.BarRepository;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
 import org.hamcrest.Matchers;
@@ -27,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.*;
 
-import static org.hamcrest.Matchers.hasSize;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -37,27 +41,55 @@ class BarTableControllerIntegrationTests {
 
 	private static final int TEST_TABLE_ID = 20;
 	private static final int TEST_TABLE2_ID = 21;
-	private static final int TEST_TABLE3_ID = 22;
-	private static final String TOKEN_TEST = "ihv-58k";
+	private static final String TOKEN_TEST_TABLE1 = "ihv-51k";
+	private static final String TOKEN_TEST_TABLE2 = "ihv-52f";
+	private static final String TOKEN_TEST_TABLE3 = "ihv-53f";
+	private static final String TOKEN_TEST_TABLE4 = "ihv-54f";
+	private static final String TOKEN_TEST_TABLE5 = "ihv-55f";
+	private static final String TOKEN_TEST_ERROR = "ihv-ERR";
+	private static final String TEST_USER = "user";
+	private static final String TEST_USER_ERROR="userError";
+	private static final int TEST_BAR_ID = 10;
 
 	@Autowired
 	private MockMvc mockMvc;
 
+
+	@MockBean
+	private BarRepository barRepository;
+	
 	@MockBean
 	private BarTableRepository barTableRepository;
 
 	private BarTable table;
 	private BarTable table2;
 	private BarTable table3;
+	private BarTable table4;
+	private BarTable table5;
 	private Bar bar;
+	private Bar bar2;
 
 	@BeforeEach
 	void setUp() {
-
+		ItemMenu im = new ItemMenu();
+		im.setId(1);
+		
+		User us = new User();
+		us.setUsername("user");
+		
 		Menu m = new Menu();
 		m.setId(1);
 		m.setItems(new HashSet<>());
-
+		
+		bar2 = new Bar();
+		bar2.setId(11);
+		bar2.setName("Pizza by Alfredo");
+		bar2.setDescription("Restaurant");
+		bar2.setContact("alfredo@gmail.com");
+		bar2.setLocation("Pennsylvania");
+		bar2.setBarTables(new HashSet<>());
+		bar2.setMenu(m);
+		
 		bar = new Bar();
 		bar.setId(10);
 		bar.setName("Pizza by Alfredo");
@@ -68,32 +100,67 @@ class BarTableControllerIntegrationTests {
 		bar.setMenu(m);
 
 		Bill b = new Bill();
+		Set<ItemBill> sib = new HashSet<>();
+		ItemBill ib = new ItemBill();
+		ib.setId(1);
+		ib.setAmount(2);
+		ib.setItemMenu(im);
+		sib.add(ib);
 		b.setId(1);
+		b.setItemBill(sib);
 
+		Client cl = new Client(); 
+		cl.setUsername("user");
+		
+		Client cl2 = new Client(); 
+		cl2.setUsername("user");
+		
 		table = new BarTable();
 		table.setId(20);
 		table.setBar(bar);
-		table.setToken("ihv-57f");
+		table.setToken("ihv-51k");
 		table.setName("mesa1");
 		table.setSeats(4);
 		table.setFree(true);
-
+		
 		table2 = new BarTable();
 		table2.setId(21);
 		table2.setBar(bar);
-		table2.setToken("ihv-58f");
+		table2.setToken("ihv-52k");
 		table2.setName("mesa2");
 		table2.setSeats(4);
 		table2.setFree(false);
 		table2.setBill(b);
-
+		table2.setClient(cl);
+		
 		table3 = new BarTable();
 		table3.setId(22);
-		table3.setToken("ihv-58k");
+		table3.setToken("ihv-53k");
 		table3.setName("mesa3");
 		table3.setSeats(4);
 		table3.setFree(true);
-
+		
+		
+		table4 = new BarTable();
+		table4.setId(23);
+		table4.setBar(bar);
+		table4.setToken("ihv-54k");
+		table4.setName("mesa2");
+		table4.setSeats(4);
+		table4.setFree(true);
+		table4.setBill(b);
+		
+		table5 = new BarTable();
+		table5.setId(24);
+		table5.setBar(bar);
+		table5.setToken("ihv-55k");
+		table5.setName("mesa2");
+		table5.setSeats(4);
+		table5.setFree(false);
+		table5.setBill(b);
+		table5.setClient(cl2);
+		
+		
 		List<BarTable> tableList = Collections.singletonList(table);
 
 		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
@@ -101,30 +168,52 @@ class BarTableControllerIntegrationTests {
 		bar.setBarTables(tablesForBar1);
 		
 		given(this.barTableRepository.findAll()).willReturn(tableList);
+		given(this.barRepository.getBarById(10)).willReturn(bar);
+		given(this.barRepository.findById(11)).willReturn(Optional.of(bar2));
 		given(this.barTableRepository.findById(20)).willReturn(Optional.of(table));
 		given(this.barTableRepository.findById(21)).willReturn(Optional.of(table2));
 		given(this.barTableRepository.findById(22)).willReturn(Optional.of(table3));
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
+		given(this.barTableRepository.findById(23)).willReturn(Optional.of(table4));
+		given(this.barTableRepository.findById(24)).willReturn(Optional.of(table5));
+		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE1)).willReturn(table);
+		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE2)).willReturn(table2);
+		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
+		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
+		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
+		given(this.barTableRepository.getBarTableByClientUsername("user")).willReturn(table2);
+		given(this.barTableRepository.getBarTableByClientUsername("userError")).willReturn(null);
+		
+		given(this.barTableRepository.getClientByPrincipalUserName("user")).willReturn(us);
+		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
+		given(this.barTableRepository.save(table)).willReturn(table);
 		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
 
-
-	}
-//
-	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
-	@Test
-	void testGetAllTables() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
 	}
 
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
 	void testGetTableById() throws Exception {
-		String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false},\"1\":{\"id\":1,\"items\":[],\"categories\":[],\"new\":false},\"2\":{\"id\":1,\"itemBill\":null,\"itemOrder\":null,\"new\":false}}";
+		String json = "{\"0\":{\"id\":21,\"name\":\"mesa2\",\"token\":\"ihv-58f\",\"free\":false,\"seats\":4,\"new\":false,\"client_username\":\"user\"},\"1\":{\"id\":1,\"items\":[],\"categories\":[],\"new\":false},\"2\":{\"id\":1,\"itemBill\":null,\"itemOrder\":null,\"new\":false}}";
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
 	}
 	
+
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testBarTableForClient() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableClient/" + TEST_USER)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testBarTableForClientError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableClient/" + TEST_USER_ERROR)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
+	}
+
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
 	void testBusyTable() throws Exception {
@@ -150,9 +239,56 @@ class BarTableControllerIntegrationTests {
 	@Test
 	void testOcupateBarTableByToken() throws Exception {
 		this.mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TEST_TABLE3_ID + "/" + TOKEN_TEST)
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE3)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
+	
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testOcupateBarTableByTokenDiferent() throws Exception {
+		this.mockMvc.perform(
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_ERROR)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().is4xxClientError());
+	}
+	
+	@WithMockUser(username = "user", roles = { "CLIENT" })
+	@Test
+	void testOcupateBarTableNotFreeByToken() throws Exception {
+		this.mockMvc.perform(
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/"  + TOKEN_TEST_TABLE5)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().is4xxClientError());
+	}
+
+	@WithMockUser(username="admin", roles={"OWNER"})
+	@Test
+	void testDeleteTable() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/tables/deleteTable/"+ TEST_BAR_ID + "/" + TEST_TABLE2_ID).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username="admin", roles={"OWNER"})
+	@Test
+	void testUpdateTable() throws Exception {
+		String json = "{\"name\":\"mesa4\",\"seats\":4}";
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/tables/updateTable/" + TEST_TABLE_ID).
+				contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+				.andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username="admin", roles={"OWNER"})
+	@Test
+	void testCreateTable() throws Exception {
+		String json = "{\"name\":\"mesa4\",\"seats\":4}";
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/tables/createTable/" + TEST_BAR_ID)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+				.andExpect(status().isCreated());
+	}
+	
 
 }
