@@ -70,15 +70,10 @@ public class BarController {
 		if (bar == null) {
 			return ResponseEntity.notFound().build();
 		}
-		try {
-			if (!bar.getOwner().getUsername().equals(username)) {
-				return ResponseEntity.badRequest().build();
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		if (!bar.getOwner().getUsername().equals(username)) {
+			return ResponseEntity.badRequest().build();
 		}
 		barService.removeBar(id);
-
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -97,9 +92,7 @@ public class BarController {
 					numeroMesasLibres += 1;
 				}
 			}
-
 			String capacity = numeroMesasLibres + "/" + b.getBarTables().size();
-
 			BarCapacity ba = new BarCapacity();
 
 			ba.setId(b.getId());
@@ -115,7 +108,6 @@ public class BarController {
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
 	public ResponseEntity<BarDTO> getBarById(@PathVariable("id") Integer id) {
-
 		Bar bar = barService.findBarById(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
@@ -129,14 +121,12 @@ public class BarController {
 					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				}
 			}
-
 			Integer freeTables = 0;
 			for(BarTable bt : bar.getBarTables()) {
 				if (bt.isFree()) {
 					freeTables += 1;
 				}
 			}
-
 			BarDTO barDTO = new BarDTO(bar.getId(), bar.getName(), bar.getDescription(), bar.getContact(),
 					bar.getLocation(), bar.getOpeningTime(), bar.getClosingTime(), bar.getImages(),
 					bar.getBarTables().size(), freeTables, bar.getOwner().getUsername(), bar.getEmployees());

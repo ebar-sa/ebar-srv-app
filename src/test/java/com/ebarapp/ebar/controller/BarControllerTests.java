@@ -46,6 +46,7 @@ class BarControllerTests {
 
     private static final int TEST_BAR_ID = 10;
     private static final int TEST_BAR2_ID = 11;
+    private static final int TEST_BAR3_ID = 12;
 
     private static final String TEST_USER_FIRST_NAME = "John";
     private static final String TEST_USER_LAST_NAME = "Doe";
@@ -156,8 +157,24 @@ class BarControllerTests {
         bar2.setEmployees(new HashSet<>());
         bar2.setOwner(owner);
 
+        Bar bar3 = new Bar();
+        bar3.setId(TEST_BAR3_ID);
+        bar3.setName("Pizza by Antonio");
+        bar3.setDescription("Restaurant");
+        bar3.setContact("paco@gmail.com");
+        bar3.setLocation("Pennsylvania");
+        bar3.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
+        bar3.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
+        bar3.setPaidUntil(Date.from(Instant.parse("2020-01-01T22:30:00.00Z")));
+        bar3.setBarTables(barTables);
+        bar3.setImages(images);
+        bar3.setVotings(new HashSet<>());
+        bar3.setEmployees(new HashSet<>());
+        bar3.setOwner(owner);
+
         given(this.barService.findBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barService.findBarById(TEST_BAR2_ID)).willReturn(bar2);
+        given(this.barService.findBarById(TEST_BAR3_ID)).willReturn(bar3);
         given(this.barService.findAllBar()).willReturn(allBares);
 
         given(this.userService.getUserByUsername("admin")).willReturn(Optional.of(user));
@@ -187,6 +204,13 @@ class BarControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureDeleteBarNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/3"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
     @WithMockUser(username="admin", roles={"OWNER"})
     @Test
     void failureDeleteBar() throws Exception {
@@ -204,10 +228,26 @@ class BarControllerTests {
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test
-    void testGetBarById() throws Exception {
+    void successGetBarById() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("name", hasToString(bar.getName())));
+    }
+
+    @WithMockUser(username="admin2", roles={"OWNER"})
+    @Test
+    void failureGetBarByIdPaymentRequired() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR3_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isPaymentRequired());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void failureGetBarByIdPaymentNotFound() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/" + TEST_BAR3_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
