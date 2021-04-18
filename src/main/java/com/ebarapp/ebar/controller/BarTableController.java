@@ -48,22 +48,35 @@ public class BarTableController {
 	private BarService barService;
 
 	@Autowired
-	private BillService billServie;
+	private BillService billService;
 	
 	@Autowired
 	private ClientService clientService;
 
 
 	@GetMapping("{id}")
-	@PreAuthorize("permitAll()")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
-		Set<BarTable> tables = this.barTableService.getBarTablesByBarId(barId);
+		Bar bar = barService.findBarById(barId);
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		if (!tables.isEmpty()) {
+		if (bar != null) {
+			Set<BarTable> tables = this.barTableService.getBarTablesByBarId(barId);
+
+			if (!bar.isSubscriptionActive()) {
+				if (bar.getOwner().getUsername().equals(ud.getUsername())) {
+					return new ResponseEntity<>(HttpStatus.PAYMENT_REQUIRED);
+				} else {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}
+			}
+
 			return new ResponseEntity<>(tables, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+
 
 	}
 	
@@ -88,6 +101,15 @@ public class BarTableController {
  		BarTable barTable = this.barTableService.findbyId(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(x -> x.getAuthority()).collect(Collectors.toList());
+
+		if (!barTable.getBar().isSubscriptionActive()) {
+			if (barTable.getBar().getOwner().getUsername().equals(ud.getUsername())) {
+				res.put(3, barTable.getBar().getId());
+				return new ResponseEntity<>(res, HttpStatus.PAYMENT_REQUIRED);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		}
 		
 		if (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE")) {
 			Menu menu = barTable.getBar().getMenu();
@@ -143,10 +165,10 @@ public class BarTableController {
 		if (barTable != null) {
 			User user = barTableService.getClientByPrincipalUserName(ud.getUsername());
 			if (barTable.isFree() && authorities.contains("ROLE_CLIENT")) {
-				Client cliente = new Client(user, barTable);
-				barTable.setClient(cliente);
+				Client client = new Client(user, barTable);
+				barTable.setClient(client);
 				barTable.setFree(false);
-				this.clientService.saveClient(cliente);
+				this.clientService.saveClient(client);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
 			} else if(barTable.isFree() && (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE"))){
@@ -167,8 +189,12 @@ public class BarTableController {
 		Map<Integer, Object> res = new HashMap<>();
 		BarTable barTable = this.barTableService.findbyId(id);
 		String token = BarTableService.generarToken();
+
+
 		if (barTable != null) {
+			Client client = barTable.getClient();
 			if (!barTable.isFree()) {
+				client.setTable(null);
 				barTable.setClient(null);
 				barTable.setFree(true);
 				barTable.setToken(token);
@@ -176,9 +202,10 @@ public class BarTableController {
 				if (b.getId() != null) {
 					b.setItemBill(new HashSet<>());
 					b.setItemOrder(new HashSet<>());
-					this.billServie.createBill(b);
+					this.billService.createBill(b);
 					barTable.setBill(b);
 				}
+				this.clientService.saveClient(client);
 				this.barTableService.saveTable(barTable);
 				res.put(0, barTable);
 				res.put(1, b);
@@ -200,9 +227,9 @@ public class BarTableController {
 		if (barTable != null) {
 			if (barTable.isFree()) {
 				User user = barTableService.getClientByPrincipalUserName(ud.getUsername());
-				Client cliente = new Client(user, barTable);
+				Client client = new Client(user, barTable);
 				this.clientService.modifyClientTable(barTable.getId(), ud.getUsername());
-				barTable.setClient(cliente);
+				barTable.setClient(client);
 				barTable.setFree(false);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
@@ -230,7 +257,7 @@ public class BarTableController {
         	newTable.setBar(bar);
         	bar.getBarTables().add(newTable);
         	Bill b = new Bill();
-        	billServie.createBill(b);
+        	billService.createBill(b);
         	newTable.setBill(b);
         	BarTable table = barTableService.saveTable(newTable);
         	barService.createBar(bar);

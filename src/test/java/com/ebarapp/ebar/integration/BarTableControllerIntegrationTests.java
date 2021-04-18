@@ -11,7 +11,7 @@ import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarRepository;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
-import org.hamcrest.Matchers;
+import com.ebarapp.ebar.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +29,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 
@@ -57,6 +58,9 @@ class BarTableControllerIntegrationTests {
 
 	@MockBean
 	private BarRepository barRepository;
+
+	@MockBean
+	private ClientRepository clientRepository;
 	
 	@MockBean
 	private BarTableRepository barTableRepository;
@@ -89,6 +93,7 @@ class BarTableControllerIntegrationTests {
 		bar2.setLocation("Pennsylvania");
 		bar2.setBarTables(new HashSet<>());
 		bar2.setMenu(m);
+		bar2.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 		
 		bar = new Bar();
 		bar.setId(10);
@@ -98,6 +103,7 @@ class BarTableControllerIntegrationTests {
 		bar.setLocation("Pennsylvania");
 		bar.setBarTables(new HashSet<>());
 		bar.setMenu(m);
+		bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
 
 		Bill b = new Bill();
 		Set<ItemBill> sib = new HashSet<>();
@@ -188,6 +194,8 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
 		given(this.barTableRepository.save(table)).willReturn(table);
 		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
+
+		given(this.clientRepository.save(cl)).willReturn(cl);
 
 	}
 
