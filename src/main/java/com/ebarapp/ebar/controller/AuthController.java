@@ -112,28 +112,24 @@ public class AuthController {
     @PostMapping("/updateProfile")
     public ResponseEntity<MessageResponse> editUser(@Valid @RequestBody ProfileUpdateDTO userData) {
     	User user = userService.getByUsername(userData.getUsername());
-        if (user == null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("User not exist"));
-        } 
 
         if (!encoder.matches(userData.getOldPassword(), user.getPassword())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Incorrect password"));
-        } 
-        
-        if (!userData.getPassword().equals(userData.getConfirmPassword())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Passwords not match"));
-        } 
+        }
 
+        if(userData.getPassword()!=null) {
+            if (!userData.getPassword().equals(userData.getConfirmPassword())) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Passwords not match"));
+            }
+            user.setPassword(encoder.encode(userData.getPassword()));
+        }
 
-        user.setPassword(encoder.encode(userData.getPassword()));
         user.setEmail(userData.getEmail());
-        
+
         try {
             userService.saveUser(user);
         } catch (DataIntegrityViolationException e) {
