@@ -39,11 +39,6 @@ public class ItemMenu extends BaseEntity {
 
 	@Column(name = "description")
 	private String		description;
-
-//	@NotNull
-//	@Enumerated(EnumType.STRING)
-//	@Column(name = "ration_type")
-//	private RationType	rationType;
 	
 	@NotNull
 	@Column(name = "ration_type")
@@ -53,10 +48,6 @@ public class ItemMenu extends BaseEntity {
 	@Column(name = "price")
 	private Double		price;
 
-//	@NotNull
-//	@ManyToOne
-//	private Category	category;
-	
 	@NotNull
 	@Column(name = "category")
 	private String category;

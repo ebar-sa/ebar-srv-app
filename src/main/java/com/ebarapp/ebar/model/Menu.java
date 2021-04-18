@@ -20,12 +20,6 @@ public class Menu extends BaseEntity {
 	
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<ItemMenu> items;
-
-//	public Set<Category> getCategories() {
-//		Set<Category> categories = new HashSet<>();
-//		items.forEach(x->categories.add(x.getCategory()));
-//		return categories;
-//	}
 	
 	public Set<String> getCategories() {
 		Set<String> categories = new HashSet<>();
