@@ -7,7 +7,6 @@ import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.model.Menu;
-import com.ebarapp.ebar.model.Option;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
@@ -17,21 +16,13 @@ import com.ebarapp.ebar.service.ItemBillService;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -45,9 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import java.util.TreeSet;
 
-import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,7 +50,6 @@ class BarTableControllerTest {
 
 	private static final int TEST_TABLE_ID = 20;
 	private static final int TEST_TABLE2_ID = 21;
-	private static final int TEST_TABLE3_ID = 22;
 	private static final int TEST_TABLE4_ID = 23;
 	private static final int TEST_TABLE5_ID = 24;
 	private static final int TEST_BAR_ID = 10;
@@ -306,13 +294,6 @@ class BarTableControllerTest {
 				.andExpect(status().is4xxClientError());
 	}
 
-//	@Disabled
-//	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
-//	@Test
-//	void testGetAllTables() throws Exception {
-//		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/").contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
-//	}
 	
 	@WithMockUser(username="admin", roles={"OWNER"})
 	@Test
@@ -329,12 +310,8 @@ class BarTableControllerTest {
 				contentType(MediaType.APPLICATION_JSON)
 				.content(json))
 				.andExpect(status().isOk());
-
-	void testGetAllTables() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
-
 	}
+	
 	
 	@WithMockUser(username="admin", roles={"OWNER"})
 	@Test

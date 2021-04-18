@@ -2,7 +2,6 @@ package com.ebarapp.ebar.service;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
-import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
@@ -50,9 +49,6 @@ public class BarTableService {
 		return this.barTableRepository.getBarTableByClientUsername(username);
 	}
 
-	public Set<BarTable> getBarTablesByBarId(final Integer id){
-		return this.barTableRepository.getBarTablesByBarId(id);
-	}
 	
 	public List<String> getAllValidTokensByBarId(Integer id) { 
 		return barTableRepository.getAllValidTokenByBarId(id); 

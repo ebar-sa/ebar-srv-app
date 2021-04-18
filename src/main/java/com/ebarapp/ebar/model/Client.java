@@ -36,8 +36,7 @@ public class Client extends User {
 	  public Client() {
 		  super();
 	  }	
-    public Client () {
-    }
+
     
     public Client (UserDataMapper userData) {
         super(userData.getUsername(), userData.getFirstName(), userData.getLastName(), userData.getDni(), userData.getEmail(), userData.getPhoneNumber(), userData.getPassword(), userData.getRoles());

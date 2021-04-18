@@ -10,11 +10,9 @@ import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarRepository;
 import com.ebarapp.ebar.repository.BarTableRepository;
-import com.ebarapp.ebar.service.BarService;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.*;
 
-import static org.hamcrest.Matchers.hasSize;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -190,18 +187,8 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
 		given(this.barTableRepository.save(table)).willReturn(table);
-
-	}
 		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
 
-
-	}
-//
-	@WithMockUser(username = "test", authorities = "ROLE_EMPLOYEE")
-	@Test
-	void testGetAllTables() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/10").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasToString("[{\"id\":20,\"name\":\"mesa1\",\"token\":\"ihv-57f\",\"free\":true,\"seats\":4,\"new\":false}]")));
 	}
 
 	@WithMockUser(username = "user", roles = { "CLIENT" })
