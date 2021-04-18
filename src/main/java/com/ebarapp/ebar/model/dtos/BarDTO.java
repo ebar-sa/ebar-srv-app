@@ -1,6 +1,8 @@
 package com.ebarapp.ebar.model.dtos;
 
 import com.ebarapp.ebar.model.DBImage;
+import com.ebarapp.ebar.model.Employee;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,13 +24,14 @@ public class BarDTO {
     private Integer tables;
     private Integer freeTables;
     private String owner;
+    private Set<Employee> employees;
 
     public BarDTO() {
         //Empty
     }
 
     public BarDTO(Integer id, String name, String description, String contact, String location, Date openingTime, Date closingTime, Set<DBImage> images,
-                  Integer tables, Integer freeTables, String ownerUsername) {
+                  Integer tables, Integer freeTables, String ownerUsername, Set<Employee> employees) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -40,5 +43,6 @@ public class BarDTO {
         this.tables = tables;
         this.freeTables = freeTables;
         this.owner = ownerUsername;
+        this.employees = employees;
     }
 }
