@@ -44,7 +44,8 @@ public class User implements UserDetails {
 	@Column(name = "last_name")
 	protected String	lastName;
 
-	@Column(name = "dni", unique = true)
+    @Column(name = "dni", unique = true)
+    @Pattern(regexp = "^[0-9]{8}[A-Z]$", message = "Must be a valid dni")
 	protected String	dni;
 
 	@NotBlank
@@ -58,16 +59,19 @@ public class User implements UserDetails {
 	
 	@NotBlank
 	protected String	password;
+
+	@Column(name = "stripe_id")
+	protected String	stripeId;
 	
 	@NotNull
 	@ElementCollection(targetClass=RoleType.class, fetch = FetchType.EAGER)
 	@Column(name = "role")
-	private Set<RoleType> roles;
+	protected Set<RoleType> roles;
 	
 	public User() {
 	}
 
-	public User(String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password) {
+	public User(String username, String firstName, String lastName, String dni, String email, String phoneNumber, String password, Set<RoleType> roles) {
 		this.username = username;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -75,6 +79,7 @@ public class User implements UserDetails {
 		this.email = email;
 		this.phoneNumber = phoneNumber;
 		this.password = password;
+		this.roles = roles;
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities(){

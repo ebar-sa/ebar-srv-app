@@ -10,20 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import javax.validation.ConstraintViolation;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
 
-public class VotingValidatorTest {
+class VotingValidatorTest {
 
-    @Autowired
     private Voting voting;
 
-    @Autowired
     private VotingValidator validator = new VotingValidator();
 
-    @Autowired
     private Errors errors;
 
     @BeforeEach
@@ -51,7 +46,7 @@ public class VotingValidatorTest {
 
         validator.validate(this.voting, this.errors);
 
-        Assertions.assertThat(errors.hasErrors()).isEqualTo(false);
+        Assertions.assertThat(errors.hasErrors()).isFalse();
     }
 
     //Closing hour
@@ -67,7 +62,7 @@ public class VotingValidatorTest {
 
         validator.validate(this.voting, this.errors);
 
-        Assertions.assertThat(errors.hasErrors()).isEqualTo(true);
+        Assertions.assertThat(errors.hasErrors()).isTrue();
     }
 
     //Opening Hour
@@ -83,7 +78,7 @@ public class VotingValidatorTest {
 
         validator.validate(this.voting, this.errors);
 
-        Assertions.assertThat(errors.hasErrors()).isEqualTo(true);
+        Assertions.assertThat(errors.hasErrors()).isTrue();
     }
 
     //Timer
@@ -96,7 +91,7 @@ public class VotingValidatorTest {
 
         validator.validate(this.voting, this.errors);
 
-        Assertions.assertThat(errors.hasErrors()).isEqualTo(true);
+        Assertions.assertThat(errors.hasErrors()).isTrue();
     }
 
     //Title and description
@@ -110,7 +105,7 @@ public class VotingValidatorTest {
 
         validator.validate(this.voting, this.errors);
 
-        Assertions.assertThat(errors.hasErrors()).isEqualTo(true);
+        Assertions.assertThat(errors.hasErrors()).isTrue();
     }
 
 }

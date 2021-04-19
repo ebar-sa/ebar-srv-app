@@ -2,6 +2,7 @@ package com.ebarapp.ebar.service;
 
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
+import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class BarTableService {
@@ -20,10 +22,38 @@ public class BarTableService {
 
 	@Autowired
 	private BarTableRepository barTableRepository;
-	
+
+	public BarTable createBarTable(BarTable newBarTable) { 
+		return barTableRepository.save(newBarTable); 
+	}
+
+	public void removeBarTable(Integer id) { barTableRepository.deleteById(id); }
+
 	public List<BarTable> findAllBarTable(){
 		return this.barTableRepository.findAll();
 	}
+	
+	public BarTable findBarTableByToken(String token) { 
+		return this.barTableRepository.findByToken(token);
+	}
+	
+	public void removeTable(Integer id) {
+        barTableRepository.deleteById(id);
+    }
+	
+	
+	public User getClientByPrincipalUserName(String userName) {
+		return this.barTableRepository.getClientByPrincipalUserName(userName);
+	}
+	public BarTable getBarTableByClientUsername(String username) {
+		return this.barTableRepository.getBarTableByClientUsername(username);
+	}
+
+	
+	public List<String> getAllValidTokensByBarId(Integer id) { 
+		return barTableRepository.getAllValidTokenByBarId(id); 
+	}
+
 
 	public BarTable findbyId(Integer id) {
 		Optional<BarTable> barTableOpt =  this.barTableRepository.findById(id);
@@ -34,7 +64,9 @@ public class BarTableService {
 		}
 	}
 	
-	
+	public Set<BarTable> getBarTablesByBarId(final Integer id){
+		return this.barTableRepository.getBarTablesByBarId(id);
+	}
 
 	public static String generateNewToken() {
 	    byte[] randomBytes = new byte[4];

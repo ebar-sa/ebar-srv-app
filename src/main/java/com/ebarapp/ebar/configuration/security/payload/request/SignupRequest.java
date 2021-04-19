@@ -35,6 +35,7 @@ public class SignupRequest {
     @NotBlank
     private String lastName;
 
+    @Pattern(regexp = "^$|^[0-9]{8}[A-Z]$", message = "Must be a valid dni")
     private String dni;
 
     @Pattern(regexp = "^[+]*[(]?[0-9]{1,4}[)]?[-\\s\\./0-9]*$", message = "Must be a valid phone number")

@@ -7,13 +7,21 @@ public class LoginResponse {
 	private String token;
 	private String type = "Bearer";
 	private String username;
+	private String dni;
 	private String email;
+	private String firstName;
+	private String lastName;
 	private List<String> roles;
-
-	public LoginResponse(String accessToken, String username, String email, List<String> roles) {
-		this.token = accessToken;
+	
+	public LoginResponse(String token, String username, String dni, String email, String firstName,
+			String lastName, List<String> roles) {
+		super();
+		this.token = token;
 		this.username = username;
+		this.dni = dni;
 		this.email = email;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.roles = roles;
 	}
 
@@ -51,5 +59,29 @@ public class LoginResponse {
 
 	public List<String> getRoles() {
 		return roles;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getDni() {
+		return dni;
+	}
+
+	public void setDni(String dni) {
+		this.dni = dni;
 	}
 }
