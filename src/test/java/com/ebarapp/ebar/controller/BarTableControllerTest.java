@@ -7,7 +7,9 @@ import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.model.Menu;
+import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.model.User;
+import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
@@ -87,6 +89,19 @@ class BarTableControllerTest {
 		ItemMenu im = new ItemMenu();
 		im.setId(1);
 		
+		Owner owner = new Owner();
+		owner.setUsername("admin");
+		owner.setFirstName("Pepe");
+		owner.setLastName("Diaz");
+		owner.setEmail("example@mail.com");
+		owner.setDni("34235645X");
+		owner.setPhoneNumber("654321678");
+		owner.setPassword("password");
+		Set<RoleType> rol = new HashSet<>();
+		rol.add(RoleType.ROLE_OWNER);
+		owner.setRoles(rol);
+		
+		
 		User us = new User();
 		us.setUsername("user");
 
@@ -108,6 +123,7 @@ class BarTableControllerTest {
 		bar.setLocation("Pennsylvania");
 		bar.setMenu(m);
 		bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
+		bar.setOwner(owner);
 		
 		Bill b = new Bill();
 		Set<ItemBill> sib = new HashSet<>();
@@ -206,6 +222,14 @@ class BarTableControllerTest {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE2_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
+	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testGetAllTablesAdmin() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/" + TEST_BAR_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+
 	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test

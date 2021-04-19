@@ -1,11 +1,14 @@
+
 package com.ebarapp.ebar.controller;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,7 @@ import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BarTable;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.Client;
+import com.ebarapp.ebar.model.Employee;
 import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.User;
@@ -36,6 +40,7 @@ import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
 import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ClientService;
+import com.ebarapp.ebar.service.EmployeeService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -43,25 +48,39 @@ import com.ebarapp.ebar.service.ClientService;
 public class BarTableController {
 
 	@Autowired
-	private BarTableService barTableService;
-	
-	@Autowired
-	private BarService barService;
+	private BarTableService	barTableService;
 
 	@Autowired
-	private BillService billService;
-	
+	private BarService		barService;
+
 	@Autowired
-	private ClientService clientService;
+	private BillService		billService;
+
+	@Autowired
+	private ClientService	clientService;
+
+	@Autowired
+	private EmployeeService	employeeService;
 
 
 	@GetMapping("{id}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
-		Bar bar = barService.findBarById(barId);
+		Bar bar = this.barService.findBarById(barId);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		if (bar != null) {
+		Optional<Employee> e = this.employeeService.findbyUsername(ud.getUsername());
+		Employee employee;
+		if (e.isPresent()) {
+			employee = e.get();
+		} else {
+			employee = null;
+		}
+		Boolean isTheOwner = bar.getOwner().getUsername().equals(ud.getUsername());
+		Boolean areEmployees = false;
+		if (employee != null) {
+			areEmployees = bar.getEmployees().contains(employee);
+		}
+		if (isTheOwner || areEmployees) {
 			Set<BarTable> tables = this.barTableService.getBarTablesByBarId(barId);
 
 			if (!bar.isSubscriptionActive()) {
@@ -74,13 +93,9 @@ public class BarTableController {
 
 			return new ResponseEntity<>(tables, HttpStatus.OK);
 		}
-
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-
-
 	}
-	
 
 	@GetMapping("tableClient/{username}")
 	@PreAuthorize("permitAll()")
@@ -98,8 +113,8 @@ public class BarTableController {
 	@GetMapping("/tableDetails/{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Map<Integer, Object>> getTableDetails(@PathVariable("id") final Integer id) {
- 		Map<Integer, Object> res = new HashMap<>();
- 		BarTable barTable = this.barTableService.findbyId(id);
+		Map<Integer, Object> res = new HashMap<>();
+		BarTable barTable = this.barTableService.findbyId(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
@@ -111,52 +126,65 @@ public class BarTableController {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 		}
-		
+
 		if (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE")) {
-			Menu menu = barTable.getBar().getMenu();
-			Bill bill = this.barTableService.getBillByTableId(id);
-			res.put(0, barTable);
-			res.put(1, menu);
-			res.put(2, bill);
-			return new ResponseEntity<>(res, HttpStatus.OK);
-		} else if(!barTable.isFree()) {
-			String nameLogged = ud.getUsername();
-			String nameClient = barTable.getClient().getUsername();
-			if(nameClient.equals(nameLogged)) {
+			Optional<Employee> e = this.employeeService.findbyUsername(ud.getUsername());
+			Employee employee;
+			if (e.isPresent()) {
+				employee = e.get();
+			} else {
+				employee = null;
+			}
+			Boolean isTheOwner = barTable.getBar().getOwner().getUsername().equals(ud.getUsername());
+			Boolean areEmployees = false;
+			if (employee != null) {
+				areEmployees = barTable.getBar().getEmployees().contains(employee);
+			}
+			if (isTheOwner || areEmployees) {
 				Menu menu = barTable.getBar().getMenu();
 				Bill bill = this.barTableService.getBillByTableId(id);
 				res.put(0, barTable);
 				res.put(1, menu);
 				res.put(2, bill);
 				return new ResponseEntity<>(res, HttpStatus.OK);
-			}else {
-				res.put(0, "Esta mesa esta reservada por otro Cliente.");
-				return new ResponseEntity<>(res,HttpStatus.CONFLICT);	
+			} else {
+				return new ResponseEntity<>(HttpStatus.CONFLICT);
 			}
-			
-		}else if(barTable.isFree() && authorities.contains("ROLE_CLIENT")) {
+		} else if (!barTable.isFree()) {
+			String nameLogged = ud.getUsername();
+			String nameClient = barTable.getClient().getUsername();
+			if (nameClient.equals(nameLogged)) {
+				Menu menu = barTable.getBar().getMenu();
+				Bill bill = this.barTableService.getBillByTableId(id);
+				res.put(0, barTable);
+				res.put(1, menu);
+				res.put(2, bill);
+				return new ResponseEntity<>(res, HttpStatus.OK);
+			} else {
+				res.put(0, "Esta mesa esta reservada por otro Cliente.");
+				return new ResponseEntity<>(res, HttpStatus.CONFLICT);
+			}
+
+		} else if (barTable.isFree() && authorities.contains("ROLE_CLIENT")) {
 			res.put(0, "No tienes acceso a esta mesa");
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);	
-		}else { 
-			return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);	
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@GetMapping("/tableBillRefresh/{id}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Bill> refreshBillAndOrder(@PathVariable("id") final Integer id) {
 		Bill bill = this.barTableService.getBillByTableId(id);
-		
-		if(bill != null) { 
+
+		if (bill != null) {
 			return new ResponseEntity<>(bill, HttpStatus.OK);
-		}else { 
+		} else {
 			return new ResponseEntity<>(new Bill(), HttpStatus.NO_CONTENT);
 		}
 	}
-	
-	
-	
-	
+
 	@GetMapping("/busyTable/{id}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<BarTable> busyTable(@PathVariable("id") final Integer id) {
@@ -164,7 +192,7 @@ public class BarTableController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 		if (barTable != null) {
-			User user = barTableService.getClientByPrincipalUserName(ud.getUsername());
+			User user = this.barTableService.getClientByPrincipalUserName(ud.getUsername());
 			if (barTable.isFree() && authorities.contains("ROLE_CLIENT")) {
 				Client client = new Client(user, barTable);
 				barTable.setClient(client);
@@ -172,11 +200,11 @@ public class BarTableController {
 				this.clientService.saveClient(client);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
-			} else if(barTable.isFree() && (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE"))){
+			} else if (barTable.isFree() && (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE"))) {
 				barTable.setFree(false);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
-			}else { 
+			} else {
 				return new ResponseEntity<>(HttpStatus.CONFLICT);
 			}
 		} else {
@@ -190,7 +218,6 @@ public class BarTableController {
 		Map<Integer, Object> res = new HashMap<>();
 		BarTable barTable = this.barTableService.findbyId(id);
 		String token = BarTableService.generarToken();
-
 
 		if (barTable != null) {
 			Client client = barTable.getClient();
@@ -224,12 +251,12 @@ public class BarTableController {
 
 	@GetMapping("/autoOccupateTable/{token}")
 	@PreAuthorize("hasRole('CLIENT')")
-	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("token") String token) {
+	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("token") final String token) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		BarTable barTable = this.barTableService.findBarTableByToken(token);
 		if (barTable != null) {
 			if (barTable.isFree()) {
-				User user = barTableService.getClientByPrincipalUserName(ud.getUsername());
+				User user = this.barTableService.getClientByPrincipalUserName(ud.getUsername());
 				Client client = new Client(user, barTable);
 				this.clientService.modifyClientTable(barTable.getId(), ud.getUsername());
 				barTable.setClient(client);
@@ -243,66 +270,62 @@ public class BarTableController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@PostMapping("/createTable/{barId}")
-    @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-    public ResponseEntity<BarTable> createTable(@PathVariable("barId") Integer barId, @Valid @RequestBody BarTableDTO barTableDTO) {
-        Bar bar = barService.findBarById(barId);
-        if (bar == null) {
-            return ResponseEntity.notFound().build();
-        }
-         else {
-        	BarTable newTable = new BarTable(barTableDTO);
-        	String token = BarTableService.generarToken();
-        	newTable.setToken(token);
-        	newTable.setBar(bar);
-        	newTable.setFree(true);
-        	newTable.setBar(bar);
-        	bar.getBarTables().add(newTable);
-        	Bill b = new Bill();
-        	billService.createBill(b);
-        	newTable.setBill(b);
-        	BarTable table = barTableService.saveTable(newTable);
-        	barService.createBar(bar);
-            return new ResponseEntity<>(table, HttpStatus.CREATED);
-        }
-    }
-	
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<BarTable> createTable(@PathVariable("barId") final Integer barId, @Valid @RequestBody final BarTableDTO barTableDTO) {
+		Bar bar = this.barService.findBarById(barId);
+		if (bar == null) {
+			return ResponseEntity.notFound().build();
+		} else {
+			BarTable newTable = new BarTable(barTableDTO);
+			String token = BarTableService.generarToken();
+			newTable.setToken(token);
+			newTable.setBar(bar);
+			newTable.setFree(true);
+			newTable.setBar(bar);
+			bar.getBarTables().add(newTable);
+			Bill b = new Bill();
+			this.billService.createBill(b);
+			newTable.setBill(b);
+			BarTable table = this.barTableService.saveTable(newTable);
+			this.barService.createBar(bar);
+			return new ResponseEntity<>(table, HttpStatus.CREATED);
+		}
+	}
+
 	@DeleteMapping("/deleteTable/{barId}/{tableId}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<List<BarTable>> deleteTable(@PathVariable("barId") final Integer barId, @PathVariable("tableId") final Integer tableId) {
-        Bar bar = this.barService.findBarById(barId);
-		BarTable table = barTableService.findbyId(tableId);
+		Bar bar = this.barService.findBarById(barId);
+		BarTable table = this.barTableService.findbyId(tableId);
 		Set<ItemBill> ib = table.getBill().getItemBill();
 		Bill b = table.getBill();
-        b.getItemBill().removeAll(ib);
-        if (tableId == null) {
-            return ResponseEntity.notFound().build();
-        }
-         else {
-        	bar.getBarTables().remove(table);
-          	barService.createBar(bar);
-        	barTableService.removeTable(tableId);
-    		List<BarTable> tables = this.barTableService.findAllBarTable();
-            return new ResponseEntity<>(tables, HttpStatus.OK);
-        }
-    }
-	
+		b.getItemBill().removeAll(ib);
+		if (tableId == null) {
+			return ResponseEntity.notFound().build();
+		} else {
+			bar.getBarTables().remove(table);
+			this.barService.createBar(bar);
+			this.barTableService.removeTable(tableId);
+			List<BarTable> tables = this.barTableService.findAllBarTable();
+			return new ResponseEntity<>(tables, HttpStatus.OK);
+		}
+	}
+
 	@PostMapping("/updateTable/{tableId}")
-    @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<BarTable> updateTable(@PathVariable("tableId") Integer tableId, @Valid @RequestBody BarTableDTO barTableDTO) {
-        if (tableId == null) {
-            return ResponseEntity.notFound().build();
-        }
-         else {
-        	BarTable table = barTableService.findbyId(tableId);
-        	table.setName(barTableDTO.getName());
-        	table.setSeats(barTableDTO.getSeats());
-            Bar bar = table.getBar();
-        	barService.createBar(bar);
-            return new ResponseEntity<>(table, HttpStatus.OK);
-        }
-    }
-		
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<BarTable> updateTable(@PathVariable("tableId") final Integer tableId, @Valid @RequestBody final BarTableDTO barTableDTO) {
+		if (tableId == null) {
+			return ResponseEntity.notFound().build();
+		} else {
+			BarTable table = this.barTableService.findbyId(tableId);
+			table.setName(barTableDTO.getName());
+			table.setSeats(barTableDTO.getSeats());
+			Bar bar = table.getBar();
+			this.barService.createBar(bar);
+			return new ResponseEntity<>(table, HttpStatus.OK);
+		}
+	}
 
 }
