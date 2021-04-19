@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,14 +52,19 @@ public class EmployeeController {
 	private UserService		userService;
 
 
-	// Falta validar que el owner este mirando el empleado de su bar y no de otro
 	@GetMapping("/{idBar}/employees")
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Set<Employee>> getAllEmployeesByBar(@PathVariable("idBar") final Integer idBar) {
 		Bar bar = this.barService.findBarById(idBar);
 		if (bar != null) {
-			Set<Employee> empleados = bar.getEmployees();
-			return ResponseEntity.ok(empleados);
+			UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			String username = ud.getUsername();
+			if (bar.getOwner().getUsername().equals(username)) {
+				Set<Employee> empleados = bar.getEmployees();
+				return ResponseEntity.ok(empleados);
+			} else {
+				return ResponseEntity.notFound().build();
+			}
 		} else {
 			return ResponseEntity.notFound().build();
 		}
@@ -70,8 +77,10 @@ public class EmployeeController {
 		Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
 		Bar bar = this.barService.findBarById(idBar);
 		if (empOpt.isPresent() && bar != null) {
+			UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			String username = ud.getUsername();
 			Employee emp = empOpt.get();
-			if (bar.getEmployees().contains(emp)) {
+			if (bar.getEmployees().contains(emp) && bar.getOwner().getUsername().equals(username)) {
 				return ResponseEntity.ok(emp);
 			} else {
 				return ResponseEntity.notFound().build();
@@ -94,30 +103,41 @@ public class EmployeeController {
 
 		Bar bar = this.barService.findBarById(idBar);
 		if (bar != null) {
-			Employee emp = new Employee();
-			emp.setUsername(signUpRequest.getUsername());
-			emp.setFirstName(signUpRequest.getFirstName());
-			emp.setLastName(signUpRequest.getLastName());
-			emp.setDni(signUpRequest.getDni());
-			emp.setEmail(signUpRequest.getEmail());
-			emp.setPhoneNumber(signUpRequest.getPhoneNumber());
-			emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
-			emp.setBar(bar);
-			Set<String> strRoles = signUpRequest.getRoles();
-			Set<RoleType> roles = new HashSet<>();
-			strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-			emp.setRoles(roles);
-			this.employeeService.saveEmployee(emp);
-			Set<Employee> semp = new HashSet<>();
-			if (bar.getEmployees() != null) {
-				semp = bar.getEmployees();
+			UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			String username = ud.getUsername();
+			if (bar.getOwner().getUsername().equals(username)) {
+				Employee emp = new Employee();
+				emp.setUsername(signUpRequest.getUsername());
+				emp.setFirstName(signUpRequest.getFirstName());
+				emp.setLastName(signUpRequest.getLastName());
+				emp.setDni(signUpRequest.getDni());
+				emp.setEmail(signUpRequest.getEmail());
+				emp.setPhoneNumber(signUpRequest.getPhoneNumber());
+				emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
+				emp.setBar(bar);
+				Set<String> strRoles = signUpRequest.getRoles();
+				Set<RoleType> roles = new HashSet<>();
+				strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
+				emp.setRoles(roles);
+				try {
+					this.employeeService.saveEmployee(emp);
+					Set<Employee> semp = new HashSet<>();
+					if (bar.getEmployees() != null) {
+						semp = bar.getEmployees();
+					}
+					semp.add(emp);
+					bar.setEmployees(semp);
+					this.barService.save(bar);
+				} catch (Exception e) {
+					return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+				}
+
+				return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
+			} else {
+				return ResponseEntity.badRequest().body(new MessageResponse("No eres el dueño de este bar"));
 			}
-			semp.add(emp);
-			bar.setEmployees(semp);
-			this.barService.save(bar);
-			return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
 		} else {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.badRequest().body(new MessageResponse("El bar no existe"));
 		}
 
 	}
@@ -128,8 +148,10 @@ public class EmployeeController {
 
 		Bar bar = this.barService.findBarById(idBar);
 		if (bar != null) {
+			UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			String username = ud.getUsername();
 			Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
-			if (empOpt.isPresent()) {
+			if (empOpt.isPresent() && bar.getOwner().getUsername().equals(username)) {
 				Employee emp = empOpt.get();
 				emp.setUsername(updateRequest.getUsername());
 				emp.setFirstName(updateRequest.getFirstName());
@@ -142,22 +164,26 @@ public class EmployeeController {
 				Set<RoleType> roles = new HashSet<>();
 				strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
 				emp.setRoles(roles);
-				this.employeeService.saveEmployee(emp);
-				Set<Employee> semp = new HashSet<>();
-				if (bar.getEmployees() != null) {
-					semp = bar.getEmployees();
+				try {
+					this.employeeService.saveEmployee(emp);
+					Set<Employee> semp = new HashSet<>();
+					if (bar.getEmployees() != null) {
+						semp = bar.getEmployees();
+					}
+					semp.add(emp);
+					bar.setEmployees(semp);
+					this.barService.save(bar);
+				} catch (Exception e) {
+					return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
 				}
-				semp.add(emp);
-				bar.setEmployees(semp);
-				this.barService.save(bar);
-				return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
+
+				return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
 			} else {
-				return ResponseEntity.notFound().build();
+				return ResponseEntity.badRequest().body(new MessageResponse("No eres el dueño de este bar"));
 			}
 		} else {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.badRequest().body(new MessageResponse("El bar no existe"));
 		}
-
 	}
 
 	@DeleteMapping("/{idBar}/employees/delete/{user}")
@@ -167,7 +193,9 @@ public class EmployeeController {
 		Bar bar = this.barService.findBarById(idBar);
 		if (empOpt.isPresent() && bar != null) {
 			Employee emp = empOpt.get();
-			if (bar.getEmployees().contains(emp)) {
+			UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			String username = ud.getUsername();
+			if (bar.getEmployees().contains(emp) && bar.getOwner().getUsername().equals(username)) {
 				Set<Employee> employees = bar.getEmployees();
 				employees.remove(emp);
 				bar.setEmployees(employees);
