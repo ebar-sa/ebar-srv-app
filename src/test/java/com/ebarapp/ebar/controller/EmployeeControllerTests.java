@@ -208,7 +208,7 @@ class EmployeeControllerTests {
 		String json = "{ \"username\": \"pepediaz2\",\r\n" + "    \"password\": \"123456\",\r\n" + "    \"firstName\":\"nombre\",\r\n" + "    \"lastName\":\"apellido\",\r\n" + "    \"email\": \"employee12@email.es\",\r\n"
 			+ "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
 
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/employees/create").contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(MockMvcResultMatchers.status().isNotFound());
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/2/employees/create").contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	@WithMockUser(username = "pepediaz", roles = {
@@ -230,7 +230,7 @@ class EmployeeControllerTests {
 		String json = "{ \"username\": \"pepediaz\",\r\n" + "    \"password\": \"123456\",\r\n" + "    \"firstName\":\"Pablo\",\r\n" + "    \"lastName\":\"Reneses\",\r\n" + "    \"email\": \"employee@12email.es\",\r\n"
 			+ "    \"roles\": [\"ROLE_EMPLOYEE\"]}";
 
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/99/employees/update/employeeTest1").contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(MockMvcResultMatchers.status().isNotFound());
+		this.mockMvc.perform(MockMvcRequestBuilders.put("/api/bar/99/employees/update/employeeTest1").contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	@WithMockUser(username = "pepediaz", roles = {

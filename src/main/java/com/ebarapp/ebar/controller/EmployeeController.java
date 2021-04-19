@@ -119,20 +119,25 @@ public class EmployeeController {
 				Set<RoleType> roles = new HashSet<>();
 				strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
 				emp.setRoles(roles);
-				this.employeeService.saveEmployee(emp);
-				Set<Employee> semp = new HashSet<>();
-				if (bar.getEmployees() != null) {
-					semp = bar.getEmployees();
+				try {
+					this.employeeService.saveEmployee(emp);
+					Set<Employee> semp = new HashSet<>();
+					if (bar.getEmployees() != null) {
+						semp = bar.getEmployees();
+					}
+					semp.add(emp);
+					bar.setEmployees(semp);
+					this.barService.save(bar);
+				} catch (Exception e) {
+					return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
 				}
-				semp.add(emp);
-				bar.setEmployees(semp);
-				this.barService.save(bar);
+
 				return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
 			} else {
-				return ResponseEntity.notFound().build();
+				return ResponseEntity.badRequest().body(new MessageResponse("No eres el dueño de este bar"));
 			}
 		} else {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.badRequest().body(new MessageResponse("El bar no existe"));
 		}
 
 	}
@@ -159,22 +164,26 @@ public class EmployeeController {
 				Set<RoleType> roles = new HashSet<>();
 				strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
 				emp.setRoles(roles);
-				this.employeeService.saveEmployee(emp);
-				Set<Employee> semp = new HashSet<>();
-				if (bar.getEmployees() != null) {
-					semp = bar.getEmployees();
+				try {
+					this.employeeService.saveEmployee(emp);
+					Set<Employee> semp = new HashSet<>();
+					if (bar.getEmployees() != null) {
+						semp = bar.getEmployees();
+					}
+					semp.add(emp);
+					bar.setEmployees(semp);
+					this.barService.save(bar);
+				} catch (Exception e) {
+					return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
 				}
-				semp.add(emp);
-				bar.setEmployees(semp);
-				this.barService.save(bar);
-				return ResponseEntity.ok(new MessageResponse("Employee updated successfully!"));
+
+				return ResponseEntity.ok(new MessageResponse("Employee registered successfully!"));
 			} else {
-				return ResponseEntity.notFound().build();
+				return ResponseEntity.badRequest().body(new MessageResponse("No eres el dueño de este bar"));
 			}
 		} else {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.badRequest().body(new MessageResponse("El bar no existe"));
 		}
-
 	}
 
 	@DeleteMapping("/{idBar}/employees/delete/{user}")
