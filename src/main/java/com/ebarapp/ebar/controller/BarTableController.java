@@ -195,7 +195,10 @@ public class BarTableController {
 		if (barTable != null) {
 			Client client = barTable.getClient();
 			if (!barTable.isFree()) {
-				client.setTable(null);
+				if (client != null) {
+					client.setTable(null);
+					this.clientService.saveClient(client);
+				}
 				barTable.setClient(null);
 				barTable.setFree(true);
 				barTable.setToken(token);
@@ -206,7 +209,6 @@ public class BarTableController {
 					this.billService.createBill(b);
 					barTable.setBill(b);
 				}
-				this.clientService.saveClient(client);
 				this.barTableService.saveTable(barTable);
 				res.put(0, barTable);
 				res.put(1, b);
