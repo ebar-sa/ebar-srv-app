@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -72,19 +71,23 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userService.existsUserByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Username is already taken!"));
-        } else if (userService.existsUserByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Email is already in use!"));
-        }
-
         String dni = signUpRequest.getDni();
         if (dni != null && dni.equals("")) {
             dni = null;
+        }
+
+        if (userService.existsUserByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Nombre de usuario en uso. Por favor, elija otro."));
+        } else if (userService.existsUserByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Correo electrónico en uso. Por favor, introduzca otro."));
+        } else if (userService.existsUserByDni(dni)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("DNI en uso. Por favor, introduzca otro."));
         }
 
         UserDataMapper userData = new UserDataMapper(signUpRequest.getUsername(),
@@ -97,58 +100,56 @@ public class AuthController {
                 signUpRequest.getRoles().stream().map(RoleType::valueOf).collect(Collectors.toSet()));
 
         User userWithRole = generateUserWithRole(userData);
-        
+
         try {
             userService.saveUser(userWithRole);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse(e.getMessage()));
+                    .body(new MessageResponse("Se ha producido un error. Por favor, inténtelo de nuevo más tarde."));
         }
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("¡Usuario registrado correctamente!"));
     }
 
     @PostMapping("/updateProfile")
     public ResponseEntity<MessageResponse> editUser(@Valid @RequestBody ProfileUpdateDTO userData) {
-    	User user = userService.getByUsername(userData.getUsername());
+        User user = userService.getByUsername(userData.getUsername());
 
         if (!encoder.matches(userData.getOldPassword(), user.getPassword())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Incorrect password"));
-        } 
-        
-        
-        if(userData.getPassword()!=null) {
-	        if (!userData.getPassword().equals(userData.getConfirmPassword())) {
-	            return ResponseEntity
-	                    .badRequest()
-	                    .body(new MessageResponse("Passwords not match"));
-	        } 
-	        user.setPassword(encoder.encode(userData.getPassword()));
+                    .body(new MessageResponse("Contraseña incorrecta"));
         }
-        
-        
+
+        if (userData.getPassword() != null) {
+            if (!userData.getPassword().equals(userData.getConfirmPassword())) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Las contraseñas no coinciden"));
+            }
+            user.setPassword(encoder.encode(userData.getPassword()));
+        }
+
         user.setEmail(userData.getEmail());
-        
+
         try {
             userService.saveUser(user);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse(e.getMessage()));
+                    .body(new MessageResponse("Se ha producido un error. Por favor, inténtelo de nuevo más tarde."));
         }
-        return ResponseEntity.ok(new MessageResponse("Data updated successfully!"));
+        return ResponseEntity.ok(new MessageResponse("¡Datos actualizados correctamente!"));
     }
-    
-	private User generateUserWithRole(UserDataMapper userData) {
-		if (userData.getRoles().contains(RoleType.ROLE_OWNER)) {
-			return new Owner(userData);
-		} else if (userData.getRoles().contains(RoleType.ROLE_EMPLOYEE)) {
-			return new Employee(userData);
-		} else if (userData.getRoles().contains(RoleType.ROLE_CLIENT)) {
-			return new Client(userData);
-		}
-		return null;
-	}
+
+    private User generateUserWithRole(UserDataMapper userData) {
+        if (userData.getRoles().contains(RoleType.ROLE_OWNER)) {
+            return new Owner(userData);
+        } else if (userData.getRoles().contains(RoleType.ROLE_EMPLOYEE)) {
+            return new Employee(userData);
+        } else if (userData.getRoles().contains(RoleType.ROLE_CLIENT)) {
+            return new Client(userData);
+        }
+        return null;
+    }
 }
