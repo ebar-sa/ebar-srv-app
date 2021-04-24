@@ -46,7 +46,8 @@ public class BarTableService {
 		return this.barTableRepository.getClientByPrincipalUserName(userName);
 	}
 	public BarTable getBarTableByClientUsername(String username) {
-		return this.barTableRepository.getBarTableByClientUsername(username);
+		//return this.barTableRepository.getBarTableByClientUsername(username);
+		return null;
 	}
 
 	
