@@ -16,7 +16,6 @@ import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.ItemBillService;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,12 +50,14 @@ class BarTableControllerTest {
 	private static final int TEST_TABLE2_ID = 21;
 	private static final int TEST_TABLE4_ID = 23;
 	private static final int TEST_TABLE5_ID = 24;
+	private static final int TEST_TABLE6_ID = 25;
 	private static final int TEST_BAR_ID = 10;
 	private static final String TOKEN_TEST_TABLE1 = "ihv-51k";
 	private static final String TOKEN_TEST_TABLE2 = "ihv-52f";
 	private static final String TOKEN_TEST_TABLE3 = "ihv-53f";
 	private static final String TOKEN_TEST_TABLE4 = "ihv-54f";
 	private static final String TOKEN_TEST_TABLE5 = "ihv-55f";
+	private static final String TOKEN_TEST_TABLE6 = "ihv-56f";
 	private static final String TOKEN_TEST_ERROR = "ihv-ERR";
 	private static final String TEST_USER = "user";
 	private static final String TEST_USER_ERROR="userError";
@@ -76,6 +77,7 @@ class BarTableControllerTest {
 	@MockBean
 	private ClientService clientService;
 
+	private BarTable table6;
 	private BarTable table5;
 	private BarTable table4;
 	private BarTable table3;
@@ -167,6 +169,7 @@ class BarTableControllerTest {
 		table4.setName("mesa2");
 		table4.setSeats(4);
 		table4.setFree(true);
+		table4.setAvailable(true);
 		table4.setBill(b);
 		
 		table5 = new BarTable();
@@ -179,7 +182,14 @@ class BarTableControllerTest {
 		table5.setBill(b);
 		table5.setClient(cl2);
 		
-
+		table6 = new BarTable();
+		table6.setId(25);
+		table6.setBar(bar);
+		table6.setToken("ihv-56k");
+		table6.setName("mesa2");
+		table6.setSeats(4);
+		table6.setFree(true);
+		table6.setAvailable(false);
 
 		List<BarTable> tableList = new ArrayList<BarTable>();
 		tableList.add(table);
@@ -201,11 +211,13 @@ class BarTableControllerTest {
 		given(this.tableService.findbyId(22)).willReturn(table3);
 		given(this.tableService.findbyId(23)).willReturn(table4);
 		given(this.tableService.findbyId(24)).willReturn(table5);
+		given(this.tableService.findbyId(25)).willReturn(table6);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE1)).willReturn(table);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE2)).willReturn(table2);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE6)).willReturn(table6);
 		given(this.tableService.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
 		given(this.tableService.createBarTable(table)).willReturn(table);
@@ -261,32 +273,45 @@ class BarTableControllerTest {
 	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
-	void testBusyTable() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/busyTable/" + TEST_TABLE_ID)
+	void testDisableTable() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/disableTable/" + TEST_TABLE4_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
-	void testBusyTableError() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/busyTable/" + TEST_TABLE2_ID)
+	void testDisableTableError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/disableTable/" + TEST_TABLE5_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
+	}
+	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testDisableTableErrorNotFound() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/disableTable/" + 100)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
 	}
 
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
-	void testFreeTable() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE2_ID)
+	void testEnableTable() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/enableTable/" + TEST_TABLE6_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
-	void testFreeTableError() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE_ID)
+	void testEnableTableError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/enableTable/" + TEST_TABLE5_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
 	}
 	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testEnableTableErrorNotFound() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/enableTable/" + 100)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
+	}
 	
 	@WithMockUser(username = "user", roles = { "CLIENT" })
 	@Test
@@ -345,5 +370,31 @@ class BarTableControllerTest {
 				.andExpect(status().isCreated());
 	}
 	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testBusyTable() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/busyTable/" + TEST_TABLE_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
 
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testBusyTableError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/busyTable/" + TEST_TABLE2_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
+	}
+
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testFreeTable() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE2_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(username = "admin", roles = { "OWNER" })
+	@Test
+	void testFreeTableError() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/freeTable/" + TEST_TABLE_ID)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
+	}
 }
