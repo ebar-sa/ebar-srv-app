@@ -62,7 +62,11 @@ public class BarTableController {
 	@Autowired
 	private EmployeeService	employeeService;
 
+    private static final String ROLE_OWNER = "ROLE_OWNER";
+    
+    private static final String ROLE_EMPLOYEE = "ROLE_EMPLOYEE";
 
+	
 	@GetMapping("{id}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Set<BarTable>> getAllTables(@PathVariable("id") final Integer barId) {
@@ -127,7 +131,7 @@ public class BarTableController {
 			}
 		}
 
-		if (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE")) {
+		if (authorities.contains(ROLE_OWNER) || authorities.contains(ROLE_EMPLOYEE)) {
 			Optional<Employee> e = this.employeeService.findbyUsername(ud.getUsername());
 			Employee employee;
 			if (e.isPresent()) {
@@ -200,7 +204,7 @@ public class BarTableController {
 				this.clientService.saveClient(client);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
-			} else if (barTable.isFree() && (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE"))) {
+			} else if (barTable.isFree() && (authorities.contains(ROLE_OWNER) || authorities.contains(ROLE_EMPLOYEE))) {
 				barTable.setFree(false);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
@@ -336,7 +340,7 @@ public class BarTableController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 		if (barTable != null) {
-			if (barTable.isFree() && barTable.isAvailable() && (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE"))) {
+			if (barTable.isFree() && barTable.isAvailable() && (authorities.contains(ROLE_OWNER) || authorities.contains(ROLE_EMPLOYEE))) {
 				barTable.setAvailable(false);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);
@@ -355,7 +359,7 @@ public class BarTableController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 		if (barTable != null) {
-			if (barTable.isFree() && !barTable.isAvailable() && (authorities.contains("ROLE_OWNER") || authorities.contains("ROLE_EMPLOYEE"))) {
+			if (barTable.isFree() && !barTable.isAvailable() && (authorities.contains(ROLE_OWNER) || authorities.contains(ROLE_EMPLOYEE))) {
 				barTable.setAvailable(true);
 				this.barTableService.saveTable(barTable);
 				return new ResponseEntity<>(barTable, HttpStatus.OK);

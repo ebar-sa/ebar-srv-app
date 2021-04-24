@@ -86,8 +86,8 @@ public class BarController {
 		for(Bar b : bares) {
 			if (!b.isSubscriptionActive()) continue;
 
-			int numeroMesasLibres = 0;
-			int disabled = 0;
+			Integer numeroMesasLibres = 0;
+			Integer disabled = 0;
 			for(BarTable bt : b.getBarTables()) {
 				if (bt.isFree() && bt.isAvailable()) {
 					numeroMesasLibres += 1;
