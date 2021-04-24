@@ -49,6 +49,10 @@ public class BarTable extends BaseEntity {
 	private Integer	seats;
 
 	@NotNull
+	@Column(name= "available")
+	private boolean available;
+	
+	@NotNull
 	@ManyToOne
 	private Bar		bar;
 
