@@ -61,7 +61,5 @@ public class BarTable extends BaseEntity {
 	
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<Client> clients;
-	
-	
 
 }
