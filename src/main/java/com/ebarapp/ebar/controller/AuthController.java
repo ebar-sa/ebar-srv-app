@@ -84,7 +84,7 @@ public class AuthController {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Correo electrónico en uso. Por favor, introduzca otro."));
-        } else if (userService.existsUserByDni(dni)) {
+        } else if (dni != null && userService.existsUserByDni(dni)) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("DNI en uso. Por favor, introduzca otro."));
