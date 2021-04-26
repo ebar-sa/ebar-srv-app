@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ebarapp.ebar.service.RedSysService;
 import com.stripe.model.PaymentMethod;
 import com.stripe.model.PaymentMethod.Card;
 
@@ -59,6 +60,9 @@ class PaymentControllerTests {
 
     @MockBean
     private BarService barService;
+
+    @MockBean
+    private RedSysService redSysService;
 
     @BeforeEach
     void setUp() throws StripeException {
