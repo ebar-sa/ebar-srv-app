@@ -204,14 +204,11 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
-
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE6)).willReturn(table6);
-
 		given(this.barTableRepository.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
 		given(this.barTableRepository.save(table)).willReturn(table);
 		given(this.barTableRepository.getBarTablesByBarId(10)).willReturn(tablesForBar1);
-
 		given(this.clientRepository.save(cl)).willReturn(cl);
 
 	}
