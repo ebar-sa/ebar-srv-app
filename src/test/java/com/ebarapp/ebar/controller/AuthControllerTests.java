@@ -45,6 +45,7 @@ class AuthControllerTests {
     private static final String EMAIL = "pepediaz@outlook.com";
     private static final String TAKENEMAIL = "taken@outlook.com";
     private static final String DNI = "27485322W";
+    private static final String TAKENDNI = "12321321W";
     private static final String PHONENUMBER = "722345789";
     private static final String FIRSTNAME = "Pepe";
     private static final String SECONDNAME = "Diaz";
@@ -101,6 +102,8 @@ class AuthControllerTests {
                 .willReturn(true);
         given(this.userService.existsUserByEmail(TAKENEMAIL))
                 .willReturn(true);
+        given(this.userService.existsUserByDni(TAKENDNI))
+                .willReturn(true);
         given(this.userService.getByUsername(USERNAME2))
                 .willReturn(user2);
         given(this.encoder.matches(PASSWORD, ENC_PASSWORD)).willReturn(true);
@@ -152,9 +155,9 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("¡Usuario registrado correctamente!")));
     }
-    
+
     @Test
     void testRegisterNewEmployee() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -173,7 +176,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("¡Usuario registrado correctamente!")));
     }
 
     @Test
@@ -194,9 +197,9 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("User registered successfully!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("¡Usuario registrado correctamente!")));
     }
-    
+
     @Test
     void testRegisterTakenUsername() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -215,7 +218,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Username is already taken!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Nombre de usuario en uso. Por favor, elija otro.")));
     }
 
     @Test
@@ -236,7 +239,28 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Email is already in use!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Correo electrónico en uso. Por favor, introduzca otro.")));
+    }
+
+    @Test
+    void testRegisterTakenDNI() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<String> roles = new HashSet<>();
+        roles.add(RoleType.ROLE_CLIENT.toString());
+        SignupRequest request = new SignupRequest();
+        request.setUsername(USERNAME);
+        request.setEmail(EMAIL);
+        request.setDni(TAKENDNI);
+        request.setFirstName(FIRSTNAME);
+        request.setLastName(SECONDNAME);
+        request.setPhoneNumber(PHONENUMBER);
+        request.setRoles(roles);
+        request.setPassword(PASSWORD);
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("DNI en uso. Por favor, introduzca otro.")));
     }
 
     @Test
@@ -252,7 +276,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Data updated successfully!")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("¡Datos actualizados correctamente!")));
     }
 
     @Test
@@ -268,7 +292,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Incorrect password")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Contraseña incorrecta")));
     }
 
     @Test
@@ -284,7 +308,7 @@ class AuthControllerTests {
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/updateProfile").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Passwords not match")));
+                .andExpect(MockMvcResultMatchers.jsonPath("message", hasToString("Las contraseñas no coinciden")));
     }
 
 }

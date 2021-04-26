@@ -86,13 +86,17 @@ public class BarController {
 		for(Bar b : bares) {
 			if (!b.isSubscriptionActive()) continue;
 
-			int numeroMesasLibres = 0;
+			Integer numeroMesasLibres = 0;
+			Integer disabled = 0;
 			for(BarTable bt : b.getBarTables()) {
-				if (bt.isFree()) {
+				if (bt.isFree() && bt.isAvailable()) {
 					numeroMesasLibres += 1;
 				}
+				if (!bt.isAvailable()) {
+					disabled++;
+				}
 			}
-			String capacity = numeroMesasLibres + "/" + b.getBarTables().size();
+			String capacity = numeroMesasLibres + "/" + (b.getBarTables().size() - disabled);
 			BarCapacity ba = new BarCapacity();
 
 			ba.setId(b.getId());
@@ -122,14 +126,18 @@ public class BarController {
 				}
 			}
 			Integer freeTables = 0;
+			Integer disabled = 0;
 			for(BarTable bt : bar.getBarTables()) {
-				if (bt.isFree()) {
+				if (bt.isFree() && bt.isAvailable()) {
 					freeTables += 1;
+				}
+				if (!bt.isAvailable()) {
+					disabled++;
 				}
 			}
 			BarDTO barDTO = new BarDTO(bar.getId(), bar.getName(), bar.getDescription(), bar.getContact(),
 					bar.getLocation(), bar.getOpeningTime(), bar.getClosingTime(), bar.getImages(),
-					bar.getBarTables().size(), freeTables, bar.getOwner().getUsername(), bar.getEmployees());
+					bar.getBarTables().size() - disabled, freeTables, bar.getOwner().getUsername(), bar.getEmployees());
 			return ResponseEntity.ok(barDTO);
 		}else {
 			return ResponseEntity.notFound().build();
