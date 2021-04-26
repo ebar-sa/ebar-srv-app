@@ -153,7 +153,6 @@ public class BarTableController {
 				return new ResponseEntity<>(HttpStatus.CONFLICT);
 			}
 		} else if (!barTable.isFree()) {
-			String nameLogged = ud.getUsername();
 			Optional<Client> clientOk = barTable.getClients().stream().filter(x->x.getUsername().equals(ud.getUsername())).findAny();
 			if (clientOk.isPresent()) {
 				Menu menu = barTable.getBar().getMenu();

@@ -30,6 +30,7 @@ public class Client extends User {
 	  public Client(User user, BarTable barTable) {
 		  super();
 		  this.username = user.username;
+		  this.roles = user.roles;
 		  this.dni = user.dni;
 		  this.email = user.email;
 		  this.firstName = user.firstName;
