@@ -3,8 +3,11 @@ package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.configuration.security.payload.request.SubscriptionRequest;
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.RedSysRequest;
+import com.ebarapp.ebar.model.RedSysResponse;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.RedSysService;
 import com.ebarapp.ebar.service.StripeService;
 import com.ebarapp.ebar.service.UserService;
 import com.stripe.model.*;
@@ -39,6 +42,9 @@ public class PaymentController {
 
     @Autowired
     private BarService barService;
+
+    @Autowired
+    private RedSysService redSysService;
 
     public PaymentController(StripeService stripeService) {
         this.stripeService = stripeService;
@@ -223,6 +229,12 @@ public class PaymentController {
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/bill")
+    public ResponseEntity<RedSysResponse> payBill(@Valid @RequestBody RedSysRequest request) {
+        RedSysResponse response = this.redSysService.payBill(request);
+        return ResponseEntity.ok(response);
     }
 
 
