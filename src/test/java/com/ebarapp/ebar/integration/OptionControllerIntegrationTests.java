@@ -44,6 +44,14 @@ class OptionControllerIntegrationTests {
     private static final String TEST_OWNER_USERNAME = "admin";
     private static final String TEST_OWNER_PASSWORD = "johndoe1";
 
+    private static final String TEST_CLIENT_FIRST_NAME = "First";
+    private static final String TEST_CLIENT_LAST_NAME = "Last";
+    private static final String TEST_CLIENT_DNI = "11111111L";
+    private static final String TEST_CLIENT_EMAIL = "firstLast@email.com";
+    private static final String TEST_CLIENT_PHONE_NUMBER = "666333998";
+    private static final String TEST_CLIENT_USERNAME = "user";
+    private static final String TEST_CLIENT_PASSWORD = "user";
+
     private static final int TEST_BAR_ID = 1;
     private static final String TEST_BAR_NAME = "Burger Food Porn";
     private static final String TEST_BAR_DESCRIPTION = "El templo de la hamburguesa.";
@@ -108,6 +116,18 @@ class OptionControllerIntegrationTests {
         owner.setUsername(TEST_OWNER_USERNAME);
         owner.setPassword(TEST_OWNER_PASSWORD);
 
+        Client client = new Client();
+        client.setFirstName(TEST_CLIENT_FIRST_NAME);
+        client.setLastName(TEST_CLIENT_LAST_NAME);
+        client.setDni(TEST_CLIENT_DNI);
+        client.setEmail(TEST_CLIENT_EMAIL);
+        client.setPhoneNumber(TEST_CLIENT_PHONE_NUMBER);
+        client.setUsername(TEST_CLIENT_USERNAME);
+        client.setPassword(TEST_CLIENT_PASSWORD);
+
+        List<Client> clients = new ArrayList<>();
+        clients.add(client);
+
         Bar bar = new Bar();
         bar.setId(TEST_BAR_ID);
         bar.setName(TEST_BAR_NAME);
@@ -126,7 +146,6 @@ class OptionControllerIntegrationTests {
 
         Set<Option> options = new HashSet<>();
         options.add(option);
-
 
         Voting voting = new Voting();
         voting.setId(TEST_VOTING_ID);
@@ -172,6 +191,7 @@ class OptionControllerIntegrationTests {
         barTable.setToken(TEST_BAR_TABLE_TOKEN);
         barTable.setSeats(TEST_BAR_TABLE_SEATS);
         barTable.setBar(bar);
+        barTable.setClients(clients);
 
         Set<BarTable> bts = new HashSet<>();
         bts.add(barTable);
@@ -229,23 +249,34 @@ class OptionControllerIntegrationTests {
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void successVote() throws Exception {
-        String token = "aaa-111";
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/"+TEST_BAR_ID+"/voting/"+TEST_VOTING_2_ID+"/option/"+TEST_OPTION_ID_2+"/vote")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(token))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void failureVote() throws Exception {
-        String token = "aaa-112";
-
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/"+TEST_BAR_ID+"/voting/"+TEST_VOTING_2_ID+"/option/"+TEST_OPTION_ID_2+"/vote")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(token))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void successIsValidVoter() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/"+TEST_BAR_ID+"/username/"+TEST_CLIENT_USERNAME)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void failureIsValidVoter() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/2/username/"+TEST_CLIENT_USERNAME)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
 }
