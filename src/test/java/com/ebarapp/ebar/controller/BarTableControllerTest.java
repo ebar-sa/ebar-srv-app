@@ -91,6 +91,7 @@ class BarTableControllerTest {
 	private BarTable table;
 	private Bar bar;
 	private Bar bar2;
+	private Employee employee;
 	
 
 
@@ -212,6 +213,10 @@ class BarTableControllerTest {
 		table6.setSeats(4);
 		table6.setFree(true);
 		table6.setAvailable(false);
+		
+		employee = new Employee();
+		employee.setUsername("employee");
+		
 
 		Set<RoleType> roles = new HashSet<>();
 		roles.add(RoleType.ROLE_CLIENT);
@@ -250,6 +255,7 @@ class BarTableControllerTest {
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE6)).willReturn(table6);
+		given(this.employeeService.findbyUsername("employee")).willReturn(Optional.of(employee));
 		given(this.tableService.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
 		given(this.tableService.createBarTable(table)).willReturn(table);
@@ -267,7 +273,7 @@ class BarTableControllerTest {
 	}
 	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
-//	@Test
+	@Test
 	void testGetTableByIdNotPayment() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE3_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isPaymentRequired());
@@ -307,14 +313,7 @@ class BarTableControllerTest {
 	void testGetTableByIdFree() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE4_ID)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
-	}
-	
-	@WithMockUser(username = "user", roles = { "CLIENT" })
-	//@Test
-	void testGetTableByIdClientNotEquals() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/tables/tableDetails/" + TEST_TABLE5_ID)
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
-	}
+	}	
 	
 	@WithMockUser(username = "admin", roles = { "OWNER" })
 	@Test
