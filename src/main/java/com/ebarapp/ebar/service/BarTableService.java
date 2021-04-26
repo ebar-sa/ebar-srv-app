@@ -45,11 +45,6 @@ public class BarTableService {
 	public User getClientByPrincipalUserName(String userName) {
 		return this.barTableRepository.getClientByPrincipalUserName(userName);
 	}
-	public BarTable getBarTableByClientUsername(String username) {
-		//return this.barTableRepository.getBarTableByClientUsername(username);
-		return null;
-	}
-
 	
 	public List<String> getAllValidTokensByBarId(Integer id) { 
 		return barTableRepository.getAllValidTokenByBarId(id); 
