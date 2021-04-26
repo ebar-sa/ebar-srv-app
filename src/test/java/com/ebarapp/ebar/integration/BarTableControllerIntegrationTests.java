@@ -206,8 +206,6 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE5)).willReturn(table5);
 
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE6)).willReturn(table6);
-		given(this.barTableRepository.getBarTableByClientUsername("user")).willReturn(table2);
-		given(this.barTableRepository.getBarTableByClientUsername("userError")).willReturn(null);
 
 		given(this.barTableRepository.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.barTableRepository.getBillByTableId(21)).willReturn(b);
