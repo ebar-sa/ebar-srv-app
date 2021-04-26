@@ -240,8 +240,6 @@ class BarTableControllerTest {
 		given(this.tableService.getClientByPrincipalUserName("user")).willReturn(us);
 		given(this.tableService.getBillByTableId(21)).willReturn(b);
 		given(this.tableService.createBarTable(table)).willReturn(table);
-		given(this.tableService.getBarTableByClientUsername("user")).willReturn(table2);
-		given(this.tableService.getBarTableByClientUsername("userError")).willReturn(null);
 		given(this.tableService.getBarTablesByBarId(10)).willReturn(tablesForBar1);
 		given(this.clientService.getClientByUsername("user")).willReturn(cl);
 		given(this.clientService.getClientByUsername("userr")).willReturn(cl2);
