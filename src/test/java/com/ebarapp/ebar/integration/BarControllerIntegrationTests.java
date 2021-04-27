@@ -201,7 +201,7 @@ class BarControllerIntegrationTests {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
     @Test
     void testGetAllTablesAndCapacity() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
