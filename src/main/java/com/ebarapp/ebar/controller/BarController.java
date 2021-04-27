@@ -88,7 +88,7 @@ public class BarController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 		
-		List<Bar> bares = new ArrayList<>();
+		List<Bar> bares = null;
 
 		if (authorities.contains(ROLE_OWNER)) {
 			bares = barService.findAllBarByOwner(userService.getByUsername(ud.getUsername()));
