@@ -2,6 +2,7 @@ package com.ebarapp.ebar.controller;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.BarCapacity;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,9 @@ public class BarController {
 	@Autowired
 	private UserService userService;
 
+    private static final String ROLE_OWNER = "ROLE_OWNER";
+    
+    private static final String ROLE_EMPLOYEE = "ROLE_EMPLOYEE";
 
 	@PostMapping("")
 	@PreAuthorize("hasRole('OWNER')")
@@ -80,7 +85,19 @@ public class BarController {
 	@GetMapping("/capacity")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
 	public ResponseEntity<List<BarCapacity>> getAllTablesAndCapacity() {
-		List<Bar> bares = barService.findAllBar();
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+		
+		List<Bar> bares = new ArrayList<>();
+
+		if (authorities.contains(ROLE_OWNER)) {
+			bares = barService.findAllBarByOwner(userService.getByUsername(ud.getUsername()));
+		} else if (authorities.contains(ROLE_EMPLOYEE)){
+			bares = barService.findAllBarByEmployee(userService.getByUsername(ud.getUsername()));
+		} else {
+			bares = barService.findAllBar();
+		}
+		
 		List<BarCapacity> res = new ArrayList<>();
 
 		for(Bar b : bares) {
