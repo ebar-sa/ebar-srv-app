@@ -231,5 +231,24 @@ public class BillController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+	
+	@DeleteMapping("/delete/{idBill}/{idItemBill}")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<Bill> deleteItemBill(@PathVariable("idBill") final Integer idBill,
+			@PathVariable("idItemBill") final Integer idItemBill) {
+		Optional<Bill> billOpt = this.billService.findbyId(idBill);
+		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
+		if (billOpt.isPresent() && resOpt.isPresent()) {
+			Bill bill = billOpt.get();
+			ItemBill res = resOpt.get();
+			bill.getItemOrder().remove(res);
+			this.billService.removeBill(idBill);
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+
+		else {
+			return ResponseEntity.notFound().build();
+		}
+	}
 
 }
