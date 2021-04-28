@@ -58,7 +58,7 @@ public class BarService {
 	}
 
 	public List<Bar> getBarsBySearch(String text){
-		text.replace("_", " ");
+		text = text.replace("_", " ");
 		String jpqlSearch = "%" + text + "%";
 		return this.barRepository.getBarsBySearch(jpqlSearch);
 	}
