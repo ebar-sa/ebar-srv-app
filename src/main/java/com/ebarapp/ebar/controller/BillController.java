@@ -29,13 +29,14 @@ import com.ebarapp.ebar.service.ItemMenuService;
 public class BillController {
 
 	@Autowired
-	private BillService billService;
+	private BillService		billService;
 
 	@Autowired
-	private ItemMenuService itemMenuService;
+	private ItemMenuService	itemMenuService;
 
 	@Autowired
-	private ItemBillService itemBillService;
+	private ItemBillService	itemBillService;
+
 
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
@@ -71,8 +72,7 @@ public class BillController {
 
 	@GetMapping("/addToOrder/{idBill}/{idItem}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill,
-			@PathVariable("idItem") final Integer idItem) {
+	public ResponseEntity<Bill> addToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
 		if (billOpt.isPresent() && itemOpt.isPresent()) {
@@ -103,8 +103,7 @@ public class BillController {
 
 	@GetMapping("/addToBill/{idBill}/{idItemBill}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill,
-			@PathVariable("idItemBill") final Integer idItemBill) {
+	public ResponseEntity<Bill> addToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
 		if (billOpt.isPresent() && resOpt.isPresent()) {
@@ -158,8 +157,7 @@ public class BillController {
 
 	@GetMapping("/addAllToBill/{idBill}/{idItemBill}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<Bill> addAllToBill(@PathVariable("idBill") final Integer idBill,
-			@PathVariable("idItemBill") final Integer idItemBill) {
+	public ResponseEntity<Bill> addAllToBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
 		if (billOpt.isPresent() && resOpt.isPresent()) {
@@ -202,8 +200,7 @@ public class BillController {
 
 	@GetMapping("/addAmountToOrder/{idBill}/{idItem}/{amount}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<Bill> addAmountToOrder(@PathVariable("idBill") final Integer idBill,
-			@PathVariable("idItem") final Integer idItem, @PathVariable("amount") final Integer amount) {
+	public ResponseEntity<Bill> addAmountToOrder(@PathVariable("idBill") final Integer idBill, @PathVariable("idItem") final Integer idItem, @PathVariable("amount") final Integer amount) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
 		if (billOpt.isPresent() && itemOpt.isPresent()) {
@@ -231,18 +228,18 @@ public class BillController {
 			return ResponseEntity.notFound().build();
 		}
 	}
-	
+
 	@DeleteMapping("/delete/{idBill}/{idItemBill}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
-	public ResponseEntity<Bill> deleteItemBill(@PathVariable("idBill") final Integer idBill,
-			@PathVariable("idItemBill") final Integer idItemBill) {
+	public ResponseEntity<Bill> deleteItemBill(@PathVariable("idBill") final Integer idBill, @PathVariable("idItemBill") final Integer idItemBill) {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
 		if (billOpt.isPresent() && resOpt.isPresent()) {
 			Bill bill = billOpt.get();
 			ItemBill res = resOpt.get();
 			bill.getItemOrder().remove(res);
-			this.billService.removeBill(idBill);
+			this.billService.saveBill(bill);
+			this.itemBillService.removeItemBill(idBill);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
 

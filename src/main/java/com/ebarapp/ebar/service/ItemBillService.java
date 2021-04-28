@@ -15,11 +15,16 @@ public class ItemBillService {
 	@Autowired
 	private ItemBillRepository itemBillRepository;
 
+
 	public Optional<ItemBill> findbyId(final Integer id) {
 		return this.itemBillRepository.findById(id);
 	}
 
 	public ItemBill saveItemBill(final ItemBill itemBill) {
 		return this.itemBillRepository.save(itemBill);
+	}
+
+	public void removeItemBill(final Integer id) {
+		this.itemBillRepository.deleteById(id);
 	}
 }
