@@ -8,6 +8,7 @@ import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.BarCapacity;
 import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
+import com.ebarapp.ebar.model.dtos.BarSearchDTO;
 import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,6 +226,20 @@ public class BarController {
 		bar.deleteImage(imageToDelete);
 		barService.createBar(bar);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@GetMapping("/search/{text}")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
+	public ResponseEntity<List<BarSearchDTO>> getBarsBySearch(@PathVariable("text") String text) {
+		List<Bar> barsSearch = this.barService.getBarsBySearch(text);
+		List<BarSearchDTO> listBarSearchDTOS = new ArrayList<>();
+		for(Bar b : barsSearch) {
+			if (b.isSubscriptionActive()) {
+				BarSearchDTO barSearchDTO = new BarSearchDTO(b.getId(), b.getName(), b.getLocation());
+				listBarSearchDTOS.add(barSearchDTO);
+			}
+		}
+		return new ResponseEntity<>(listBarSearchDTOS, HttpStatus.OK);
 	}
 
 }

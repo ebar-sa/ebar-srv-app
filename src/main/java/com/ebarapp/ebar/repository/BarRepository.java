@@ -26,4 +26,6 @@ public interface BarRepository extends JpaRepository<Bar, Integer> {
 	@Query("select b from Bar b JOIN b.employees e where e=:u")
 	List<Bar> getBarByEmployee(User u);
 
+	@Query("select b from Bar b where b.name like :text")
+	List<Bar> getBarsBySearch(String text);
 }

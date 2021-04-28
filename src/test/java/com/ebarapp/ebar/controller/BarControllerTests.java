@@ -1,6 +1,8 @@
 package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.*;
+import com.ebarapp.ebar.model.dtos.BarDTO;
+import com.ebarapp.ebar.model.dtos.BarSearchDTO;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.DBImageService;
@@ -172,10 +174,13 @@ class BarControllerTests {
         bar3.setEmployees(new HashSet<>());
         bar3.setOwner(owner);
 
+        BarSearchDTO barSearchDTO3 = new BarSearchDTO(bar3.getId(), bar3.getName(), bar3.getLocation());
+
         given(this.barService.findBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barService.findBarById(TEST_BAR2_ID)).willReturn(bar2);
         given(this.barService.findBarById(TEST_BAR3_ID)).willReturn(bar3);
         given(this.barService.findAllBar()).willReturn(allBares);
+        given(this.barService.getBarsBySearch("Pizza")).willReturn(allBares);
 
         given(this.userService.getUserByUsername("admin")).willReturn(Optional.of(user));
         given(this.userService.getUserByUsername("admin2")).willReturn(Optional.of(owner));
@@ -353,5 +358,12 @@ class BarControllerTests {
     void failureDeleteBarImageNotOwner() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/1"))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void successGetBarBySearch() throws  Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/search/Pizza"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
