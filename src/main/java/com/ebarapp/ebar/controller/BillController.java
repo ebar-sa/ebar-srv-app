@@ -180,8 +180,7 @@ public class BillController {
 	protected void addAllOrderToBill(final Bill bill, final ItemBill res, final ItemMenu item) {
 		for (ItemBill ib : bill.getItemBill()) {
 			if (ib.getItemMenu().getId().equals(item.getId())) {
-				Integer i = ib.getAmount();
-				i = ib.getAmount() + res.getAmount();
+				Integer i = ib.getAmount() + res.getAmount();
 				ib.setAmount(i);
 				bill.getItemOrder().remove(res);
 			}
