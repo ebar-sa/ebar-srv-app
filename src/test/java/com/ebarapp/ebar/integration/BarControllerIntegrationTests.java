@@ -289,7 +289,11 @@ class BarControllerIntegrationTests {
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void successGetBarBySearch() throws  Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/search/Burger"))
+        String json = "{\"lat\": 37.57549886736554, \"lng\": -4.998964040574663}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/search/Burger")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

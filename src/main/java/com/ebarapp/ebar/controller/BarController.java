@@ -9,14 +9,12 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.BarCapacity;
 import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
-import com.ebarapp.ebar.model.dtos.BarSearchDTO;
 import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 
@@ -326,18 +324,46 @@ public class BarController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	@GetMapping("/search/{text}")
+	@PostMapping("/search/{text}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
-	public ResponseEntity<List<BarSearchDTO>> getBarsBySearch(@PathVariable("text") String text) {
+	public ResponseEntity<List<BarCapacity>> getBarsBySearch(@PathVariable("text") String text, @Valid @RequestBody Map<String, String> location) {
 		List<Bar> barsSearch = this.barService.getBarsBySearch(text);
-		List<BarSearchDTO> listBarSearchDTOS = new ArrayList<>();
+		List<BarCapacity> listBarSearch = new ArrayList<>();
 		for(Bar b : barsSearch) {
 			if (b.isSubscriptionActive()) {
-				BarSearchDTO barSearchDTO = new BarSearchDTO(b.getId(), b.getName(), b.getLocation());
-				listBarSearchDTOS.add(barSearchDTO);
+				BarCapacity barCapacity = new BarCapacity();
+				barCapacity.setId(b.getId());
+				barCapacity.setLocation(b.getLocation());
+				barCapacity.setName(b.getName());
+
+				Integer numeroMesasLibres = 0;
+				Integer disabled = 0;
+				for(BarTable bt : b.getBarTables()) {
+					if (bt.isFree() && bt.isAvailable()) {
+						numeroMesasLibres += 1;
+					}
+					if (!bt.isAvailable()) {
+						disabled++;
+					}
+				}
+				barCapacity.setCapacity(numeroMesasLibres + "/" + (b.getBarTables().size() - disabled));
+				Map<String, BigDecimal> coords = getBarsByCoordinates(b.getLocation());
+				if(!(location.get("lat") == null || location.get("lng") == null)) {
+					if(coords != null) {
+						Double distance = getDistance(coords.get("lat").doubleValue(), coords.get("lng").doubleValue(),
+								Double.valueOf(location.get("lat")), Double.valueOf(location.get("lng")));
+						barCapacity.setDistance(distance);
+					}else {
+						barCapacity.setDistance(null);
+					}
+				}
+
+				barCapacity.setCoord(coords);
+
+				listBarSearch.add(barCapacity);
 			}
 		}
-		return new ResponseEntity<>(listBarSearchDTOS, HttpStatus.OK);
+		return new ResponseEntity<>(listBarSearch, HttpStatus.OK);
 	}
 
 }

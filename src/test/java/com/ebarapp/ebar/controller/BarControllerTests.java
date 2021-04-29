@@ -1,8 +1,6 @@
 package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.model.*;
-import com.ebarapp.ebar.model.dtos.BarDTO;
-import com.ebarapp.ebar.model.dtos.BarSearchDTO;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.DBImageService;
@@ -173,8 +171,6 @@ class BarControllerTests {
         bar3.setVotings(new HashSet<>());
         bar3.setEmployees(new HashSet<>());
         bar3.setOwner(owner);
-
-        BarSearchDTO barSearchDTO3 = new BarSearchDTO(bar3.getId(), bar3.getName(), bar3.getLocation());
 
         given(this.barService.findBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barService.findBarById(TEST_BAR2_ID)).willReturn(bar2);
@@ -366,7 +362,11 @@ class BarControllerTests {
     @WithMockUser(username="user", roles={"CLIENT"})
     @Test
     void successGetBarBySearch() throws  Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/search/Pizza"))
+        String json = "{\"lat\": 37.57549886736554, \"lng\": -4.998964040574663}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/search/Pizza")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
