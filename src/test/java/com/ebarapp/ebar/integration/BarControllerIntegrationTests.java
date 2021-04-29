@@ -204,9 +204,10 @@ class BarControllerIntegrationTests {
     @WithMockUser(username="test", authorities="ROLE_CLIENT")
     @Test
     void testGetAllTablesAndCapacity() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
     }
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
@@ -219,7 +220,9 @@ class BarControllerIntegrationTests {
 
     @Test
     void shouldNotGetAllTablesAndCapacity() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
                 .andExpect(status().isUnauthorized());
     }
 
