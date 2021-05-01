@@ -39,7 +39,7 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR_NAME = "Burger Food Porn";
     private static final String TEST_BAR_DESCRIPTION = "El templo de la hamburguesa.";
     private static final String TEST_BAR_CONTACT = "burgerfoodsevilla@gmail.com";
-    private static final String TEST_BAR_LOCATION = "Avenida de Finlandia, 24, Sevilla";
+    private static final String TEST_BAR_LOCATION = "Calle Este, 18, 41409 Écija, Sevilla";
     private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
     private static final Date TEST_BAR_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
@@ -64,7 +64,7 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR2_NAME = "Pizza by Alfredo";
     private static final String TEST_BAR2_DESCRIPTION = "Restaurant";
     private static final String TEST_BAR2_CONTACT = "alfredo@gmail.com";
-    private static final String TEST_BAR2_LOCATION = "Pennsylvania";
+    private static final String TEST_BAR2_LOCATION = "Calle Este, 18, 41409 Écija, Sevilla";
     private static final Date TEST_BAR2_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR2_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
     private static final Date TEST_BAR2_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
@@ -120,6 +120,7 @@ class BarControllerIntegrationTests {
         BarTable barTable = new BarTable();
         barTable.setName("Mesa 1");
         barTable.setFree(true);
+        barTable.setAvailable(true);
         barTables.add(barTable);
 
         DBImage image1 = new DBImage();
@@ -203,12 +204,40 @@ class BarControllerIntegrationTests {
 
     @WithMockUser(username="test", authorities="ROLE_CLIENT")
     @Test
-    void testGetAllTablesAndCapacity() throws Exception {
+    void testGetAllTablesAndCapacityCorrectLocation() throws Exception {
     	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
         		.content(json))
                 .andExpect(status().isOk());
     }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllTablesAndCapacityIncorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllBarsMapCorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllBarsMapIncorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test

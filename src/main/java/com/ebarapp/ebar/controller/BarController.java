@@ -120,7 +120,7 @@ public class BarController {
 				return ret;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			return null;
 		}
 		return null;
 	}
@@ -219,6 +219,68 @@ public class BarController {
 		if(res.size()>15) {
 			res.subList(0, 15);
 		}
+		return ResponseEntity.ok(res);
+	}
+
+	
+	@PostMapping("/map")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
+	public ResponseEntity<List<BarCapacity>> getBarsByLocation(@Valid @RequestBody Map<String, String> location) {		
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+		
+		List<Bar> bares = null;
+
+		if (authorities.contains(ROLE_OWNER)) {
+			bares = barService.findAllBarByOwner(userService.getByUsername(ud.getUsername()));
+		} else if (authorities.contains(ROLE_EMPLOYEE)){
+			bares = barService.findAllBarByEmployee(userService.getByUsername(ud.getUsername()));
+		} else {
+			bares = barService.findAllBar();
+		}
+		
+		List<BarCapacity> res = new ArrayList<>();
+
+		if(!(location.get("lat") == null || location.get("lng") == null)) {
+			for(Bar b : bares) {
+				
+				Map<String, BigDecimal> coords = getBarsByCoordinates(b.getLocation());
+				if (!b.isSubscriptionActive() && coords==null) continue;
+	
+				Integer numeroMesasLibres = 0;
+				Integer disabled = 0;
+				for(BarTable bt : b.getBarTables()) {
+					if (bt.isFree() && bt.isAvailable()) {
+						numeroMesasLibres += 1;
+					}
+					if (!bt.isAvailable()) {
+						disabled++;
+					}
+				}
+				String capacity = numeroMesasLibres + "/" + (b.getBarTables().size() - disabled);
+				Double distance = getDistance(coords.get("lat").doubleValue(), coords.get("lng").doubleValue(),
+						Double.valueOf(location.get("lat")), Double.valueOf(location.get("lng")));
+				
+				if(distance > 10000.) {
+					continue;
+				}
+				BarCapacity ba = new BarCapacity();
+				
+				ba.setDistance(distance);
+				ba.setId(b.getId());
+				ba.setName(b.getName());
+				ba.setLocation(b.getLocation());
+				ba.setCapacity(capacity);
+				ba.setCoord(coords);
+	
+				res.add(ba);
+			}
+			
+			res = res.stream()
+					.filter(x -> Integer.valueOf(x.getCapacity().split("/")[0]) > 0)
+					.collect(Collectors.toList());
+		}
+				
 		return ResponseEntity.ok(res);
 	}
 
