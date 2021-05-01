@@ -3,6 +3,7 @@ package com.ebarapp.ebar.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +27,7 @@ public interface BarRepository extends JpaRepository<Bar, Integer> {
 	@Query("select b from Bar b JOIN b.employees e where e=:u")
 	List<Bar> getBarByEmployee(User u);
 
+	//@Query("select b from Bar b where b.name like :text")
 	@Query("select b from Bar b where b.name like :text")
-	List<Bar> getBarsBySearch(String text);
+	List<Bar> getBarsBySearch(String text, Pageable pageable);
 }

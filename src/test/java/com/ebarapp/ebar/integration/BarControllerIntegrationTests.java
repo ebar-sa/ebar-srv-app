@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -169,7 +170,7 @@ class BarControllerIntegrationTests {
         given(this.barRepository.getBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barRepository.getBarById(TEST_BAR2_ID)).willReturn(bar2);
         given(this.barRepository.findAll()).willReturn(bars);
-        given(this.barRepository.getBarsBySearch("Burguer")).willReturn(barSearch);
+        given(this.barRepository.getBarsBySearch("Burguer", PageRequest.of(0,20))).willReturn(barSearch);
 
         given(this.userRepository.findByUsername("admin")).willReturn(Optional.of(user));
         given(this.userRepository.findByUsername("admin2")).willReturn(Optional.of(owner));
