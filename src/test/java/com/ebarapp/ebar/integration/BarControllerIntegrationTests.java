@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -148,6 +149,9 @@ class BarControllerIntegrationTests {
         bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setOwner(owner);
 
+        List<Bar> barSearch = new ArrayList<>();
+        barSearch.add(bar);
+
         Bar bar2 = new Bar();
         bar2.setId(TEST_BAR2_ID);
         bar2.setName(TEST_BAR2_NAME);
@@ -167,6 +171,7 @@ class BarControllerIntegrationTests {
         given(this.barRepository.getBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barRepository.getBarById(TEST_BAR2_ID)).willReturn(bar2);
         given(this.barRepository.findAll()).willReturn(bars);
+        given(this.barRepository.getBarsBySearch("Burguer", PageRequest.of(0,20))).willReturn(barSearch);
 
         given(this.userRepository.findByUsername("admin")).willReturn(Optional.of(user));
         given(this.userRepository.findByUsername("admin2")).willReturn(Optional.of(owner));
@@ -309,5 +314,16 @@ class BarControllerIntegrationTests {
     void failureDeleteImageInNotInBar() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/" + TEST_DBIMAGE2_ID))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void successGetBarBySearch() throws  Exception {
+        String json = "{\"lat\": 37.57549886736554, \"lng\": -4.998964040574663}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/search/Burger")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

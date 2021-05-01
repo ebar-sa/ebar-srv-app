@@ -177,9 +177,9 @@ class BarControllerTests {
         given(this.barService.findBarById(TEST_BAR2_ID)).willReturn(bar2);
         given(this.barService.findBarById(TEST_BAR3_ID)).willReturn(bar3);
         given(this.barService.findAllBar()).willReturn(allBares);
+        given(this.barService.getBarsBySearch("Pizza")).willReturn(allBares);
         given(this.barService.findAllBarByOwner(owner)).willReturn(allBares);
         
-
         given(this.userService.getUserByUsername("admin")).willReturn(Optional.of(user));
         given(this.userService.getUserByUsername("admin2")).willReturn(Optional.of(owner));
 
@@ -405,5 +405,16 @@ class BarControllerTests {
     void failureDeleteBarImageNotOwner() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/1"))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void successGetBarBySearch() throws  Exception {
+        String json = "{\"lat\": 37.57549886736554, \"lng\": -4.998964040574663}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/search/Pizza")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

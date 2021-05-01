@@ -9,7 +9,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.ebarapp.ebar.model.*;
@@ -385,6 +384,48 @@ public class BarController {
 		bar.deleteImage(imageToDelete);
 		barService.createBar(bar);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@PostMapping("/search/{text}")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
+	public ResponseEntity<List<BarCapacity>> getBarsBySearch(@PathVariable("text") String text, @Valid @RequestBody Map<String, String> location) {
+		List<Bar> barsSearch = this.barService.getBarsBySearch(text);
+		List<BarCapacity> listBarSearch = new ArrayList<>();
+		for(Bar b : barsSearch) {
+			if (b.isSubscriptionActive()) {
+				BarCapacity barCapacity = new BarCapacity();
+				barCapacity.setId(b.getId());
+				barCapacity.setLocation(b.getLocation());
+				barCapacity.setName(b.getName());
+
+				Integer numeroMesasLibres = 0;
+				Integer disabled = 0;
+				for(BarTable bt : b.getBarTables()) {
+					if (bt.isFree() && bt.isAvailable()) {
+						numeroMesasLibres += 1;
+					}
+					if (!bt.isAvailable()) {
+						disabled++;
+					}
+				}
+				barCapacity.setCapacity(numeroMesasLibres + "/" + (b.getBarTables().size() - disabled));
+				Map<String, BigDecimal> coords = getBarsByCoordinates(b.getLocation());
+				if(!(location.get("lat") == null || location.get("lng") == null)) {
+					if(coords != null) {
+						Double distance = getDistance(coords.get("lat").doubleValue(), coords.get("lng").doubleValue(),
+								Double.valueOf(location.get("lat")), Double.valueOf(location.get("lng")));
+						barCapacity.setDistance(distance);
+					}else {
+						barCapacity.setDistance(null);
+					}
+				}
+
+				barCapacity.setCoord(coords);
+
+				listBarSearch.add(barCapacity);
+			}
+		}
+		return new ResponseEntity<>(listBarSearch, HttpStatus.OK);
 	}
 
 }
