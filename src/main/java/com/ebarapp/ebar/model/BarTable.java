@@ -59,7 +59,7 @@ public class BarTable extends BaseEntity {
 	@ManyToOne
 	private Bar		bar;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.EAGER)
 	private Bill	bill;
 
 	

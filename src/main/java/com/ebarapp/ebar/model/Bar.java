@@ -68,7 +68,7 @@ public class Bar extends BaseEntity {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<DBImage>	images;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Menu menu = new Menu();
 	
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
