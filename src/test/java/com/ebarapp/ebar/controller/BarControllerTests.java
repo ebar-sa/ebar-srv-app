@@ -111,6 +111,7 @@ class BarControllerTests {
         BarTable barTable = new BarTable();
         barTable.setName("Mesa 1");
         barTable.setFree(true);
+        barTable.setAvailable(true);
         barTables.add(barTable);
 
         bar = new Bar();
@@ -118,7 +119,7 @@ class BarControllerTests {
         bar.setName("Pizza by Alfredo");
         bar.setDescription("Restaurant");
         bar.setContact("alfredo@gmail.com");
-        bar.setLocation("Pennsylvania");
+        bar.setLocation("Calle Este, 18, 41409 Écija, Sevilla");
         bar.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
@@ -162,7 +163,7 @@ class BarControllerTests {
         bar3.setName("Pizza by Antonio");
         bar3.setDescription("Restaurant");
         bar3.setContact("paco@gmail.com");
-        bar3.setLocation("Pennsylvania");
+        bar3.setLocation("Calle Este, 18, 41409 Écija, Sevilla");
         bar3.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar3.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar3.setPaidUntil(Date.from(Instant.parse("2020-01-01T22:30:00.00Z")));
@@ -177,7 +178,8 @@ class BarControllerTests {
         given(this.barService.findBarById(TEST_BAR3_ID)).willReturn(bar3);
         given(this.barService.findAllBar()).willReturn(allBares);
         given(this.barService.getBarsBySearch("Pizza")).willReturn(allBares);
-
+        given(this.barService.findAllBarByOwner(owner)).willReturn(allBares);
+        
         given(this.userService.getUserByUsername("admin")).willReturn(Optional.of(user));
         given(this.userService.getUserByUsername("admin2")).willReturn(Optional.of(owner));
 
@@ -221,9 +223,55 @@ class BarControllerTests {
 
     @WithMockUser(username="test", authorities="ROLE_CLIENT")
     @Test
-    void testGetAllTablesAndCapacity() throws Exception {
+    void testGetAllTablesAndCapacityCorrectLocation() throws Exception {
     	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
         this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username="test", authorities="ROLE_OWNER")
+    @Test
+    void testGetAllTablesAndCapacityCorrectLocationOwner() throws Exception {
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllTablesAndCapacityWrongLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetBarsByCorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": \"37.589696\",\n \"lng\": \"-4.983041\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_OWNER")
+    @Test
+    void testGetBarsByCorrectLocationOwner() throws Exception {
+    	String json = "{ \n \"lat\": \"37.589696\",\n \"lng\": \"-4.983041\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetBarsByIncorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
         		.content(json))
                 .andExpect(status().isOk());
     }
