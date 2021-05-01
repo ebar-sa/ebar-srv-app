@@ -244,7 +244,7 @@ public class BarController {
 			for(Bar b : bares) {
 				
 				Map<String, BigDecimal> coords = getBarsByCoordinates(b.getLocation());
-				if (!b.isSubscriptionActive() && coords==null) continue;
+				if (!b.isSubscriptionActive() || coords==null) continue;
 	
 				Integer numeroMesasLibres = 0;
 				Integer disabled = 0;
