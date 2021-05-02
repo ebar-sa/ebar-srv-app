@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.ebarapp.ebar.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.Bill;
-import com.ebarapp.ebar.model.Employee;
-import com.ebarapp.ebar.model.ItemBill;
-import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.dtos.ItemMenuDTO;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BillService;
@@ -134,7 +129,8 @@ public class ItemMenuController {
 			if (username.equals(o) || names.contains(username)) {
 				ItemMenu i = itemMenuService.getById(idItemMenu);
 				if (i != null) {
-					List<Bill> bills = billService.findAll();
+					List<BarTable> barTables = new ArrayList<>(bar.getBarTables());
+					List<Bill> bills = barTables.stream().map(x->x.getBill()).collect(Collectors.toList());
 					for (Bill b : bills) {
 						List<ItemBill> bill = new ArrayList<>(b.getItemBill());
 						List<ItemBill> order = new ArrayList<>(b.getItemOrder());

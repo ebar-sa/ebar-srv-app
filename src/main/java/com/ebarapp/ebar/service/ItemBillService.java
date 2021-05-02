@@ -15,6 +15,7 @@ public class ItemBillService {
 	@Autowired
 	private ItemBillRepository itemBillRepository;
 
+	public void removeItemBill (final Integer id){ itemBillRepository.deleteById(id); }
 
 	public Optional<ItemBill> findbyId(final Integer id) {
 		return this.itemBillRepository.findById(id);

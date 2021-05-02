@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ebarapp.ebar.model.*;
+import com.ebarapp.ebar.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -20,16 +22,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.Employee;
-import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.model.Menu;
-import com.ebarapp.ebar.model.Owner;
-import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.BillService;
-import com.ebarapp.ebar.service.ItemMenuService;
-import com.ebarapp.ebar.service.MenuService;
 
 @WebMvcTest(controllers = ItemMenuController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
 class ItemMenuControllerTests {
@@ -56,6 +48,9 @@ class ItemMenuControllerTests {
 	@MockBean
 	private BillService billService;
 
+	@MockBean
+	private ItemBillService itemBillService;
+
 	@BeforeEach
 	void setUp() {
 
@@ -72,6 +67,35 @@ class ItemMenuControllerTests {
 		b.setOwner(o);
 		Set<Employee> e = new HashSet<>();
 		b.setEmployees(e);
+
+		BarTable table = new BarTable();
+		table.setId(20);
+		table.setBar(b);
+		table.setToken("ihv-51k");
+		table.setName("mesa1");
+		table.setSeats(4);
+		table.setFree(true);
+
+		Set<BarTable> barTables = new HashSet<>();
+		barTables.add(table);
+		b.setBarTables(barTables);
+
+		ItemMenu im = new ItemMenu();
+		im.setId(2);
+
+		Bill bill = new Bill();
+		bill.setId(1);
+		Set<ItemBill> sib = new HashSet<>();
+		ItemBill ib = new ItemBill();
+		ib.setId(1);
+		ib.setAmount(2);
+		ib.setItemMenu(im);
+		sib.add(ib);
+		ib.setId(1);
+		bill.setItemOrder(new HashSet<>());
+		bill.setItemBill(sib);
+
+		table.setBill(bill);
 
 		Menu m = new Menu();
 		m.setId(TEST_MENU_ID);
