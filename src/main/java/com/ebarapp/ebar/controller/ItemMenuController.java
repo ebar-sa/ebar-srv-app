@@ -106,6 +106,9 @@ public class ItemMenuController {
 					return ResponseEntity.notFound().build();
 				else {
 					ItemMenu itemMenu = new ItemMenu(itemDTO);
+					if (i.getImage() != null) {
+						itemMenu.setImage(i.getImage());
+					}
 					itemMenu.setId(idItemMenu);
 					itemMenuService.save(itemMenu);
 					return ResponseEntity.ok(itemMenu);
@@ -142,7 +145,8 @@ public class ItemMenuController {
 						}
 						for (ItemBill or : order) {
 							if (or.getItemMenu().equals(i)) {
-								return ResponseEntity.status(HttpStatus.CONFLICT).build();							}
+								return ResponseEntity.status(HttpStatus.CONFLICT).build();
+							}
 						}
 					}
 					Menu m = bar.getMenu();
@@ -156,6 +160,37 @@ public class ItemMenuController {
 			}
 		}
 		return ResponseEntity.notFound().build();
+	}
+
+	@DeleteMapping("/bares/{idBar}/menu/itemMenu/{idItemMenu}/deleteImage")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<ItemMenu> deleteImageItemMenu(@PathVariable("idBar") Integer idBar,
+			@PathVariable("idItemMenu") Integer idItemMenu) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Bar bar = barService.findBarById(idBar);
+		if (bar != null) {
+			String o = bar.getOwner().getUsername();
+			List<String> names = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
+			if (username.equals(o) || names.contains(username)) {
+				ItemMenu i = itemMenuService.getById(idItemMenu);
+				if (i != null) {
+					if (i.getImage() != null) {
+						i.setImage(null);
+						itemMenuService.save(i);
+						return ResponseEntity.ok().build();
+					} else {
+						return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+					}
+				} else {
+					return ResponseEntity.notFound().build();
+				}
+			} else {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			}
+		} else {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 }
