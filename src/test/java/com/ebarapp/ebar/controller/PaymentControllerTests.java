@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ebarapp.ebar.service.RedSysService;
+import com.ebarapp.ebar.model.BraintreeResponse;
+import com.ebarapp.ebar.service.BraintreeService;
 import com.stripe.model.PaymentMethod;
 import com.stripe.model.PaymentMethod.Card;
 
@@ -62,7 +63,7 @@ class PaymentControllerTests {
     private BarService barService;
 
     @MockBean
-    private RedSysService redSysService;
+    private BraintreeService braintreeService;
 
     @BeforeEach
     void setUp() throws StripeException {

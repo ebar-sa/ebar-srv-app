@@ -3,13 +3,14 @@ package com.ebarapp.ebar.controller;
 
 import com.ebarapp.ebar.configuration.security.payload.request.SubscriptionRequest;
 import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.RedSysRequest;
-import com.ebarapp.ebar.model.RedSysResponse;
+import com.ebarapp.ebar.model.BraintreeRequest;
+import com.ebarapp.ebar.model.BraintreeResponse;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.RedSysService;
+import com.ebarapp.ebar.service.BraintreeService;
 import com.ebarapp.ebar.service.StripeService;
 import com.ebarapp.ebar.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.model.*;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class PaymentController {
     private BarService barService;
 
     @Autowired
-    private RedSysService redSysService;
+    private BraintreeService braintreeService;
 
     public PaymentController(StripeService stripeService) {
         this.stripeService = stripeService;
@@ -232,9 +233,20 @@ public class PaymentController {
     }
 
     @PostMapping("/bill")
-    public ResponseEntity<RedSysResponse> payBill(@Valid @RequestBody RedSysRequest request) {
-        RedSysResponse response = this.redSysService.payBill(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<BraintreeResponse> payBill(@Valid @RequestBody BraintreeRequest request) {
+        BraintreeResponse response;
+        try {
+            response = this.braintreeService.payBill(request);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (response.getErrors() != null) {
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            return ResponseEntity.ok().build();
+        }
+
     }
 
 
