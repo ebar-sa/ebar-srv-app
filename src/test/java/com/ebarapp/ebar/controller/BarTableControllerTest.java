@@ -55,6 +55,7 @@ class BarTableControllerTest {
 	private static final int TEST_TABLE5_ID = 24;
 	private static final int TEST_TABLE6_ID = 25;
 	private static final int TEST_BAR_ID = 10;
+	private static final String TOKEN_TEST_TABLE0 = "ihv-50k";
 	private static final String TOKEN_TEST_TABLE1 = "ihv-51k";
 	private static final String TOKEN_TEST_TABLE2 = "ihv-52f";
 	private static final String TOKEN_TEST_TABLE3 = "ihv-53f";
@@ -83,6 +84,7 @@ class BarTableControllerTest {
 	@MockBean
 	private EmployeeService employeeService;
 
+	private BarTable table0;
 	private BarTable table6;
 	private BarTable table5;
 	private BarTable table4;
@@ -125,6 +127,8 @@ class BarTableControllerTest {
 		
 		Client cl2 = new Client();
 		cl2.setUsername("userr");
+		
+		
 
 		bar = new Bar();
 		bar.setId(10);
@@ -156,7 +160,15 @@ class BarTableControllerTest {
 		b.setId(1);
 		b.setItemBill(sib);
 		
-
+		
+		table0 = new BarTable();
+		table0.setId(19);
+		table0.setBar(bar);
+		table0.setToken("ihv-50k");
+		table0.setName("mesa0");
+		table0.setSeats(4);
+		table0.setFree(true);
+		
 		table = new BarTable();
 		table.setId(20);
 		table.setBar(bar);
@@ -204,6 +216,10 @@ class BarTableControllerTest {
 		Client cl = new Client();
 		cl.setUsername("user");
 		cl.setTable(table2);
+		
+		Client cl3 = new Client();
+		cl3.setUsername("user1");
+		cl3.setTable(table0);
 	
 		table6 = new BarTable();
 		table6.setId(25);
@@ -221,6 +237,7 @@ class BarTableControllerTest {
 		Set<RoleType> roles = new HashSet<>();
 		roles.add(RoleType.ROLE_CLIENT);
 		cl.setRoles(roles);
+		cl3.setRoles(roles);
     
 		List<BarTable> tableList = new ArrayList<BarTable>();
 		tableList.add(table);
@@ -231,7 +248,12 @@ class BarTableControllerTest {
 
 		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
 		tablesForBar1.add(table);
+		tablesForBar1.add(table0);
 		bar.setBarTables(tablesForBar1);
+		
+		List<Client> clientsForTable0 = new ArrayList<Client>();
+		clientsForTable0.add(cl3);
+		table0.setClients(clientsForTable0);
 		
 		List<Client> clientsForTable = new ArrayList<Client>();
 		clientsForTable.add(cl);
@@ -244,12 +266,14 @@ class BarTableControllerTest {
 		given(this.tableService.findAllBarTable()).willReturn(tableListDelete);
 		given(this.barService.findBarById(10)).willReturn(bar);
 		given(this.tableService.findbyId(20)).willReturn(table);
+		given(this.tableService.findbyId(19)).willReturn(table0);
 		given(this.tableService.findbyId(21)).willReturn(table2);
 		given(this.tableService.findbyId(22)).willReturn(table3);
 		given(this.tableService.findbyId(23)).willReturn(table4);
 		given(this.tableService.findbyId(24)).willReturn(table5);
 		given(this.tableService.findbyId(25)).willReturn(table6);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE1)).willReturn(table);
+		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE0)).willReturn(table0);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE2)).willReturn(table2);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
@@ -262,6 +286,7 @@ class BarTableControllerTest {
 		given(this.tableService.getBarTablesByBarId(10)).willReturn(tablesForBar1);
 		given(this.clientService.getClientByUsername("user")).willReturn(cl);
 		given(this.clientService.getClientByUsername("userr")).willReturn(cl2);
+		given(this.clientService.getClientByUsername("user1")).willReturn(cl3);
 
 	}
 	
@@ -361,7 +386,7 @@ class BarTableControllerTest {
 	@Test
 	void testOcupateBarTableByToken() throws Exception {
 		this.mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE3)
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE0 + "/" +TEST_BAR_ID)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}

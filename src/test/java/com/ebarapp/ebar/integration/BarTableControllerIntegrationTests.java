@@ -48,6 +48,7 @@ class BarTableControllerIntegrationTests {
 	private static final int TEST_TABLE4_ID = 23;
 	private static final int TEST_TABLE5_ID = 24;
 	private static final int TEST_TABLE6_ID = 25;
+	private static final String TOKEN_TEST_TABLE0 = "ihv-50k";
 	private static final String TOKEN_TEST_TABLE1 = "ihv-51k";
 	private static final String TOKEN_TEST_TABLE2 = "ihv-52f";
 	private static final String TOKEN_TEST_TABLE3 = "ihv-53f";
@@ -73,6 +74,7 @@ class BarTableControllerIntegrationTests {
 	@MockBean
 	private BarTableRepository barTableRepository;
 
+	private BarTable table0;
 	private BarTable table;
 	private BarTable table2;
 	private BarTable table3;
@@ -148,11 +150,14 @@ class BarTableControllerIntegrationTests {
 		b.setId(1);
 		b.setItemBill(sib);
 
+		table0 = new BarTable();
+		table0.setId(19);
+		table0.setBar(bar);
+		table0.setToken("ihv-50k");
+		table0.setName("mesa0");
+		table0.setSeats(4);
+		table0.setFree(true);
 		
-
-		
-		Client cl2 = new Client(); 
-		cl2.setUsername("userr");
 		
 		table = new BarTable();
 		table.setId(20);
@@ -171,9 +176,18 @@ class BarTableControllerIntegrationTests {
 		table2.setFree(false);
 		table2.setBill(b);
 		
+		
+		Client cl2 = new Client(); 
+		cl2.setUsername("userr");
+		
 		Client cl = new Client();
 		cl.setUsername("user");
 		cl.setTable(table2);
+		
+		Client cl3 = new Client();
+		cl3.setUsername("user1");
+		cl3.setTable(table0);
+		
 		
 		table3 = new BarTable();
 		table3.setId(22);
@@ -216,16 +230,23 @@ class BarTableControllerIntegrationTests {
 
 		Set<RoleType> roles2 = new HashSet<>();
 		roles2.add(RoleType.ROLE_OWNER);
+		owner.setRoles(roles2);
 		
 		Set<RoleType> roles = new HashSet<>();
 		roles.add(RoleType.ROLE_CLIENT);
 		cl.setRoles(roles);
 		us.setRoles(roles);
-		owner.setRoles(roles2);
+		cl3.setRoles(roles);
+
 		
 		Set<BarTable> tablesForBar1 = new HashSet<BarTable>();
 		tablesForBar1.add(table);
+		tablesForBar1.add(table0);
 		bar.setBarTables(tablesForBar1);
+		
+		List<Client> clientsForTable0 = new ArrayList<Client>();
+		clientsForTable0.add(cl3);
+		table0.setClients(clientsForTable0);
 		
 		List<Client> clientsForTable = new ArrayList<Client>();
 		clientsForTable.add(cl);
@@ -246,6 +267,7 @@ class BarTableControllerIntegrationTests {
 		given(this.barTableRepository.findById(24)).willReturn(Optional.of(table5));
 		given(this.barTableRepository.findById(25)).willReturn(Optional.of(table6));
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE1)).willReturn(table);
+		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE0)).willReturn(table0);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE2)).willReturn(table2);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE3)).willReturn(table3);
 		given(this.barTableRepository.findByToken(TOKEN_TEST_TABLE4)).willReturn(table4);
@@ -258,6 +280,7 @@ class BarTableControllerIntegrationTests {
 		given(this.clientRepository.save(cl)).willReturn(cl);
 		given(this.clientRepository.findClientByUsername("user")).willReturn(Optional.of(cl));
 		given(this.clientRepository.findClientByUsername("userr")).willReturn(Optional.of(cl2));
+		given(this.clientRepository.findClientByUsername("user1")).willReturn(Optional.of(cl3));
 
 	}
 
@@ -357,7 +380,7 @@ class BarTableControllerIntegrationTests {
 	@Test
 	void testOcupateBarTableByToken() throws Exception {
 		this.mockMvc.perform(
-				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE3)
+				MockMvcRequestBuilders.get("/api/tables/autoOccupateTable/" + TOKEN_TEST_TABLE0 + "/" + TEST_BAR_ID)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
