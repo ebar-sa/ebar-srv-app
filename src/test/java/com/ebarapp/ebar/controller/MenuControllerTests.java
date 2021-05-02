@@ -223,17 +223,9 @@ class MenuControllerTests {
 		"OWNER"
 	})
 	void testGetMenuById() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bares/" + MenuControllerTests.TEST_PRUEBA_BAR_ID + "/menu").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("id", Matchers.hasToString(String.valueOf(MenuControllerTests.TEST_PRUEBA_MENU_ID))));
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bares/" + MenuControllerTests.TEST_PRUEBA_BAR_ID + "/menu")).andExpect(MockMvcResultMatchers.status().isOk());
 	}
 
-//	@Test
-//	@WithMockUser(username = "prueba2", roles = {
-//		"OWNER"
-//	})
-//	void testNotGetMenuFailOwner() throws Exception {
-//		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bares/" + MenuControllerTests.TEST_PRUEBA_BAR_ID + "/menu").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isForbidden());
-//	}
 
 	@Test
 	@WithMockUser(username = "prueba", roles = {
