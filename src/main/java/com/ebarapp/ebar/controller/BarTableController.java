@@ -258,12 +258,14 @@ public class BarTableController {
 
 	}
 
-	@GetMapping("/autoOccupateTable/{token}")
+	@GetMapping("/autoOccupateTable/{token}/{barId}")
 	@PreAuthorize("hasRole('CLIENT')")
-	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("token") final String token) {
+	public ResponseEntity<BarTable> ocupateBarTableByToken(@PathVariable("token") final String token, @PathVariable("barId") Integer barId) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		BarTable barTable = this.barTableService.findBarTableByToken(token);
-		if (barTable != null) {
+		Bar bar = this.barService.findBarById(barId);
+		Boolean barTableIsInTheBar = bar.getBarTables().stream().anyMatch(x -> x.getId().equals(barTable.getId()));
+		if (barTable != null && barTableIsInTheBar) {
 			User user = this.barTableService.getClientByPrincipalUserName(ud.getUsername());
 			Client client = new Client(user, barTable);
 			this.clientService.modifyClientTable(barTable.getId(), ud.getUsername());
