@@ -13,6 +13,8 @@ before_install:
 - mysql -u root -e 'CREATE DATABASE ebarbbdd;'
 - mysql -u root -e "CREATE USER 'ebar'@'localhost' IDENTIFIED BY '@Q1R2s3u4';"
 - mysql -u root -e "GRANT ALL ON ebarbbdd.* TO 'ebar'@'localhost';"
+git:
+  depth: false
 addons:
   sonarcloud:
     organization: ebar-sa
