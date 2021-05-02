@@ -240,6 +240,10 @@ class BarTableControllerTest {
 		List<Client> clientsForTable2 = new ArrayList<Client>();
 		table3.setClients(clientsForTable2);
 
+		Map<Integer, Object> map = new HashMap<>();
+		map.put(0, table2);
+		map.put(1, b);
+
 		given(this.tableService.findAllBarTable()).willReturn(tableList);
 		given(this.tableService.findAllBarTable()).willReturn(tableListDelete);
 		given(this.barService.findBarById(10)).willReturn(bar);
@@ -249,6 +253,8 @@ class BarTableControllerTest {
 		given(this.tableService.findbyId(23)).willReturn(table4);
 		given(this.tableService.findbyId(24)).willReturn(table5);
 		given(this.tableService.findbyId(25)).willReturn(table6);
+		given(this.tableService.freeTable(20)).willReturn(new HashMap<>());
+		given(this.tableService.freeTable(21)).willReturn(map);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE1)).willReturn(table);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE2)).willReturn(table2);
 		given(this.tableService.findBarTableByToken(TOKEN_TEST_TABLE3)).willReturn(table3);

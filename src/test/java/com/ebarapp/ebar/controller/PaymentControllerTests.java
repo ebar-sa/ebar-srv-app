@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ebarapp.ebar.model.BraintreeResponse;
-import com.ebarapp.ebar.service.BraintreeService;
+import com.ebarapp.ebar.service.*;
 import com.stripe.model.PaymentMethod;
 import com.stripe.model.PaymentMethod.Card;
 
@@ -35,9 +35,6 @@ import static org.mockito.BDDMockito.given;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.model.type.RoleType;
-import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.StripeService;
-import com.ebarapp.ebar.service.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Subscription;
 
@@ -61,6 +58,9 @@ class PaymentControllerTests {
 
     @MockBean
     private BarService barService;
+
+    @MockBean
+    private BarTableService barTableService;
 
     @MockBean
     private BraintreeService braintreeService;
