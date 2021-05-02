@@ -1,5 +1,6 @@
 package com.ebarapp.ebar.service;
 
+import com.ebarapp.ebar.model.Owner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +29,14 @@ public class UserService implements UserDetailsService {
 
     public User getByUsername(String username) throws UsernameNotFoundException {
         return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    }
+
+    public Owner getOwnerByUsername(String username) {
+        return this.userRepository.findOwnerByUsername(username);
+    }
+
+    public Owner getOwnerByBarTableId(Integer barTableId) {
+        return this.userRepository.getOwnerByBarTableId(barTableId);
     }
 
     public Optional<User> getUserByUsername(String username) {

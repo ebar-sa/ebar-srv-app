@@ -6,10 +6,7 @@ import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BraintreeRequest;
 import com.ebarapp.ebar.model.BraintreeResponse;
 import com.ebarapp.ebar.model.User;
-import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.BraintreeService;
-import com.ebarapp.ebar.service.StripeService;
-import com.ebarapp.ebar.service.UserService;
+import com.ebarapp.ebar.service.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.model.*;
 import com.stripe.net.Webhook;
@@ -43,6 +40,9 @@ public class PaymentController {
 
     @Autowired
     private BarService barService;
+
+    @Autowired
+    private BarTableService barTableService;
 
     @Autowired
     private BraintreeService braintreeService;
@@ -232,18 +232,18 @@ public class PaymentController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/bill")
-    public ResponseEntity<BraintreeResponse> payBill(@Valid @RequestBody BraintreeRequest request) {
+    @PostMapping("/bill/{id}")
+    public ResponseEntity<BraintreeResponse> payBill(@Valid @RequestBody BraintreeRequest request, @PathVariable("id") Integer tableId) {
         BraintreeResponse response;
         try {
-            response = this.braintreeService.payBill(request);
+            response = this.braintreeService.payBill(request, tableId);
         } catch (JsonProcessingException e) {
             return ResponseEntity.badRequest().build();
         }
-
         if (response.getErrors() != null) {
             return ResponseEntity.badRequest().body(response);
         } else {
+            this.barTableService.freeTable(tableId);
             return ResponseEntity.ok().build();
         }
 

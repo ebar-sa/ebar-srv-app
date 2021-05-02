@@ -5,6 +5,7 @@ import com.ebarapp.ebar.model.BraintreeRequest;
 import com.ebarapp.ebar.model.BraintreeResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -12,18 +13,21 @@ import java.math.BigDecimal;
 @Service
 public class BraintreeService {
 
-    private static final BraintreeGateway gateway = new BraintreeGateway(
-            Environment.SANDBOX,
-            "j4hyq9c7ff2jmc3f",
-            "mjhcytfk8qymk529",
-            "1429112210645221ee1ac895b3ddab70"
-    );
+    @Autowired
+    private UserService userService;
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public BraintreeResponse payBill(BraintreeRequest request) throws JsonProcessingException {
+    public BraintreeResponse payBill(BraintreeRequest request, Integer barTableId) throws JsonProcessingException {
 
-       var response = new BraintreeResponse();
+        var response = new BraintreeResponse();
+        var owner = this.userService.getOwnerByBarTableId(barTableId);
+        var gateway = new BraintreeGateway(
+                Environment.SANDBOX,
+                owner.getBraintreeMerchantId(),
+                owner.getBraintreePublicKey(),
+                owner.getBraintreePrivateKey()
+        );
 
         TransactionRequest t = new TransactionRequest()
                 .amount(BigDecimal.valueOf(request.getAmount()))
