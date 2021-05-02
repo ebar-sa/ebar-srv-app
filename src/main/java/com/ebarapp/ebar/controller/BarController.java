@@ -15,6 +15,7 @@ import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.BarCapacity;
 import com.ebarapp.ebar.model.dtos.BarCreateDTO;
 import com.ebarapp.ebar.model.dtos.BarDTO;
+import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 
@@ -46,6 +47,9 @@ public class BarController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ClientService clientService;
 
     private static final String ROLE_OWNER = "ROLE_OWNER";
     
@@ -165,7 +169,7 @@ public class BarController {
 		List<BarCapacity> res = new ArrayList<>();
 
 		for(Bar b : bares) {
-			if (!b.isSubscriptionActive()) continue;
+			if (!b.isSubscriptionActive() && authorities.contains(ROLE_CLIENT)) continue;
 
 			Integer numeroMesasLibres = 0;
 			Integer disabled = 0;
@@ -427,5 +431,22 @@ public class BarController {
 		}
 		return new ResponseEntity<>(listBarSearch, HttpStatus.OK);
 	}
+
+
+	@GetMapping("barClient/{username}")
+	@PreAuthorize("hasRole('CLIENT')")
+	public ResponseEntity<Bar> getBarForClient(@PathVariable("username") final String username) {
+		Client client = this.clientService.getClientByUsername(username);
+		if(client != null) {
+			BarTable table = client.getTable();
+			if (table != null) {
+				return new ResponseEntity<>(table.getBar(), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+		}
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
 
 }
