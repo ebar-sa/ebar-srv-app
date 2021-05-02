@@ -1,6 +1,12 @@
 
 package com.ebarapp.ebar.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ebarapp.ebar.model.Bar;
+import com.ebarapp.ebar.model.ItemMenu;
 import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.service.BarService;
 
@@ -38,13 +45,21 @@ public class MenuController {
 
 	@GetMapping("/bares/{idBar}/menu")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<Menu> getMenu(@PathVariable("idBar") final Integer idBar) {
+	public ResponseEntity<Map<String, List<ItemMenu>>> getMenu(@PathVariable("idBar") final Integer idBar) {
 		Bar b = barService.findBarById(idBar);
 		if (b != null) {
 			Menu m = b.getMenu();
-			if (m.getId() != null)
-				return ResponseEntity.ok(m);
-			else
+			if (m.getId() != null) {
+				Map<String, List<ItemMenu>> mapMenu = new TreeMap<>();
+				List<String> categories = new ArrayList<>(m.getCategories());
+				List<ItemMenu> items = new ArrayList<>(m.getItems());
+				for (String c : categories) {
+					List<ItemMenu> itemCategory = items.stream().filter(x -> x.getCategory().equals(c))
+							.collect(Collectors.toList());
+					mapMenu.put(c, itemCategory);
+				}
+				return ResponseEntity.ok(mapMenu);
+			} else
 				return ResponseEntity.notFound().build();
 		} else
 			return ResponseEntity.notFound().build();

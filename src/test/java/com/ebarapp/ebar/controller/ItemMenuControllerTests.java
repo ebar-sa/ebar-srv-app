@@ -4,40 +4,26 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ebarapp.ebar.model.*;
+import com.ebarapp.ebar.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.Employee;
-import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.model.Menu;
-import com.ebarapp.ebar.model.Owner;
-import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.BillService;
-import com.ebarapp.ebar.service.ItemMenuService;
-import com.ebarapp.ebar.service.MenuService;
-
-@ExtendWith(SpringExtension.class)			
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-@ActiveProfiles(profiles = "dev")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-//@WebMvcTest(controllers = ItemMenuController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@WebMvcTest(controllers = ItemMenuController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
 class ItemMenuControllerTests {
 
 	private static final int TEST_BAR_ID = 1;
@@ -62,6 +48,9 @@ class ItemMenuControllerTests {
 	@MockBean
 	private BillService billService;
 
+	@MockBean
+	private ItemBillService itemBillService;
+
 	@BeforeEach
 	void setUp() {
 
@@ -78,6 +67,35 @@ class ItemMenuControllerTests {
 		b.setOwner(o);
 		Set<Employee> e = new HashSet<>();
 		b.setEmployees(e);
+
+		BarTable table = new BarTable();
+		table.setId(20);
+		table.setBar(b);
+		table.setToken("ihv-51k");
+		table.setName("mesa1");
+		table.setSeats(4);
+		table.setFree(true);
+
+		Set<BarTable> barTables = new HashSet<>();
+		barTables.add(table);
+		b.setBarTables(barTables);
+
+		ItemMenu im = new ItemMenu();
+		im.setId(2);
+
+		Bill bill = new Bill();
+		bill.setId(1);
+		Set<ItemBill> sib = new HashSet<>();
+		ItemBill ib = new ItemBill();
+		ib.setId(1);
+		ib.setAmount(2);
+		ib.setItemMenu(im);
+		sib.add(ib);
+		ib.setId(1);
+		bill.setItemOrder(new HashSet<>());
+		bill.setItemBill(sib);
+
+		table.setBill(bill);
 
 		Menu m = new Menu();
 		m.setId(TEST_MENU_ID);
@@ -157,6 +175,19 @@ class ItemMenuControllerTests {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(json))
 				.andExpect(MockMvcResultMatchers.status().isCreated());
+	}
+	
+	@Test
+	@WithMockUser(username = "pruebaIncorrecto", roles = {
+			"OWNER"
+	})
+	void testFailCreateItemMenu() throws Exception {
+		String json = "{\"id\":12,\"name\":\"Fanta Naranja\",\"description\":\"Bebida azucarada\",\"rationType\":\"Unidad\",\"price\":1.5,\"category\":\"Bebida\",\"image\":null,\"new\":false}\r\n";
+		
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bares/"+ TEST_BAR_ID+"/menu/itemMenu")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+				.andExpect(MockMvcResultMatchers.status().isForbidden());
 	}
 	
 	@Test
@@ -277,4 +308,41 @@ class ItemMenuControllerTests {
 				.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_2_ID + "/delete"))
 				.andExpect(MockMvcResultMatchers.status().isForbidden());
 	}
+	
+	@Test
+	@WithMockUser(username = "prueba", roles = {
+			"OWNER"
+	})
+	void ItemMenuWithoutImageDeleteImage() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_ID + "/deleteImage"))
+		.andExpect(MockMvcResultMatchers.status().isForbidden());
+	}
+	
+	@Test
+	@WithMockUser(username = "pruebaIncorrecto", roles = {
+			"OWNER"
+	})
+	void rolIncorrectImageDeleteImage() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_ID + "/deleteImage"))
+		.andExpect(MockMvcResultMatchers.status().isForbidden());
+	}
+	
+	@Test
+	@WithMockUser(username = "prueba", roles = {
+			"OWNER"
+	})
+	void NotFoundItemMenuDeleteImage() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bares/" + TEST_BAR_ID + "/menu/itemMenu/" + TEST_INCORRECT_ITEM_MENU_ID + "/deleteImage"))
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
+	@Test
+	@WithMockUser(username = "prueba", roles = {
+			"OWNER"
+	})
+	void NotFoundBarDeleteImage() throws Exception {
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bares/" + TEST_INCORRECT_BAR_ID + "/menu/itemMenu/" + TEST_ITEM_MENU_ID + "/deleteImage"))
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
 }

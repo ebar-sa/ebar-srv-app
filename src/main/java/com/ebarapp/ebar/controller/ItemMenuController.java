@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.ebarapp.ebar.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.Bill;
-import com.ebarapp.ebar.model.Employee;
-import com.ebarapp.ebar.model.ItemBill;
-import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.dtos.ItemMenuDTO;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BillService;
@@ -106,6 +101,9 @@ public class ItemMenuController {
 					return ResponseEntity.notFound().build();
 				else {
 					ItemMenu itemMenu = new ItemMenu(itemDTO);
+					if (i.getImage() != null) {
+						itemMenu.setImage(i.getImage());
+					}
 					itemMenu.setId(idItemMenu);
 					itemMenuService.save(itemMenu);
 					return ResponseEntity.ok(itemMenu);
@@ -131,7 +129,8 @@ public class ItemMenuController {
 			if (username.equals(o) || names.contains(username)) {
 				ItemMenu i = itemMenuService.getById(idItemMenu);
 				if (i != null) {
-					List<Bill> bills = billService.findAll();
+					List<BarTable> barTables = new ArrayList<>(bar.getBarTables());
+					List<Bill> bills = barTables.stream().map(x->x.getBill()).collect(Collectors.toList());
 					for (Bill b : bills) {
 						List<ItemBill> bill = new ArrayList<>(b.getItemBill());
 						List<ItemBill> order = new ArrayList<>(b.getItemOrder());
@@ -142,7 +141,8 @@ public class ItemMenuController {
 						}
 						for (ItemBill or : order) {
 							if (or.getItemMenu().equals(i)) {
-								return ResponseEntity.status(HttpStatus.CONFLICT).build();							}
+								return ResponseEntity.status(HttpStatus.CONFLICT).build();
+							}
 						}
 					}
 					Menu m = bar.getMenu();
@@ -156,6 +156,37 @@ public class ItemMenuController {
 			}
 		}
 		return ResponseEntity.notFound().build();
+	}
+
+	@DeleteMapping("/bares/{idBar}/menu/itemMenu/{idItemMenu}/deleteImage")
+	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
+	public ResponseEntity<ItemMenu> deleteImageItemMenu(@PathVariable("idBar") Integer idBar,
+			@PathVariable("idItemMenu") Integer idItemMenu) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Bar bar = barService.findBarById(idBar);
+		if (bar != null) {
+			String o = bar.getOwner().getUsername();
+			List<String> names = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
+			if (username.equals(o) || names.contains(username)) {
+				ItemMenu i = itemMenuService.getById(idItemMenu);
+				if (i != null) {
+					if (i.getImage() != null) {
+						i.setImage(null);
+						itemMenuService.save(i);
+						return ResponseEntity.ok().build();
+					} else {
+						return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+					}
+				} else {
+					return ResponseEntity.notFound().build();
+				}
+			} else {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			}
+		} else {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 }
