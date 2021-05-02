@@ -14,6 +14,8 @@ import com.ebarapp.ebar.repository.BarRepository;
 import com.ebarapp.ebar.repository.BarTableRepository;
 
 import com.ebarapp.ebar.repository.ClientRepository;
+import com.ebarapp.ebar.repository.ItemBillRepository;
+import com.ebarapp.ebar.service.ItemBillService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +75,9 @@ class BarTableControllerIntegrationTests {
 	
 	@MockBean
 	private BarTableRepository barTableRepository;
+
+	@MockBean
+	private ItemBillRepository itemBillRepository;
 
 	private BarTable table0;
 	private BarTable table;
@@ -157,7 +162,6 @@ class BarTableControllerIntegrationTests {
 		table0.setName("mesa0");
 		table0.setSeats(4);
 		table0.setFree(true);
-		
 		
 		table = new BarTable();
 		table.setId(20);

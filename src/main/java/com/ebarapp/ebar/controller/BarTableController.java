@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.ebarapp.ebar.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +37,6 @@ import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.Menu;
 import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.model.dtos.BarTableDTO;
-import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.BarTableService;
-import com.ebarapp.ebar.service.BillService;
-import com.ebarapp.ebar.service.ClientService;
-import com.ebarapp.ebar.service.EmployeeService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -61,6 +57,9 @@ public class BarTableController {
 
 	@Autowired
 	private EmployeeService	employeeService;
+
+	@Autowired
+	private ItemBillService itemBillService;
 
     private static final String ROLE_OWNER = "ROLE_OWNER";
     
@@ -236,8 +235,13 @@ public class BarTableController {
 				barTable.setToken(token);
 				Bill b = this.barTableService.getBillByTableId(barTable.getId());
 				if (b.getId() != null) {
+					Set<ItemBill> itemBills = new HashSet<>(b.getItemBill());
 					b.setItemBill(new HashSet<>());
 					b.setItemOrder(new HashSet<>());
+					for(ItemBill ib : itemBills) {
+						ib.setItemMenu(null);
+						itemBillService.removeItemBill(ib.getId());
+					}
 					this.billService.createBill(b);
 					barTable.setBill(b);
 				}
