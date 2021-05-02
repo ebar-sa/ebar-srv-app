@@ -3,6 +3,7 @@ package com.ebarapp.ebar.controller;
 import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,6 +75,9 @@ class BarControllerTests {
     private UserService userService;
 
     @MockBean
+    private ClientService clientService;
+
+    @MockBean
     private DBImageService dbImageService;
 
     private Bar bar;
@@ -104,6 +108,16 @@ class BarControllerTests {
         owner.setUsername(TEST_OWNER_USERNAME);
         owner.setPassword(TEST_OWNER_PASSWORD);
         owner.setRoles(roles);
+
+        Client client = new Client();
+        client.setFirstName(TEST_USER_FIRST_NAME);
+        client.setLastName(TEST_USER_LAST_NAME);
+        client.setDni(TEST_OWNER_DNI);
+        client.setEmail(TEST_USER_EMAIL);
+        client.setPhoneNumber(TEST_USER_PHONE_NUMBER);
+        client.setUsername(TEST_USER_USERNAME);
+        client.setPassword(TEST_USER_PASSWORD);
+        client.setRoles(roles);
 
         List<Bar> allBares = new ArrayList<>();
         Set<BarTable> barTables = new HashSet<>();
@@ -186,6 +200,7 @@ class BarControllerTests {
         given(this.dbImageService.getimageById(1)).willReturn(image);
         given(this.dbImageService.getimageById(2)).willReturn(image2);
         given(this.dbImageService.getimageById(3)).willReturn(null);
+        given(this.clientService.getClientByUsername(TEST_USER_USERNAME)).willReturn(client);
 
     }
 
@@ -416,5 +431,12 @@ class BarControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "user", roles = { "CLIENT" })
+    @Test
+    void testBarForClient() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/barClient/" + TEST_USER_USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
     }
 }
