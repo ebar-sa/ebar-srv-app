@@ -3,6 +3,7 @@ package com.ebarapp.ebar.controller;
 import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
+import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,6 +75,9 @@ class BarControllerTests {
     private UserService userService;
 
     @MockBean
+    private ClientService clientService;
+
+    @MockBean
     private DBImageService dbImageService;
 
     private Bar bar;
@@ -105,12 +109,23 @@ class BarControllerTests {
         owner.setPassword(TEST_OWNER_PASSWORD);
         owner.setRoles(roles);
 
+        Client client = new Client();
+        client.setFirstName(TEST_USER_FIRST_NAME);
+        client.setLastName(TEST_USER_LAST_NAME);
+        client.setDni(TEST_OWNER_DNI);
+        client.setEmail(TEST_USER_EMAIL);
+        client.setPhoneNumber(TEST_USER_PHONE_NUMBER);
+        client.setUsername(TEST_USER_USERNAME);
+        client.setPassword(TEST_USER_PASSWORD);
+        client.setRoles(roles);
+
         List<Bar> allBares = new ArrayList<>();
         Set<BarTable> barTables = new HashSet<>();
 
         BarTable barTable = new BarTable();
         barTable.setName("Mesa 1");
         barTable.setFree(true);
+        barTable.setAvailable(true);
         barTables.add(barTable);
 
         bar = new Bar();
@@ -118,7 +133,7 @@ class BarControllerTests {
         bar.setName("Pizza by Alfredo");
         bar.setDescription("Restaurant");
         bar.setContact("alfredo@gmail.com");
-        bar.setLocation("Pennsylvania");
+        bar.setLocation("Calle Este, 18, 41409 Écija, Sevilla");
         bar.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
@@ -162,7 +177,7 @@ class BarControllerTests {
         bar3.setName("Pizza by Antonio");
         bar3.setDescription("Restaurant");
         bar3.setContact("paco@gmail.com");
-        bar3.setLocation("Pennsylvania");
+        bar3.setLocation("Calle Este, 18, 41409 Écija, Sevilla");
         bar3.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
         bar3.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
         bar3.setPaidUntil(Date.from(Instant.parse("2020-01-01T22:30:00.00Z")));
@@ -176,13 +191,16 @@ class BarControllerTests {
         given(this.barService.findBarById(TEST_BAR2_ID)).willReturn(bar2);
         given(this.barService.findBarById(TEST_BAR3_ID)).willReturn(bar3);
         given(this.barService.findAllBar()).willReturn(allBares);
-
+        given(this.barService.getBarsBySearch("Pizza")).willReturn(allBares);
+        given(this.barService.findAllBarByOwner(owner)).willReturn(allBares);
+        
         given(this.userService.getUserByUsername("admin")).willReturn(Optional.of(user));
         given(this.userService.getUserByUsername("admin2")).willReturn(Optional.of(owner));
 
         given(this.dbImageService.getimageById(1)).willReturn(image);
         given(this.dbImageService.getimageById(2)).willReturn(image2);
         given(this.dbImageService.getimageById(3)).willReturn(null);
+        given(this.clientService.getClientByUsername(TEST_USER_USERNAME)).willReturn(client);
 
     }
 
@@ -218,12 +236,59 @@ class BarControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
     @Test
-    void testGetAllTablesAndCapacity() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+    void testGetAllTablesAndCapacityCorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username="test", authorities="ROLE_OWNER")
+    @Test
+    void testGetAllTablesAndCapacityCorrectLocationOwner() throws Exception {
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllTablesAndCapacityWrongLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetBarsByCorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": \"37.589696\",\n \"lng\": \"-4.983041\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_OWNER")
+    @Test
+    void testGetBarsByCorrectLocationOwner() throws Exception {
+    	String json = "{ \n \"lat\": \"37.589696\",\n \"lng\": \"-4.983041\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetBarsByIncorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
     }
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
@@ -252,7 +317,9 @@ class BarControllerTests {
 
     @Test
     void shouldNotGetAllTablesAndCapacity() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -353,5 +420,23 @@ class BarControllerTests {
     void failureDeleteBarImageNotOwner() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/1"))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void successGetBarBySearch() throws  Exception {
+        String json = "{\"lat\": 37.57549886736554, \"lng\": -4.998964040574663}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/search/Pizza")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "user", roles = { "CLIENT" })
+    @Test
+    void testBarForClient() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/barClient/" + TEST_USER_USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
     }
 }

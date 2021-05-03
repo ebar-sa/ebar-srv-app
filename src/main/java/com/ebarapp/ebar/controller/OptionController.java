@@ -1,8 +1,6 @@
 package com.ebarapp.ebar.controller;
 
-import com.ebarapp.ebar.model.Bar;
-import com.ebarapp.ebar.model.Option;
-import com.ebarapp.ebar.model.Voting;
+import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.OptionDTO;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BarTableService;
@@ -21,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -129,11 +129,35 @@ public class OptionController {
         return new ResponseEntity<>(option, HttpStatus.OK);
     }
 
+    @GetMapping("/bar/{barId}/username/{username}")
+    @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE') or hasRole('CLIENT')")
+    public ResponseEntity<Boolean> userIsValidVoter(@PathVariable("barId") Integer barId, @PathVariable("username") String username) {
+        Boolean res = false;
+        Integer i = 0;
+        Bar bar = this.barService.findBarById(barId);
+        if (bar == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<BarTable> tables = new ArrayList<>(bar.getBarTables());
+        if (tables.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        while (i < tables.size()) {
+            List <String> clientsInATable = tables.get(i).getClients().stream().map(Client::getUsername).collect(Collectors.toList());
+            if (clientsInATable.contains(username)) {
+                res = true;
+                break;
+            }
+            i++;
+        }
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
     @PostMapping("bar/{barId}/voting/{votingId}/option/{optionId}/vote")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<Option> vote(@PathVariable("barId") Integer barId,@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId, @RequestBody String token){
+    public ResponseEntity<Option> vote(@PathVariable("barId") Integer barId,@PathVariable("votingId") Integer votingId, @PathVariable("optionId") Integer optionId){
         UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (ud == null){
+        if (ud == null) {
             return ResponseEntity.notFound().build();
         }
         Bar updatedBar = this.barService.findBarById(barId);
@@ -144,11 +168,24 @@ public class OptionController {
             return ResponseEntity.badRequest().build();
         }
         //The user must verify he is in the bar
-        List<String> allValidTokens = barTableService.getAllValidTokensByBarId(barId);
-        if (! allValidTokens.contains(token)) {
+        Integer i = 0;
+        String username = ud.getUsername();
+        Boolean validVoter = false;
+        List<BarTable> tables = new ArrayList<>(updatedBar.getBarTables());
+        if (tables.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        while (i < tables.size()) {
+            List <String> clientsInATable = tables.get(i).getClients().stream().map(Client::getUsername).collect(Collectors.toList());
+            if (clientsInATable.contains(username)) {
+                validVoter = true;
+                break;
+            }
+            i++;
+        }
+        if (validVoter.equals(false)){
             return ResponseEntity.badRequest().build();
         }
-        String username = ud.getUsername();
         Option option = optionService.getOptionById(optionId);
         if (option == null) {
             return ResponseEntity.notFound().build();
@@ -170,7 +207,6 @@ public class OptionController {
         if (voting.getVotersUsernames().contains(username)){
             return ResponseEntity.badRequest().build();
         }
-
         Integer totalVotes = option.getVotes() + 1;
         option.setVotes(totalVotes);
         optionService.createOption(option);

@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Employee;
+import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.repository.BarRepository;
 
 @Service
@@ -20,6 +23,14 @@ public class BarService {
 
 	public List<Bar> findAllBar() {
 		return this.barRepository.findAll();
+	}
+	
+	public List<Bar> findAllBarByOwner(final User owner){
+		return this.barRepository.getBarByOwner(owner);
+	}
+	
+	public List<Bar> findAllBarByEmployee(final User employee){
+		return this.barRepository.getBarByEmployee(employee);
 	}
 
 	public Bar findBarById(final Integer id) {
@@ -48,4 +59,9 @@ public class BarService {
 		return res;
 	}
 
+	public List<Bar> getBarsBySearch(String text){
+		text = text.replace("_", " ");
+		String jpqlSearch = "%" + text + "%";
+		return this.barRepository.getBarsBySearch(jpqlSearch, PageRequest.of(0, 20));
+	}
 }

@@ -92,6 +92,10 @@
                     <groupId>org.junit.vintage</groupId>
                     <artifactId>junit-vintage-engine</artifactId>
                 </exclusion>
+                <exclusion>
+	                <groupId>org.skyscreamer</groupId>
+	                <artifactId>jsonassert</artifactId>
+            	</exclusion>
             </exclusions>
         </dependency>
 
@@ -112,6 +116,27 @@
             <artifactId>jackson-datatype-joda</artifactId>
             <version>2.1.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.braintreepayments.gateway</groupId>
+            <artifactId>braintree-java</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>5.3.4</version>
+        </dependency>
+        
+                
+        <dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20210307</version>
+		</dependency>
+        
+        
     </dependencies>
 
     <build>

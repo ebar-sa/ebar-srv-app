@@ -18,6 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -33,29 +34,28 @@ import com.ebarapp.ebar.service.ItemMenuService;
 @WebMvcTest(controllers = BillController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityAutoConfiguration.class)
 class BillControllerTests {
 
-	private static final int	TEST_MENU_ID		= 1;
-	private static final int	TEST_BAR_ID			= 1;
-	private static final int	TEST_BILL_ID		= 1;
-	private static final int	TEST_ITEM_ID		= 1;
-	private static final int	TEST_ITEMBILL_ID	= 4;
+	private static final int TEST_MENU_ID = 1;
+	private static final int TEST_BAR_ID = 1;
+	private static final int TEST_BILL_ID = 1;
+	private static final int TEST_ITEM_ID = 1;
+	private static final int TEST_ITEMBILL_ID = 4;
 
 	@Autowired
-	private MockMvc				mockMvc;
+	private MockMvc mockMvc;
 
 	@MockBean
-	private BillService			billService;
+	private BillService billService;
 
 	@MockBean
-	private ItemMenuService		itemMenuService;
+	private ItemMenuService itemMenuService;
 
 	@MockBean
-	private ItemBillService		itemBillService;
+	private ItemBillService itemBillService;
 
-	private Bill				bill;
-	private ItemMenu			itemMenu;
-	private ItemBill			itemBill;
-	private Optional<Bill>		billOpt;
-
+	private Bill bill;
+	private ItemMenu itemMenu;
+	private ItemBill itemBill;
+	private Optional<Bill> billOpt;
 
 	@BeforeEach
 	void setUp() {
@@ -125,67 +125,175 @@ class BillControllerTests {
 		BDDMockito.given(this.billService.getItemMenuByBillId(BillControllerTests.TEST_BILL_ID)).willReturn(imb);
 		BDDMockito.given(this.itemMenuService.findbyId(3)).willReturn(item3Opt);
 		BDDMockito.given(this.itemBillService.findbyId(1)).willReturn(itemBillOpt);
-		BDDMockito.given(this.itemBillService.findbyId(BillControllerTests.TEST_ITEMBILL_ID)).willReturn(Optional.of(this.itemBill));
-		
+		BDDMockito.given(this.itemBillService.findbyId(BillControllerTests.TEST_ITEMBILL_ID))
+				.willReturn(Optional.of(this.itemBill));
+
 		BDDMockito.given(this.itemBillService.findbyId(2)).willReturn(Optional.of(this.itemBill));
 		BDDMockito.given(this.itemMenuService.findbyId(2)).willReturn(Optional.of(itemMenuOrder));
 	}
 
-	// test para ver que se obtiene el order
-
 	@Test
 	void testBillOrderById() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/" + BillControllerTests.TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasSize(1)));
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/" + BillControllerTests.TEST_BILL_ID)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasSize(1)));
 	}
 
-	// test para ver que se obtiene la bill
 	@Test
 	void testBillById() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/" + BillControllerTests.TEST_BILL_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasSize(1)));
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/" + BillControllerTests.TEST_BILL_ID)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasSize(1)));
 	}
 
-	// test para ver que se añade al order
 	@Test
 	void testAddToOrder() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/" + BillControllerTests.TEST_ITEM_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("itemOrder",
-				Matchers.hasSize(2)));
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/"
+						+ BillControllerTests.TEST_ITEM_ID).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasSize(2)));
 
 	}
-	
+
 	@Test
 	void testAddToOrder2() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/2").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("itemOrder",
-				Matchers.hasSize(1)));
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/2")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemOrder", Matchers.hasSize(1)));
 
 	}
 
 	@Test
 	void testDontAddToOrder() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/5").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNotFound());
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToOrder/" + BillControllerTests.TEST_BILL_ID + "/5")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
-	// test para ver que se añade al bill
 	@Test
 	void testAddToBill() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/1").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("itemBill",
-				Matchers.hasSize(2)));
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasSize(2)));
 	}
 
 	@Test
 	void testDontAddToBill() throws Exception {
-		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/5").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNotFound());
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/5")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+
+	@Test
+	void testAddToBillRepeat() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/2")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasToString(
+						"[{\"id\":2,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+	}
+
+	@Test
+	void testAddAllToBill() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addAllToBill/" + BillControllerTests.TEST_BILL_ID + "/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasSize(2)));
+	}
+
+	@Test
+	void testDontAddAllToBill() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addAllToBill/" + BillControllerTests.TEST_BILL_ID + "/5")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+
+	@Test
+	void testAddAllToBillRepeat() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/addAllToBill/" + BillControllerTests.TEST_BILL_ID + "/2")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasToString(
+						"[{\"id\":2,\"amount\":4,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+	}
+
+	@Test
+	void testAddAmountToOrder() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders
+						.get("/api/bill/addAmountToOrder/" + BillControllerTests.TEST_BILL_ID + "/1" + "/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasSize(1)));
 	}
 	
-		@Test
-		void testAddToBillRepeat() throws Exception {
-			this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bill/addToBill/" + BillControllerTests.TEST_BILL_ID + "/2").contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("itemBill",
-					Matchers.hasToString("[{\"id\":2,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
-		}
+	@Test
+	void testAddAmountToOrder2() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders
+						.get("/api/bill/addAmountToOrder/" + BillControllerTests.TEST_BILL_ID + "/2" + "/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasSize(1)));
+	}
+
+	@Test
+	void testDontAddAmountToOrder() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders
+						.get("/api/bill/addAmountToOrder/" + BillControllerTests.TEST_BILL_ID + "/5" + "/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+
+	@Test
+	void successDeleteItemBill() throws Exception {
+
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/deleteOrder/" + BillControllerTests.TEST_BILL_ID + "/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
+	@Test
+	void failureDeleteItemBill() throws Exception {
+
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.get("/api/bill/deleteOrder/" + BillControllerTests.TEST_BILL_ID + "/7")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
+	@Test
+	void successDeleteBill() throws Exception {
+
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.delete("/api/bill/" + BillControllerTests.TEST_BILL_ID)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
+	@Test
+	void failureDeleteBill() throws Exception {
+		this.mockMvc
+				.perform(MockMvcRequestBuilders.delete("/api/bill/" + "/100000000000")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
 
 }

@@ -1,10 +1,13 @@
 
 package com.ebarapp.ebar.model;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -49,6 +52,10 @@ public class BarTable extends BaseEntity {
 	private Integer	seats;
 
 	@NotNull
+	@Column(name= "available")
+	private boolean available;
+	
+	@NotNull
 	@ManyToOne
 	private Bar		bar;
 
@@ -56,9 +63,7 @@ public class BarTable extends BaseEntity {
 	private Bill	bill;
 
 	
-	@OneToOne(fetch = FetchType.LAZY)
-	private Client	client;
-	
-	
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<Client> clients;
 
 }
