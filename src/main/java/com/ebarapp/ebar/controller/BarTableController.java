@@ -219,43 +219,14 @@ public class BarTableController {
 	@GetMapping("/freeTable/{id}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Map<Integer, Object>> freeTable(@PathVariable("id") final Integer id) {
-		Map<Integer, Object> res = new HashMap<>();
-		BarTable barTable = this.barTableService.findbyId(id);
-		String token = BarTableService.generarToken();
-
-		if (barTable != null) {
-			List<Client> clients = barTable.getClients();
-			if (!barTable.isFree()) {
-				if (!clients.isEmpty()) {
-					clients.stream().forEach(x->x.setTable(null));
-					clients.stream().forEach(x -> this.clientService.saveClient(x));
-				}
-				barTable.getClients().clear();
-				barTable.setFree(true);
-				barTable.setToken(token);
-				Bill b = this.barTableService.getBillByTableId(barTable.getId());
-				if (b.getId() != null) {
-					Set<ItemBill> itemBills = new HashSet<>(b.getItemBill());
-					b.setItemBill(new HashSet<>());
-					b.setItemOrder(new HashSet<>());
-					for(ItemBill ib : itemBills) {
-						ib.setItemMenu(null);
-						itemBillService.removeItemBill(ib.getId());
-					}
-					this.billService.createBill(b);
-					barTable.setBill(b);
-				}
-				this.barTableService.saveTable(barTable);
-				res.put(0, barTable);
-				res.put(1, b);
-				return new ResponseEntity<>(res, HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>(HttpStatus.CONFLICT);
-			}
+		Map<Integer, Object> res = this.barTableService.freeTable(id);
+		if (res == null) {
+			return ResponseEntity.notFound().build();
+		} else if (res.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).build();
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.ok(res);
 		}
-
 	}
 
 	@GetMapping("/autoOccupateTable/{token}/{barId}")
@@ -294,6 +265,7 @@ public class BarTableController {
 			newTable.setAvailable(true);
 			bar.getBarTables().add(newTable);
 			Bill b = new Bill();
+
 			this.billService.createBill(b);
 			newTable.setBill(b);
 			BarTable table = this.barTableService.saveTable(newTable);
@@ -377,6 +349,15 @@ public class BarTableController {
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+
+	@GetMapping("/checkPayment/{id}")
+	@PreAuthorize("hasRole('CLIENT')")
+	public ResponseEntity<Map<String, Boolean>> checkIfPaymentIsSet(@PathVariable("id") Integer id) {
+		Map<String, Boolean> result = new HashMap<>();
+		Boolean isSet = this.barTableService.checkIfPaymentIsSet(id);
+		result.put("paymentSet", isSet);
+		return ResponseEntity.ok(result);
 	}
 
 }

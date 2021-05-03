@@ -30,4 +30,7 @@ public interface BarTableRepository extends JpaRepository<BarTable, Integer> {
 	
 	@Query("SELECT bt.token FROM BarTable bt WHERE bt.bar.id = :id AND bt.free=false")
 	List<String> getAllValidTokenByBarId(@Param("id") int id);
+
+	@Query("SELECT CASE WHEN o.braintreeMerchantId IS NULL OR o.braintreePublicKey IS NULL OR o.braintreePrivateKey IS NULL THEN false ELSE true END FROM BarTable bt JOIN bt.bar b JOIN b.owner o WHERE bt.id = :id ")
+    Boolean checkIfPaymentIsSet(@Param("id") Integer id);
 }

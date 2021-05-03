@@ -11,10 +11,15 @@ public class LoginResponse {
 	private String email;
 	private String firstName;
 	private String lastName;
+	private String braintreeMerchantId;
+	private String braintreePublicKey;
+	private String braintreePrivateKey;
+
 	private List<String> roles;
 	
 	public LoginResponse(String token, String username, String dni, String email, String firstName,
-			String lastName, List<String> roles) {
+			String lastName, List<String> roles, String braintreeMerchantId, String braintreePublicKey,
+						 String braintreePrivateKey) {
 		super();
 		this.token = token;
 		this.username = username;
@@ -23,6 +28,9 @@ public class LoginResponse {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.roles = roles;
+		this.braintreeMerchantId = braintreeMerchantId;
+		this.braintreePublicKey = braintreePublicKey;
+		this.braintreePrivateKey = braintreePrivateKey;
 	}
 
 	public String getAccessToken() {
@@ -83,5 +91,29 @@ public class LoginResponse {
 
 	public void setDni(String dni) {
 		this.dni = dni;
+	}
+
+	public String getBraintreeMerchantId() {
+		return braintreeMerchantId;
+	}
+
+	public void setBraintreeMerchantId(String braintreeMerchantId) {
+		this.braintreeMerchantId = braintreeMerchantId;
+	}
+
+	public String getBraintreePublicKey() {
+		return braintreePublicKey;
+	}
+
+	public void setBraintreePublicKey(String braintreePublicKey) {
+		this.braintreePublicKey = braintreePublicKey;
+	}
+
+	public String getBraintreePrivateKey() {
+		return braintreePrivateKey;
+	}
+
+	public void setBraintreePrivateKey(String braintreePrivateKey) {
+		this.braintreePrivateKey = braintreePrivateKey;
 	}
 }

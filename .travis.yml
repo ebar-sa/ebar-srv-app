@@ -13,10 +13,12 @@ before_install:
 - mysql -u root -e 'CREATE DATABASE ebarbbdd;'
 - mysql -u root -e "CREATE USER 'ebar'@'localhost' IDENTIFIED BY '@Q1R2s3u4';"
 - mysql -u root -e "GRANT ALL ON ebarbbdd.* TO 'ebar'@'localhost';"
+git:
+  depth: false
 addons:
   sonarcloud:
     organization: ebar-sa
     token:
       secure: IJNkamnwu3W6v0WarV6mKLpeMYg14xOGzEzaK4zGOHN70470rDzurpVpbsZdozER1agT63ULvdf2iPtmAxATEQYaD/mFCi0D/q4+jTXa4gUoOfj6HBYtMRyYy7ypZmKFjDHXnnsCwQv9k0JP8xE6G8Ce/QwEkE6bpAvIzKgUHOWLeWQJ7nqQuz7BV0L7U2q+CyHolu02ySXkiV8K/CJ0T8e7oR3xQb7z0Rr7Y+DKEsOB/PO4IuLh8mbzu9i6eJqR9zkUom61IFvBjou+7Zh/uOFpT+Opj7yFnqKxLW8Wz839wtyY6jV5I5WDZLNju9ox+f80hiWFfAPjvK61ONn05ClBjvHHDlYwudS/IlJpkXhrho0IXxgtbpyruY2AdZzx5RCr8+MXX5NLTVz8X3a3EQMvqhy6/ypSXiloIbpr+/3P5pfzeM0s8LuFlWjcR9M0r2tIoL5MZF1DcZoFXas2OzUVEeQphuXs2Z6sB9yGfqKtzsHLSEvpCCHZJ7Y1hbK5XJudkwPKN9l/0R/EybmuDbR4+UiZvmvEY3dC2EZT3wl+Py62wIHZ4l75ezUIGFPDTRDzvnaTfJKGTSIKa2o8En7Ki0t5FfUVd2sAS9cgnJnzXTg9KmCFpq898uvBPPf2gTgJ4d1z9GBTxVBlVxOynvXTbewrOxaMhQo8P+iAwls=
 script:
-- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ebar-sa_ebar-srv-app -Dspring-boot.run.profiles=dev
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ebar-sa_ebar-srv-app -Dspring-boot.run.profiles=dev -Dsonar.javascript.exclusions= -Dsonar.typescript.exclusions=

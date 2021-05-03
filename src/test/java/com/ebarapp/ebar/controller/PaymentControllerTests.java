@@ -10,6 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.braintreegateway.ValidationError;
+import com.braintreegateway.ValidationErrorCode;
+import com.ebarapp.ebar.model.BraintreeRequest;
+import com.ebarapp.ebar.model.BraintreeResponse;
+import com.ebarapp.ebar.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.model.PaymentMethod;
 import com.stripe.model.PaymentMethod.Card;
 
@@ -28,14 +35,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Owner;
 import com.ebarapp.ebar.model.type.RoleType;
-import com.ebarapp.ebar.service.BarService;
-import com.ebarapp.ebar.service.StripeService;
-import com.ebarapp.ebar.service.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Subscription;
 
@@ -45,6 +52,12 @@ class PaymentControllerTests {
     private static final int TEST_BAR_ID = 10;
     
     private static final int TEST_BAR2_ID = 11;
+
+    private static final int TEST_BAR_TABLE_ID = 20;
+
+    private static final int TEST_BAR_TABLE_ID_2 = 21;
+
+    private static final int TEST_BAR_TABLE_ID_3 = 22;
     
     private static final String PAYMENT_METHOD = "token1";
 
@@ -60,8 +73,14 @@ class PaymentControllerTests {
     @MockBean
     private BarService barService;
 
+    @MockBean
+    private BarTableService barTableService;
+
+    @MockBean
+    private BraintreeService braintreeService;
+
     @BeforeEach
-    void setUp() throws StripeException {
+    void setUp() throws StripeException, JsonProcessingException {
         Set<RoleType> roles = new HashSet<>();
         roles.add(RoleType.ROLE_OWNER);
         
@@ -133,6 +152,11 @@ class PaymentControllerTests {
         pm.setCard(card);
         pm.setId("pm_token");
         pm.setCustomer(owner.getStripeId());
+
+        BraintreeResponse braintreeResponse = new BraintreeResponse();
+        BraintreeResponse braintreeResponse2 = new BraintreeResponse();
+        braintreeResponse2.setErrors(Collections.singletonList(
+                new ValidationError("number", ValidationErrorCode.CREDIT_CARD_NUMBER_IS_INVALID, "Card number is invalid")));
         
         given(this.stripeService.getCreditCardsByCustomerId(owner.getStripeId())).willReturn(Collections.singletonList(pm));
         given(this.stripeService.addCard(owner.getStripeId(), PAYMENT_METHOD)).willReturn(true);
@@ -151,6 +175,10 @@ class PaymentControllerTests {
         given(this.stripeService.createSubscription(owner.getStripeId(), bar2)).willReturn(subscription2);
         given(this.stripeService.getCustomerActiveSubscriptions(owner.getStripeId())).willReturn(subs);
         given(this.stripeService.cancelSubscription(owner.getStripeId(), bar.getId())).willReturn(true);
+
+        given(this.braintreeService.payBill(any(BraintreeRequest.class), eq(TEST_BAR_TABLE_ID))).willReturn(braintreeResponse);
+        given(this.braintreeService.payBill(any(BraintreeRequest.class), eq(TEST_BAR_TABLE_ID_2))).willReturn(braintreeResponse2);
+        given(this.braintreeService.payBill(any(BraintreeRequest.class), eq(TEST_BAR_TABLE_ID_3))).willThrow(new JsonProcessingException(""){});
     }
 
 	@WithMockUser(username = "owner", roles = { "OWNER" })
@@ -278,4 +306,59 @@ class PaymentControllerTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/payments/cancel/" + TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
 	}
+
+    @WithMockUser(username = "client", roles = { "CLIENT" })
+    @Test
+    void successPayBill() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> deviceData = new HashMap<>();
+        deviceData.put("related_to", "fsdfsdf");
+
+        BraintreeRequest request = new BraintreeRequest();
+        request.setAmount(10.00);
+        request.setDeviceData(deviceData);
+        request.setNonce("adfghjkl");
+        String value = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/payments/bill/" + TEST_BAR_TABLE_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(value))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithMockUser(username = "client", roles = { "CLIENT" })
+    @Test
+    void failurePayBillWithErrors() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> deviceData = new HashMap<>();
+        deviceData.put("related_to", "fsdfsdf");
+
+        BraintreeRequest request = new BraintreeRequest();
+        request.setAmount(10.00);
+        request.setDeviceData(deviceData);
+        request.setNonce("zxcvbm");
+        String value = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/payments/bill/" + TEST_BAR_TABLE_ID_2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(value))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username = "client", roles = { "CLIENT" })
+    @Test
+    void failurePayBillJsonFormatException() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        BraintreeRequest request = new BraintreeRequest();
+        request.setAmount(10.00);
+        request.setDeviceData("data");
+        request.setNonce("adfghjkl");
+        String value = objectMapper.writeValueAsString(request);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/payments/bill/" + TEST_BAR_TABLE_ID_3)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(value))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
 }

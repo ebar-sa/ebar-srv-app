@@ -25,6 +25,12 @@ public class Owner extends User {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Bar> bar;
 
+    private String braintreeMerchantId;
+
+    private String braintreePublicKey;
+
+    private String braintreePrivateKey;
+
     public Owner () {
     }
 

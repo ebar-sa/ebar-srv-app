@@ -5,19 +5,17 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.ebarapp.ebar.model.dtos.BraintreeDataDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ebarapp.ebar.configuration.security.jwt_configuration.JwtUtils;
 import com.ebarapp.ebar.configuration.security.payload.request.LoginRequest;
@@ -33,7 +31,7 @@ import com.ebarapp.ebar.model.mapper.UserDataMapper;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.UserService;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600, methods = {RequestMethod.PATCH, RequestMethod.POST})
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -52,21 +50,33 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(
+        String braintreeMerchantId = null;
+        String braintreePublicKey = null;
+        String braintreePrivateKey = null;
+
+        var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        User userDetails = (User) authentication.getPrincipal();
+        var userDetails = (User) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        if (roles.contains(RoleType.ROLE_OWNER.getName())) {
+            var owner = this.userService.getOwnerByUsername(userDetails.getUsername());
+            braintreeMerchantId = owner.getBraintreeMerchantId();
+            braintreePublicKey = owner.getBraintreePublicKey();
+            braintreePrivateKey = owner.getBraintreePrivateKey();
+        }
+
         return ResponseEntity.ok(new LoginResponse(jwt,
                 userDetails.getUsername(),
                 userDetails.getDni(),
-                userDetails.getEmail(), userDetails.getFirstName(), userDetails.getLastName(), roles));
+                userDetails.getEmail(), userDetails.getFirstName(), userDetails.getLastName(), roles,
+                braintreeMerchantId, braintreePublicKey, braintreePrivateKey));
     }
 
     @PostMapping("/signup")
@@ -139,6 +149,17 @@ public class AuthController {
                     .badRequest()
                     .body(new MessageResponse("Se ha producido un error. Por favor, inténtelo de nuevo más tarde."));
         }
+        return ResponseEntity.ok(new MessageResponse("¡Datos actualizados correctamente!"));
+    }
+
+    @PatchMapping("/updateBraintree")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<MessageResponse> patchBraintreeData(@Valid @RequestBody BraintreeDataDTO braintreeData) {
+        var owner = this.userService.getOwnerByUsername(braintreeData.getUsername());
+        owner.setBraintreeMerchantId(braintreeData.getMerchantId());
+        owner.setBraintreePublicKey(braintreeData.getPublicKey());
+        owner.setBraintreePrivateKey(braintreeData.getPrivateKey());
+        this.userService.saveUser(owner);
         return ResponseEntity.ok(new MessageResponse("¡Datos actualizados correctamente!"));
     }
 
