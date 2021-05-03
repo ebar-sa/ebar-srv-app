@@ -1,6 +1,7 @@
 
 package com.ebarapp.ebar.controller;
 
+import com.braintreegateway.exceptions.BraintreeException;
 import com.ebarapp.ebar.configuration.security.payload.request.SubscriptionRequest;
 import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BraintreeRequest;
@@ -237,7 +238,7 @@ public class PaymentController {
         BraintreeResponse response;
         try {
             response = this.braintreeService.payBill(request, tableId);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | BraintreeException e) {
             return ResponseEntity.badRequest().build();
         }
         if (response.getErrors() != null) {

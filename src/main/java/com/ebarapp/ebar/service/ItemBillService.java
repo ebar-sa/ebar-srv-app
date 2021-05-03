@@ -22,4 +22,8 @@ public class ItemBillService {
 	public ItemBill saveItemBill(final ItemBill itemBill) {
 		return this.itemBillRepository.save(itemBill);
 	}
+
+	public void deleteItemBillById(final Integer id) {
+		this.itemBillRepository.deleteById(id);
+	}
 }

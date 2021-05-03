@@ -131,6 +131,7 @@ public class BillController {
 		bill.getItemBill().add(b);
 		if (res.getAmount() == 1) {
 			bill.getItemOrder().remove(res);
+			this.itemBillService.deleteItemBillById(res.getId());
 		} else {
 			Integer a = res.getAmount();
 			a--;
@@ -146,6 +147,7 @@ public class BillController {
 				ib.setAmount(i);
 				if (res.getAmount() == 1) {
 					bill.getItemOrder().remove(res);
+					this.itemBillService.deleteItemBillById(res.getId());
 				} else {
 					Integer a = res.getAmount();
 					a--;
