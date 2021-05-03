@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,7 +40,7 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR_NAME = "Burger Food Porn";
     private static final String TEST_BAR_DESCRIPTION = "El templo de la hamburguesa.";
     private static final String TEST_BAR_CONTACT = "burgerfoodsevilla@gmail.com";
-    private static final String TEST_BAR_LOCATION = "Avenida de Finlandia, 24, Sevilla";
+    private static final String TEST_BAR_LOCATION = "Calle Este, 18, 41409 Écija, Sevilla";
     private static final Date TEST_BAR_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
     private static final Date TEST_BAR_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
@@ -64,7 +65,7 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR2_NAME = "Pizza by Alfredo";
     private static final String TEST_BAR2_DESCRIPTION = "Restaurant";
     private static final String TEST_BAR2_CONTACT = "alfredo@gmail.com";
-    private static final String TEST_BAR2_LOCATION = "Pennsylvania";
+    private static final String TEST_BAR2_LOCATION = "Calle Este, 18, 41409 Écija, Sevilla";
     private static final Date TEST_BAR2_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
     private static final Date TEST_BAR2_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
     private static final Date TEST_BAR2_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
@@ -120,6 +121,7 @@ class BarControllerIntegrationTests {
         BarTable barTable = new BarTable();
         barTable.setName("Mesa 1");
         barTable.setFree(true);
+        barTable.setAvailable(true);
         barTables.add(barTable);
 
         DBImage image1 = new DBImage();
@@ -147,6 +149,9 @@ class BarControllerIntegrationTests {
         bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setOwner(owner);
 
+        List<Bar> barSearch = new ArrayList<>();
+        barSearch.add(bar);
+
         Bar bar2 = new Bar();
         bar2.setId(TEST_BAR2_ID);
         bar2.setName(TEST_BAR2_NAME);
@@ -166,6 +171,7 @@ class BarControllerIntegrationTests {
         given(this.barRepository.getBarById(TEST_BAR_ID)).willReturn(bar);
         given(this.barRepository.getBarById(TEST_BAR2_ID)).willReturn(bar2);
         given(this.barRepository.findAll()).willReturn(bars);
+        given(this.barRepository.getBarsBySearch("Burguer", PageRequest.of(0,20))).willReturn(barSearch);
 
         given(this.userRepository.findByUsername("admin")).willReturn(Optional.of(user));
         given(this.userRepository.findByUsername("admin2")).willReturn(Optional.of(owner));
@@ -201,13 +207,42 @@ class BarControllerIntegrationTests {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
     @Test
-    void testGetAllTablesAndCapacity() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)));
+    void testGetAllTablesAndCapacityCorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
     }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllTablesAndCapacityIncorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllBarsMapCorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+    
+    @WithMockUser(username="test", authorities="ROLE_CLIENT")
+    @Test
+    void testGetAllBarsMapIncorrectLocation() throws Exception {
+    	String json = "{ \n \"lat\": null,\n \"lng\": null \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/map").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
+                .andExpect(status().isOk());
+    }
+
 
     @WithMockUser(username="test", authorities="ROLE_EMPLOYEE")
     @Test
@@ -219,7 +254,9 @@ class BarControllerIntegrationTests {
 
     @Test
     void shouldNotGetAllTablesAndCapacity() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON))
+    	String json = "{ \n \"lat\": \"37.57549886736554\",\n \"lng\": \"-4.998964040574663\" \n}";
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/capacity").contentType(MediaType.APPLICATION_JSON)
+        		.content(json))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -277,5 +314,16 @@ class BarControllerIntegrationTests {
     void failureDeleteImageInNotInBar() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/bar/"+ TEST_BAR2_ID +"/image/" + TEST_DBIMAGE2_ID))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @WithMockUser(username="user", roles={"CLIENT"})
+    @Test
+    void successGetBarBySearch() throws  Exception {
+        String json = "{\"lat\": 37.57549886736554, \"lng\": -4.998964040574663}";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/bar/search/Burger")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
