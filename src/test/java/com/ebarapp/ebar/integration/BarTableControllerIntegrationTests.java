@@ -154,6 +154,7 @@ class BarTableControllerIntegrationTests {
 		sib.add(ib);
 		b.setId(1);
 		b.setItemBill(sib);
+		b.setItemOrder(sib);
 
 		table0 = new BarTable();
 		table0.setId(19);

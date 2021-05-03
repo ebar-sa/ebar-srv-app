@@ -118,6 +118,7 @@ public class BarTableService {
 				var bill = this.barTableRepository.getBillByTableId(barTable.getId());
 				if (bill.getId() != null) {
 					Set<ItemBill> itemBills = new HashSet<>(bill.getItemBill());
+					itemBills.addAll(bill.getItemOrder());
 					bill.setItemBill(new HashSet<>());
 					bill.setItemOrder(new HashSet<>());
 					for(ItemBill ib : itemBills) {
