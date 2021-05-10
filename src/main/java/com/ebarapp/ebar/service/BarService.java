@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ebarapp.ebar.model.Bar;
@@ -51,8 +50,8 @@ public class BarService {
 
 	public Boolean isStaff(final Integer id, final String username) {
 		Boolean res = false;
-		Bar bar = this.findBarById(id);
-		List<String> employeesUsername = bar.getEmployees().stream().map(Employee::<String> getUsername).collect(Collectors.toList());
+		var bar = this.findBarById(id);
+		List<String> employeesUsername = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
 		if (bar.getOwner().getUsername().equals(username) || employeesUsername.contains(username)) {
 			res = true;
 		}

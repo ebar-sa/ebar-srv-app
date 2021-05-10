@@ -130,7 +130,7 @@ public class ItemMenuController {
 				ItemMenu i = itemMenuService.getById(idItemMenu);
 				if (i != null) {
 					List<BarTable> barTables = new ArrayList<>(bar.getBarTables());
-					List<Bill> bills = barTables.stream().map(x->x.getBill()).collect(Collectors.toList());
+					List<Bill> bills = barTables.stream().map(BarTable::getBill).collect(Collectors.toList());
 					for (Bill b : bills) {
 						List<ItemBill> bill = new ArrayList<>(b.getItemBill());
 						List<ItemBill> order = new ArrayList<>(b.getItemOrder());

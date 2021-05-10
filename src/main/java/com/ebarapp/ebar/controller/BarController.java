@@ -1,7 +1,6 @@
 package com.ebarapp.ebar.controller;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -19,7 +18,6 @@ import com.ebarapp.ebar.service.ClientService;
 import com.ebarapp.ebar.service.DBImageService;
 import com.ebarapp.ebar.service.UserService;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,13 +61,13 @@ public class BarController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Optional<User> optionalUser = this.userService.getUserByUsername(username);
-		if (! optionalUser.isPresent()) {
+		if (optionalUser.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 		Set<Bar> bars = new HashSet<>();
-		User user = optionalUser.get();
-		Owner owner = new Owner(user.getUsername(), user.getFirstName(), user.getLastName(), user.getDni(), user.getEmail(), user.getPhoneNumber(), user.getPassword(), user.getRoles(), bars);
-		Bar newBar = new Bar(newBarCreateDTO);
+		var user = optionalUser.get();
+		var owner = new Owner(user.getUsername(), user.getFirstName(), user.getLastName(), user.getDni(), user.getEmail(), user.getPhoneNumber(), user.getPassword(), user.getRoles(), bars);
+		var newBar = new Bar(newBarCreateDTO);
 		newBar.setOwner(owner);
 		bars.add(newBar);
 		owner.setBar(bars);
@@ -84,10 +82,10 @@ public class BarController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Optional<User> optionalUser = this.userService.getUserByUsername(username);
-		if (! optionalUser.isPresent()) {
+		if (optionalUser.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		Bar bar = barService.findBarById(id);
+		var bar = barService.findBarById(id);
 		if (bar == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -101,19 +99,19 @@ public class BarController {
 	
 	public Map<String, BigDecimal> getBarsByCoordinates(String completeAddress) {
 		try {
-			String surl = "https://maps.googleapis.com/maps/api/geocode/json?address="+URLEncoder.encode(completeAddress, "UTF-8")+"&key=AIzaSyANZc7ydpfQndh5qg-SWNHcBL9KwKh_jlA";
-			URL url = new URL(surl);
-			InputStream is = url.openConnection().getInputStream();
+			String surl = "https://maps.googleapis.com/maps/api/geocode/json?address="+URLEncoder.encode(completeAddress, StandardCharsets.UTF_8)+"&key=AIzaSyANZc7ydpfQndh5qg-SWNHcBL9KwKh_jlA";
+			var url = new URL(surl);
+			var is = url.openConnection().getInputStream();
 			
-			BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)); 
-			StringBuilder responseStrBuilder = new StringBuilder();
+			var streamReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+			var responseStrBuilder = new StringBuilder();
 	
 			String inputStr;
 			while ((inputStr = streamReader.readLine()) != null)
 			    responseStrBuilder.append(inputStr);
 			
-			JSONObject jo = new JSONObject(responseStrBuilder.toString());
-			JSONArray results = jo.getJSONArray("results");
+			var jo = new JSONObject(responseStrBuilder.toString());
+			var results = jo.getJSONArray("results");
 			Map<String, BigDecimal> ret = new HashMap<>();
 			if(results.length() > 0) {
 				JSONObject jsonObject;
@@ -155,17 +153,7 @@ public class BarController {
 	public ResponseEntity<List<BarCapacity>> getTablesAndCapacity(@Valid @RequestBody Map<String, String> location) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-		
-		List<Bar> bares = null;
-
-		if (authorities.contains(ROLE_OWNER)) {
-			bares = barService.findAllBarByOwner(userService.getByUsername(ud.getUsername()));
-		} else if (authorities.contains(ROLE_EMPLOYEE)){
-			bares = barService.findAllBarByEmployee(userService.getByUsername(ud.getUsername()));
-		} else {
-			bares = barService.findAllBar();
-		}
-		
+		List<Bar> bares = getBarsByUser();
 		List<BarCapacity> res = new ArrayList<>();
 
 		for(Bar b : bares) {
@@ -175,48 +163,43 @@ public class BarController {
 			Integer disabled = 0;
 			for(BarTable bt : b.getBarTables()) {
 				if (bt.isFree() && bt.isAvailable()) {
-					numeroMesasLibres += 1;
+					numeroMesasLibres++;
 				}
 				if (!bt.isAvailable()) {
 					disabled++;
 				}
 			}
 			String capacity = numeroMesasLibres + "/" + (b.getBarTables().size() - disabled);
-			BarCapacity ba = new BarCapacity();
+			var barCapacity = new BarCapacity();
 			Map<String, BigDecimal> coords = getBarsByCoordinates(b.getLocation());
 			if(!(location.get("lat") == null || location.get("lng") == null)) {
 				if(coords != null) {
 					Double distance = getDistance(coords.get("lat").doubleValue(), coords.get("lng").doubleValue(),
 							Double.valueOf(location.get("lat")), Double.valueOf(location.get("lng")));
-					ba.setDistance(distance);
+					barCapacity.setDistance(distance);
 				}else {
-					ba.setDistance(null);
+					barCapacity.setDistance(null);
 				}
 			}
 			
-			ba.setId(b.getId());
-			ba.setName(b.getName());
-			ba.setLocation(b.getLocation());
-			ba.setCapacity(capacity);
-			ba.setCoord(coords);
+			barCapacity.setId(b.getId());
+			barCapacity.setName(b.getName());
+			barCapacity.setLocation(b.getLocation());
+			barCapacity.setCapacity(capacity);
+			barCapacity.setCoord(coords);
 
-			res.add(ba);
+			res.add(barCapacity);
 		}
 		
 		if(!(location.get("lat") == null || location.get("lng") == null) && authorities.contains(ROLE_CLIENT)) {
 			res = res.stream()
-				.filter(x -> Integer.valueOf(x.getCapacity().split("/")[0]) > 0).filter(y -> y.getDistance() != null)
+				.filter(x -> Integer.parseInt(x.getCapacity().split("/")[0]) > 0).filter(y -> y.getDistance() != null)
 				.sorted(Comparator.comparingDouble(BarCapacity::getDistance)).collect(Collectors.toList());
 		}else if(authorities.contains(ROLE_CLIENT)){
 			res = res.stream()
-			.filter(x -> Integer.valueOf(x.getCapacity().split("/")[0]) > 0)
+			.filter(x -> Integer.parseInt(x.getCapacity().split("/")[0]) > 0)
 			.collect(Collectors.toList());
-			Collections.sort(res, new Comparator<BarCapacity>() {
-				  @Override
-				  public int compare(BarCapacity i1, BarCapacity i2) {
-				    return Integer.valueOf(i1.getCapacity().split("/")[0]).compareTo(Integer.valueOf(i1.getCapacity().split("/")[0]));
-				  }
-				});
+			res.sort(Comparator.comparing(i -> Integer.valueOf(i.getCapacity().split("/")[0])));
 		}
 		
 		if(res.size()>15) {
@@ -225,14 +208,10 @@ public class BarController {
 		return ResponseEntity.ok(res);
 	}
 
-	
-	@PostMapping("/map")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
-	public ResponseEntity<List<BarCapacity>> getBarsByLocation(@Valid @RequestBody Map<String, String> location) {		
+	private List<Bar> getBarsByUser() {
+		List<Bar> bares;
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-		
-		List<Bar> bares = null;
 
 		if (authorities.contains(ROLE_OWNER)) {
 			bares = barService.findAllBarByOwner(userService.getByUsername(ud.getUsername()));
@@ -241,7 +220,15 @@ public class BarController {
 		} else {
 			bares = barService.findAllBar();
 		}
-		
+
+		return bares;
+	}
+
+	
+	@PostMapping("/map")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
+	public ResponseEntity<List<BarCapacity>> getBarsByLocation(@Valid @RequestBody Map<String, String> location) {
+		List<Bar> bares = getBarsByUser();
 		List<BarCapacity> res = new ArrayList<>();
 
 		if(!(location.get("lat") == null || location.get("lng") == null)) {
@@ -264,23 +251,22 @@ public class BarController {
 				Double distance = getDistance(coords.get("lat").doubleValue(), coords.get("lng").doubleValue(),
 						Double.valueOf(location.get("lat")), Double.valueOf(location.get("lng")));
 				
-				if(distance > 10000.) {
-					continue;
+				if(distance <= 10000.) {
+					var barCapacity = new BarCapacity();
+
+					barCapacity.setDistance(distance);
+					barCapacity.setId(b.getId());
+					barCapacity.setName(b.getName());
+					barCapacity.setLocation(b.getLocation());
+					barCapacity.setCapacity(capacity);
+					barCapacity.setCoord(coords);
+
+					res.add(barCapacity);
 				}
-				BarCapacity ba = new BarCapacity();
-				
-				ba.setDistance(distance);
-				ba.setId(b.getId());
-				ba.setName(b.getName());
-				ba.setLocation(b.getLocation());
-				ba.setCapacity(capacity);
-				ba.setCoord(coords);
-	
-				res.add(ba);
 			}
 			
 			res = res.stream()
-					.filter(x -> Integer.valueOf(x.getCapacity().split("/")[0]) > 0)
+					.filter(x -> Integer.parseInt(x.getCapacity().split("/")[0]) > 0)
 					.collect(Collectors.toList());
 		}
 				
@@ -292,7 +278,7 @@ public class BarController {
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE') ")
 	public ResponseEntity<BarDTO> getBarById(@PathVariable("id") Integer id) {
-		Bar bar = barService.findBarById(id);
+		var bar = barService.findBarById(id);
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 
@@ -305,8 +291,8 @@ public class BarController {
 					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				}
 			}
-			Integer freeTables = 0;
-			Integer disabled = 0;
+			var freeTables = 0;
+			var disabled = 0;
 			for(BarTable bt : bar.getBarTables()) {
 				if (bt.isFree() && bt.isAvailable()) {
 					freeTables += 1;
@@ -315,7 +301,7 @@ public class BarController {
 					disabled++;
 				}
 			}
-			BarDTO barDTO = new BarDTO(bar.getId(), bar.getName(), bar.getDescription(), bar.getContact(),
+			var barDTO = new BarDTO(bar.getId(), bar.getName(), bar.getDescription(), bar.getContact(),
 					bar.getLocation(), bar.getOpeningTime(), bar.getClosingTime(), bar.getImages(),
 					bar.getBarTables().size() - disabled, freeTables, bar.getOwner().getUsername(), bar.getEmployees());
 			return ResponseEntity.ok(barDTO);
@@ -330,10 +316,10 @@ public class BarController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Optional<User> optionalUser = this.userService.getUserByUsername(username);
-		if (! optionalUser.isPresent()) {
+		if (optionalUser.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		Bar updatedBar = this.barService.findBarById(id);
+		var updatedBar = this.barService.findBarById(id);
 		if(updatedBar == null){
 			return ResponseEntity.notFound().build();
 		}
@@ -364,10 +350,10 @@ public class BarController {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Optional<User> optionalUser = this.userService.getUserByUsername(username);
-		if (! optionalUser.isPresent()) {
+		if (optionalUser.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		Bar bar = barService.findBarById(id);
+		var bar = barService.findBarById(id);
 		if (bar == null || bar.getImages().isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
@@ -397,13 +383,13 @@ public class BarController {
 		List<BarCapacity> listBarSearch = new ArrayList<>();
 		for(Bar b : barsSearch) {
 			if (b.isSubscriptionActive()) {
-				BarCapacity barCapacity = new BarCapacity();
+				var barCapacity = new BarCapacity();
 				barCapacity.setId(b.getId());
 				barCapacity.setLocation(b.getLocation());
 				barCapacity.setName(b.getName());
 
-				Integer numeroMesasLibres = 0;
-				Integer disabled = 0;
+				var numeroMesasLibres = 0;
+				var disabled = 0;
 				for(BarTable bt : b.getBarTables()) {
 					if (bt.isFree() && bt.isAvailable()) {
 						numeroMesasLibres += 1;
@@ -436,7 +422,7 @@ public class BarController {
 	@GetMapping("barClient/{username}")
 	@PreAuthorize("hasRole('CLIENT')")
 	public ResponseEntity<Bar> getBarForClient(@PathVariable("username") final String username) {
-		Client client = this.clientService.getClientByUsername(username);
+		var client = this.clientService.getClientByUsername(username);
 		if(client != null) {
 			BarTable table = client.getTable();
 			if (table != null) {
