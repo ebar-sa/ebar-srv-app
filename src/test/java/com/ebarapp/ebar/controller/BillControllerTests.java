@@ -202,7 +202,7 @@ class BillControllerTests {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasToString(
-						"[{\"id\":2,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+						"[{\"id\":2,\"amount\":2,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"reviews\":null,\"new\":false},\"new\":false}]")));
 	}
 
 	@Test
@@ -229,7 +229,7 @@ class BillControllerTests {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.jsonPath("itemBill", Matchers.hasToString(
-						"[{\"id\":2,\"amount\":4,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"new\":false},\"new\":false}]")));
+						"[{\"id\":2,\"amount\":4,\"itemMenu\":{\"id\":1,\"name\":\"Calamares\",\"description\":null,\"rationType\":null,\"price\":null,\"category\":null,\"image\":null,\"reviews\":null,\"new\":false},\"new\":false}]")));
 	}
 
 	@Test

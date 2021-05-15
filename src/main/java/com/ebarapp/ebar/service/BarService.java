@@ -36,6 +36,10 @@ public class BarService {
 		return this.barRepository.getBarById(id);
 	}
 
+	public Bar findBarByItemMenuId(final Integer id) {
+		return this.barRepository.findBarByItemMenuId(id);
+	}
+
 	public Bar createBar(final Bar newBar) {
 		return this.barRepository.save(newBar);
 	}

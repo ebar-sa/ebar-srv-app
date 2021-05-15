@@ -14,139 +14,134 @@ import java.util.*;
 
 @Service
 public class BarTableService {
-	
-	private static final SecureRandom secureRandom = new SecureRandom(); 
-	private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder(); 
 
-	@Autowired
-	private BarTableRepository barTableRepository;
+    private static final SecureRandom secureRandom = new SecureRandom();
 
-	@Autowired
-	private ClientRepository clientRepository;
+    @Autowired
+    private BarTableRepository barTableRepository;
 
-	@Autowired
-	private ItemBillRepository itemBillRepository;
+    @Autowired
+    private ClientRepository clientRepository;
 
-	@Autowired
-	private BillRepository billRepository;
+    @Autowired
+    private ItemBillRepository itemBillRepository;
 
-	public BarTable createBarTable(BarTable newBarTable) { 
-		return barTableRepository.save(newBarTable); 
-	}
+    @Autowired
+    private BillRepository billRepository;
 
-	public void removeBarTable(Integer id) { barTableRepository.deleteById(id); }
+    public BarTable createBarTable(BarTable newBarTable) {
+        return barTableRepository.save(newBarTable);
+    }
 
-	public List<BarTable> findAllBarTable(){
-		return this.barTableRepository.findAll();
-	}
-	
-	public BarTable findBarTableByToken(String token) { 
-		return this.barTableRepository.findByToken(token);
-	}
-	
-	public void removeTable(Integer id) {
+    public void removeBarTable(Integer id) {
         barTableRepository.deleteById(id);
     }
-	
-	
-	public User getClientByPrincipalUserName(String userName) {
-		return this.barTableRepository.getClientByPrincipalUserName(userName);
-	}
-	
-	public List<String> getAllValidTokensByBarId(Integer id) { 
-		return barTableRepository.getAllValidTokenByBarId(id); 
-	}
+
+    public List<BarTable> findAllBarTable() {
+        return this.barTableRepository.findAll();
+    }
+
+    public BarTable findBarTableByToken(String token) {
+        return this.barTableRepository.findByToken(token);
+    }
+
+    public void removeTable(Integer id) {
+        barTableRepository.deleteById(id);
+    }
 
 
-	public BarTable findbyId(Integer id) {
-		Optional<BarTable> barTableOpt =  this.barTableRepository.findById(id);
-		if(barTableOpt.isPresent()) {
-			return barTableOpt.get();
-		}else {
-			return null;
-		}
-	}
-	
-	public Set<BarTable> getBarTablesByBarId(final Integer id){
-		return this.barTableRepository.getBarTablesByBarId(id);
-	}
+    public User getClientByPrincipalUserName(String userName) {
+        return this.barTableRepository.getClientByPrincipalUserName(userName);
+    }
 
-	public static String generateNewToken() {
-	    byte[] randomBytes = new byte[4];
-	    secureRandom.nextBytes(randomBytes);
-	    return base64Encoder.encodeToString(randomBytes);
-	}
-	
-	public static String generarToken() {
-		String bancoLetras="abcdefghijklmnopqrstuvw";
-		String bancoNumeros = "123456789";
-		StringBuilder strB = new StringBuilder();
-		for (int i = 0; i <= 6; i++) {
-			if(i < 3) {
-			int randomInt = secureRandom.nextInt(bancoLetras.length());
-	        char randomChar = bancoLetras.charAt(randomInt);
-	        strB.append(randomChar);
-			}
-	        if(i == 3) {
-	        	strB.append("-");
-	        }
-	        if(i > 3) {
-	        	int randomNumInt = secureRandom.nextInt(bancoNumeros.length());
-		        char randomNum = bancoNumeros.charAt(randomNumInt);
-		        strB.append(randomNum);
-	        }
-		}
-		return strB.toString();
-	}
+    public List<String> getAllValidTokensByBarId(Integer id) {
+        return barTableRepository.getAllValidTokenByBarId(id);
+    }
 
-	public Map<Integer, Object> freeTable(Integer id) {
-		Map<Integer, Object> res = null;
-		Optional<BarTable> barTableOpt = this.barTableRepository.findById(id);
-		if (barTableOpt.isPresent()) {
-			res = new HashMap<>();
-			var barTable = barTableOpt.get();
-			String token = generarToken();
-			List<Client> clients = barTable.getClients();
-			if (!barTable.isFree()) {
-				if (!clients.isEmpty()) {
-					clients.forEach(x -> x.setTable(null));
-					clients.forEach(x -> this.clientRepository.save(x));
-				}
-				barTable.getClients().clear();
-				barTable.setFree(true);
-				barTable.setToken(token);
-				var bill = this.barTableRepository.getBillByTableId(barTable.getId());
-				if (bill.getId() != null) {
-					Set<ItemBill> itemBills = new HashSet<>(bill.getItemBill());
-					itemBills.addAll(bill.getItemOrder());
-					bill.setItemBill(new HashSet<>());
-					bill.setItemOrder(new HashSet<>());
-					for(ItemBill ib : itemBills) {
-						ib.setItemMenu(null);
-						this.itemBillRepository.deleteById(ib.getId());
-					}
-					this.billRepository.save(bill);
-					barTable.setBill(bill);
-				}
-				this.barTableRepository.save(barTable);
-				res.put(0, barTable);
-				res.put(1, bill);
-			}
-		}
 
-		return res;
+    public BarTable findbyId(Integer id) {
+        Optional<BarTable> barTableOpt = this.barTableRepository.findById(id);
+        return barTableOpt.orElse(null);
+    }
 
-	}
+    public Set<BarTable> getBarTablesByBarId(final Integer id) {
+        return this.barTableRepository.getBarTablesByBarId(id);
+    }
 
-	public BarTable saveTable(BarTable barTable) {
-		return this.barTableRepository.save(barTable);
-	}
-	
-	public Bill getBillByTableId(Integer id) {
-		return this.barTableRepository.getBillByTableId(id);
-	}
+    public static String generarToken() {
+        var bancoLetras = "abcdefghijklmnopqrstuvw";
+        var bancoNumeros = "123456789";
+        var stringBuilder = new StringBuilder();
+        for (var i = 0; i <= 6; i++) {
+            if (i < 3) {
+                var randomInt = secureRandom.nextInt(bancoLetras.length());
+                var randomChar = bancoLetras.charAt(randomInt);
+                stringBuilder.append(randomChar);
+            }
+            if (i == 3) {
+                stringBuilder.append("-");
+            }
+            if (i > 3) {
+                var randomNumInt = secureRandom.nextInt(bancoNumeros.length());
+                var randomNum = bancoNumeros.charAt(randomNumInt);
+                stringBuilder.append(randomNum);
+            }
+        }
+        return stringBuilder.toString();
+    }
 
-	public Boolean checkIfPaymentIsSet(Integer id) {
-		return this.barTableRepository.checkIfPaymentIsSet(id);
-	}
+    public Map<Integer, Object> freeTable(Integer id) {
+        Map<Integer, Object> res = null;
+        Optional<BarTable> barTableOpt = this.barTableRepository.findById(id);
+        if (barTableOpt.isPresent()) {
+            res = new HashMap<>();
+            var barTable = barTableOpt.get();
+            String token = generarToken();
+            List<Client> clients = barTable.getClients();
+            if (!barTable.isFree()) {
+                if (!clients.isEmpty()) {
+                    clients.forEach(x -> x.setTable(null));
+                    clients.forEach(x -> this.clientRepository.save(x));
+                }
+                barTable.getClients().clear();
+                barTable.setFree(true);
+                barTable.setToken(token);
+                var bill = this.barTableRepository.getBillByTableId(barTable.getId());
+                if (bill.getId() != null) {
+                    Set<ItemBill> itemBills = new HashSet<>(bill.getItemBill());
+                    itemBills.addAll(bill.getItemOrder());
+                    bill.setItemBill(new HashSet<>());
+                    bill.setItemOrder(new HashSet<>());
+                    for (ItemBill ib : itemBills) {
+                        ib.setItemMenu(null);
+                        this.itemBillRepository.deleteById(ib.getId());
+                    }
+                    this.billRepository.save(bill);
+                    barTable.setBill(bill);
+                }
+                this.barTableRepository.save(barTable);
+                res.put(0, barTable);
+                res.put(1, bill);
+            }
+        }
+
+        return res;
+
+    }
+
+    public BarTable saveTable(BarTable barTable) {
+        return this.barTableRepository.save(barTable);
+    }
+
+    public Bill getBillByTableId(Integer id) {
+        return this.barTableRepository.getBillByTableId(id);
+    }
+
+    public Boolean checkIfPaymentIsSet(Integer id) {
+        return this.barTableRepository.checkIfPaymentIsSet(id);
+    }
+
+    public BarTable getBarTableByToken(String token) {
+        return this.barTableRepository.getBarTableByToken(token);
+    }
 }

@@ -2,6 +2,7 @@ package com.ebarapp.ebar.repository;
 
 import java.util.Optional;
 
+import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.Owner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +21,9 @@ public interface UserRepository extends JpaRepository<User, String>{
 	Boolean existsByEmail(String email);
 
 	Boolean existsByDni(String dni);
+
+	@Query("SELECT c FROM Client c WHERE c.username = :user")
+	Client findClientByUsername(@Param("user") String username);
 
 	@Query("SELECT o FROM Owner o WHERE o.username = :user")
 	Owner findOwnerByUsername(@Param("user") String username);

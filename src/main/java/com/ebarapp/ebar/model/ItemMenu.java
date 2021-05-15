@@ -1,18 +1,16 @@
 
 package com.ebarapp.ebar.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import javax.validation.constraints.NotNull;
 
-import com.ebarapp.ebar.model.dtos.ItemMenuDTO;
+import com.ebarapp.ebar.model.dtos.CreateItemMenuDTO;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,7 +18,7 @@ import lombok.Setter;
 @Table(name = "item_menu")
 public class ItemMenu extends BaseEntity {
 
-	public ItemMenu(ItemMenuDTO itemDTO) {
+	public ItemMenu(CreateItemMenuDTO itemDTO) {
 		this.name = itemDTO.getName();
 		this.description = itemDTO.getDescription();
 		this.category = itemDTO.getCategory();
@@ -54,5 +52,12 @@ public class ItemMenu extends BaseEntity {
 
 	@OneToOne(cascade = CascadeType.ALL)
 	private DBImage		image;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private Set<Review> reviews;
+
+	public void addReview(Review review) {
+		getReviews().add(review);
+	}
 
 }

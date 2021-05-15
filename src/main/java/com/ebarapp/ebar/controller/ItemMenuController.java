@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ebarapp.ebar.model.dtos.ItemMenuDTO;
+import com.ebarapp.ebar.model.dtos.CreateItemMenuDTO;
 import com.ebarapp.ebar.service.BarService;
 import com.ebarapp.ebar.service.BillService;
 import com.ebarapp.ebar.service.ItemMenuService;
@@ -50,11 +50,11 @@ public class ItemMenuController {
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<ItemMenu> getItemMenu(@PathVariable("idBar") Integer idBar,
 			@PathVariable("idItemMenu") Integer idItem) {
-		Bar bar = barService.findBarById(idBar);
+		var bar = barService.findBarById(idBar);
 		if (bar != null) {
-			ItemMenu i = itemMenuService.getById(idItem);
-			if (i != null) {
-				return ResponseEntity.ok(i);
+			var itemMenu = itemMenuService.getById(idItem);
+			if (itemMenu != null) {
+				return ResponseEntity.ok(itemMenu);
 			}
 		}
 		return ResponseEntity.notFound().build();
@@ -63,19 +63,19 @@ public class ItemMenuController {
 	@PostMapping("/bares/{idBar}/menu/itemMenu")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<ItemMenu> createItemMenu(@PathVariable("idBar") Integer idBar,
-			@Valid @RequestBody ItemMenuDTO itemDTO) {
+			@Valid @RequestBody CreateItemMenuDTO itemDTO) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Bar bar = barService.findBarById(idBar);
+		var bar = barService.findBarById(idBar);
 		if (bar != null) {
 			String o = bar.getOwner().getUsername();
 			List<String> names = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
 			if (username.equals(o) || names.contains(username)) {
-				ItemMenu item = new ItemMenu(itemDTO);
-				itemMenuService.save(item);
-				Menu m = bar.getMenu();
-				m.getItems().add(item);
-				menuService.createMenu(m);
+				var itemMenu = new ItemMenu(itemDTO);
+				itemMenuService.save(itemMenu);
+				var menu = bar.getMenu();
+				menu.getItems().add(itemMenu);
+				menuService.createMenu(menu);
 				return ResponseEntity.status(HttpStatus.CREATED).build();
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -88,19 +88,19 @@ public class ItemMenuController {
 	@PutMapping("/bares/{idBar}/menu/itemMenu/{idItemMenu}")
 	@PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<ItemMenu> updateItemMenu(@PathVariable("idBar") Integer idBar,
-			@PathVariable("idItemMenu") Integer idItemMenu, @RequestBody ItemMenuDTO itemDTO) {
+			@PathVariable("idItemMenu") Integer idItemMenu, @RequestBody CreateItemMenuDTO itemDTO) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Bar bar = barService.findBarById(idBar);
+		var bar = barService.findBarById(idBar);
 		if (bar != null) {
 			String o = bar.getOwner().getUsername();
 			List<String> names = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
 			if (username.equals(o) || names.contains(username)) {
-				ItemMenu i = itemMenuService.getById(idItemMenu);
+				var i = itemMenuService.getById(idItemMenu);
 				if (i == null)
 					return ResponseEntity.notFound().build();
 				else {
-					ItemMenu itemMenu = new ItemMenu(itemDTO);
+					var itemMenu = new ItemMenu(itemDTO);
 					if (i.getImage() != null) {
 						itemMenu.setImage(i.getImage());
 					}
@@ -122,32 +122,32 @@ public class ItemMenuController {
 			@PathVariable("idItemMenu") Integer idItemMenu) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Bar bar = barService.findBarById(idBar);
+		var bar = barService.findBarById(idBar);
 		if (bar != null) {
 			String o = bar.getOwner().getUsername();
 			List<String> names = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
 			if (username.equals(o) || names.contains(username)) {
-				ItemMenu i = itemMenuService.getById(idItemMenu);
-				if (i != null) {
+				var itemMenu = itemMenuService.getById(idItemMenu);
+				if (itemMenu != null) {
 					List<BarTable> barTables = new ArrayList<>(bar.getBarTables());
 					List<Bill> bills = barTables.stream().map(BarTable::getBill).collect(Collectors.toList());
 					for (Bill b : bills) {
 						List<ItemBill> bill = new ArrayList<>(b.getItemBill());
 						List<ItemBill> order = new ArrayList<>(b.getItemOrder());
 						for (ItemBill ib : bill) {
-							if (ib.getItemMenu().equals(i)) {
+							if (ib.getItemMenu().equals(itemMenu)) {
 								return ResponseEntity.status(HttpStatus.CONFLICT).build();
 							}
 						}
 						for (ItemBill or : order) {
-							if (or.getItemMenu().equals(i)) {
+							if (or.getItemMenu().equals(itemMenu)) {
 								return ResponseEntity.status(HttpStatus.CONFLICT).build();
 							}
 						}
 					}
-					Menu m = bar.getMenu();
-					m.getItems().remove(i);
-					menuService.createMenu(m);
+					var menu = bar.getMenu();
+					menu.getItems().remove(itemMenu);
+					menuService.createMenu(menu);
 					itemMenuService.delete(idItemMenu);
 					return ResponseEntity.ok().build();
 				}
@@ -164,16 +164,16 @@ public class ItemMenuController {
 			@PathVariable("idItemMenu") Integer idItemMenu) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Bar bar = barService.findBarById(idBar);
+		var bar = barService.findBarById(idBar);
 		if (bar != null) {
 			String o = bar.getOwner().getUsername();
 			List<String> names = bar.getEmployees().stream().map(Employee::getUsername).collect(Collectors.toList());
 			if (username.equals(o) || names.contains(username)) {
-				ItemMenu i = itemMenuService.getById(idItemMenu);
-				if (i != null) {
-					if (i.getImage() != null) {
-						i.setImage(null);
-						itemMenuService.save(i);
+				var itemMenu = itemMenuService.getById(idItemMenu);
+				if (itemMenu != null) {
+					if (itemMenu.getImage() != null) {
+						itemMenu.setImage(null);
+						itemMenuService.save(itemMenu);
 						return ResponseEntity.ok().build();
 					} else {
 						return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

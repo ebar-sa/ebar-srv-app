@@ -33,4 +33,6 @@ public interface BarTableRepository extends JpaRepository<BarTable, Integer> {
 
 	@Query("SELECT CASE WHEN o.braintreeMerchantId IS NULL OR o.braintreePublicKey IS NULL OR o.braintreePrivateKey IS NULL THEN false ELSE true END FROM BarTable bt JOIN bt.bar b JOIN b.owner o WHERE bt.id = :id ")
     Boolean checkIfPaymentIsSet(@Param("id") Integer id);
+
+	BarTable getBarTableByToken(String token);
 }

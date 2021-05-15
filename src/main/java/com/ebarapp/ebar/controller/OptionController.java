@@ -41,7 +41,7 @@ public class OptionController {
     private BarService barService;
 
     private ResponseEntity<Option> validStaff(Integer barId) {
-        Bar bar = barService.findBarById(barId);
+        var bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
@@ -62,16 +62,16 @@ public class OptionController {
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
-        Bar updatedBar = this.barService.findBarById(barId);
+        var updatedBar = this.barService.findBarById(barId);
         if(updatedBar == null){
             return ResponseEntity.notFound().build();
         }
         if (!updatedBar.isSubscriptionActive()){
             return ResponseEntity.badRequest().build();
         }
-        Option newOption = new Option(newOptionDTO);
-        Option option = optionService.createOption(newOption);
-        Voting voting = votingService.getVotingById(votingId);
+        var newOption = new Option(newOptionDTO);
+        var option = optionService.createOption(newOption);
+        var voting = votingService.getVotingById(votingId);
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
@@ -87,24 +87,24 @@ public class OptionController {
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
-        Bar updatedBar = this.barService.findBarById(barId);
+        var updatedBar = this.barService.findBarById(barId);
         if(updatedBar == null){
             return ResponseEntity.notFound().build();
         }
         if (!updatedBar.isSubscriptionActive()){
             return ResponseEntity.badRequest().build();
         }
-        Voting voting = votingService.getVotingById(votingId);
+        var voting = votingService.getVotingById(votingId);
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-        Option option = optionService.getOptionById(optionId);
+        var option = optionService.getOptionById(optionId);
         if (option == null) {
             return ResponseEntity.notFound().build();
         }
         //Can't delete an option if the voting has started
-        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
-        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        var serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        var madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         if (voting.getOpeningHour().isBefore(madridZoned.toLocalDateTime())){
             return ResponseEntity.badRequest().build();
@@ -122,7 +122,7 @@ public class OptionController {
     @GetMapping("/option/{optionId}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE') or hasRole('CLIENT')")
     public ResponseEntity<Option> getOption(@PathVariable("optionId") Integer optionId) {
-        Option option = optionService.getOptionById(optionId);
+        var option = optionService.getOptionById(optionId);
         if (option == null) {
             return ResponseEntity.notFound().build();
         }
@@ -132,9 +132,9 @@ public class OptionController {
     @GetMapping("/bar/{barId}/username/{username}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE') or hasRole('CLIENT')")
     public ResponseEntity<Boolean> userIsValidVoter(@PathVariable("barId") Integer barId, @PathVariable("username") String username) {
-        Boolean res = false;
-        Integer i = 0;
-        Bar bar = this.barService.findBarById(barId);
+        var res = false;
+        var i = 0;
+        var bar = this.barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
@@ -160,7 +160,7 @@ public class OptionController {
         if (ud == null) {
             return ResponseEntity.notFound().build();
         }
-        Bar updatedBar = this.barService.findBarById(barId);
+        var updatedBar = this.barService.findBarById(barId);
         if(updatedBar == null){
             return ResponseEntity.notFound().build();
         }
@@ -168,7 +168,7 @@ public class OptionController {
             return ResponseEntity.badRequest().build();
         }
         //The user must verify he is in the bar
-        Integer i = 0;
+        var i = 0;
         String username = ud.getUsername();
         Boolean validVoter = false;
         List<BarTable> tables = new ArrayList<>(updatedBar.getBarTables());
@@ -186,18 +186,18 @@ public class OptionController {
         if (validVoter.equals(false)){
             return ResponseEntity.badRequest().build();
         }
-        Option option = optionService.getOptionById(optionId);
+        var option = optionService.getOptionById(optionId);
         if (option == null) {
             return ResponseEntity.notFound().build();
         }
-        Voting voting = votingService.getVotingById(votingId);
+        var voting = votingService.getVotingById(votingId);
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
         //Clients can vote only when the voting is active
         //Using Time Zone of Madrid
-        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
-        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        var serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        var madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         if (voting.getOpeningHour().isAfter(madridZoned.toLocalDateTime()) ||
         voting.getClosingHour() != null && voting.getClosingHour().isBefore(madridZoned.toLocalDateTime())){

@@ -101,7 +101,7 @@ public class AuthController {
                     .body(new MessageResponse("DNI en uso. Por favor, introduzca otro."));
         }
 
-        UserDataMapper userData = new UserDataMapper(signUpRequest.getUsername(),
+        var userData = new UserDataMapper(signUpRequest.getUsername(),
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
                 dni,
@@ -110,7 +110,7 @@ public class AuthController {
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getRoles().stream().map(RoleType::valueOf).collect(Collectors.toSet()));
 
-        User userWithRole = generateUserWithRole(userData);
+        var userWithRole = generateUserWithRole(userData);
 
         try {
             userService.saveUser(userWithRole);
@@ -124,7 +124,7 @@ public class AuthController {
 
     @PostMapping("/updateProfile")
     public ResponseEntity<MessageResponse> editUser(@Valid @RequestBody ProfileUpdateDTO userData) {
-        User user = userService.getByUsername(userData.getUsername());
+        var user = userService.getByUsername(userData.getUsername());
 
         if (!encoder.matches(userData.getOldPassword(), user.getPassword())) {
             return ResponseEntity

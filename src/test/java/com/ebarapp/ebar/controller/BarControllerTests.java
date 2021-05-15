@@ -142,6 +142,7 @@ class BarControllerTests {
         bar.setVotings(new HashSet<>());
         bar.setEmployees(new HashSet<>());
         bar.setOwner(owner);
+        bar.setReviews(new HashSet<>());
 
         allBares.add(bar);
 
