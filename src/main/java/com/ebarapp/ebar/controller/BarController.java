@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -157,6 +158,10 @@ public class BarController {
         List<Bar> bares = getBarsByUser();
         List<BarCapacity> res = new ArrayList<>();
 
+        bares = bares.stream()
+                .filter(this::isBarOpen)
+                .collect(Collectors.toList());
+
         for (Bar b : bares) {
             if (!b.isSubscriptionActive() && authorities.contains(ROLE_CLIENT)) continue;
 
@@ -252,6 +257,10 @@ public class BarController {
         List<Bar> bares = getBarsByUser();
         List<BarCapacity> res = new ArrayList<>();
 
+        bares = bares.stream()
+                .filter(this::isBarOpen)
+                .collect(Collectors.toList());
+
         if (!(location.get("lat") == null || location.get("lng") == null)) {
             for (Bar b : bares) {
                 computeBarData(b, location, res);
@@ -263,6 +272,15 @@ public class BarController {
         }
 
         return ResponseEntity.ok(res);
+    }
+
+    private boolean isBarOpen(Bar b) {
+        var now = ZonedDateTime.now().toLocalTime();
+        var openingTime = LocalDateTime.ofInstant(b.getOpeningTime().toInstant(), ZoneId.systemDefault()).toLocalTime();
+        var closingTime = LocalDateTime.ofInstant(b.getClosingTime().toInstant(), ZoneId.systemDefault()).toLocalTime();
+        return (now.isAfter(openingTime) && now.isBefore(closingTime)) ||
+                (openingTime.isAfter(closingTime) && now.isAfter(openingTime) && (now.isAfter(closingTime))) ||
+                (openingTime.isAfter(closingTime) && now.isBefore(openingTime) && (now.isBefore(closingTime)));
     }
 
 
@@ -383,7 +401,7 @@ public class BarController {
                 barCapacity.setName(b.getName());
 
                 Pair<Integer, Integer> freeAndDisabledTables = getFreeAndDisabledTables(b);
-                var numeroMesasLibres = freeAndDisabledTables.getFirst();
+                var numeroMesasLibres = isBarOpen(b)? freeAndDisabledTables.getFirst() : 0;
                 var disabled = freeAndDisabledTables.getSecond();
 
                 barCapacity.setCapacity(numeroMesasLibres + "/" + (b.getBarTables().size() - disabled));
