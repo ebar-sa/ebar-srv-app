@@ -13,4 +13,5 @@ public class ReviewItemsDTO {
     private Integer tableId;
     private Set<ItemMenu> items;
     private Boolean barReviewed;
+    private Boolean billEmpty;
 }

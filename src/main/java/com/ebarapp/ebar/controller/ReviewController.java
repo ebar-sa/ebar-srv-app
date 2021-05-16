@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,15 +56,21 @@ public class ReviewController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        var itemsReviewed = this.itemMenuService.getItemMenusReviewedByUsername(client.getUsername());
-
         var reviewItems = new ReviewItemsDTO();
         reviewItems.setBarReviewed(barTable.getBar().getReviews().stream().anyMatch(x -> x.getCreator().equals(client)));
         reviewItems.setTableId(barTable.getId());
-        reviewItems.setItems(barTable.getBill().getItemBill().stream()
-                .map(ItemBill::getItemMenu)
-                .filter(x -> !itemsReviewed.contains(x))
-                .collect(Collectors.toSet()));
+
+        if (barTable.getBill().getItemBill() == null || barTable.getBill().getItemBill().isEmpty()) {
+            reviewItems.setBillEmpty(true);
+            reviewItems.setItems(new HashSet<>());
+        } else {
+            var itemsReviewed = this.itemMenuService.getItemMenusReviewedByUsername(client.getUsername());
+            reviewItems.setBillEmpty(false);
+            reviewItems.setItems(barTable.getBill().getItemBill().stream()
+                    .map(ItemBill::getItemMenu)
+                    .filter(x -> !itemsReviewed.contains(x))
+                    .collect(Collectors.toSet()));
+        }
 
         return ResponseEntity.ok(reviewItems);
     }
@@ -100,12 +107,14 @@ public class ReviewController {
         if(newReview.getBar() != null) {
             var review = this.reviewService.saveReview(newReview.getBar(), client);
             bar.addReview(review);
+            this.barService.save(bar);
         }
 
         if(newReview.getItems() != null) {
             for (Map.Entry<ItemMenu, ReviewDTO> entry : itemReviews.entrySet()) {
                 var review = this.reviewService.saveReview(entry.getValue(), client);
                 entry.getKey().addReview(review);
+                this.itemMenuService.save(entry.getKey());
             }
         }
 
