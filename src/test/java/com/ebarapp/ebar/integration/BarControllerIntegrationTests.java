@@ -148,6 +148,7 @@ class BarControllerIntegrationTests {
         bar.setBarTables(barTables);
         bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setOwner(owner);
+        bar.setReviews(new HashSet<>());
 
         List<Bar> barSearch = new ArrayList<>();
         barSearch.add(bar);

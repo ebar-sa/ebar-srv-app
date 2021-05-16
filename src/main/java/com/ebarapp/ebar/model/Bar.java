@@ -83,12 +83,19 @@ public class Bar extends BaseEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private Set<Employee> employees;
 
+	@OneToMany(fetch = FetchType.LAZY)
+	private Set<Review> reviews;
+
 	@Column(name = "paid_until")
 	private Date paidUntil;
 
 	public void addVoting(Voting newVoting) { getVotings().add(newVoting); }
 
 	public void deleteVoting(Voting oldVoting) { getVotings().remove(oldVoting); }
+
+	public void addReview(Review review) {
+		getReviews().add(review);
+	}
 
 	public void addImages(Set<DBImage> newImages) { getImages().addAll(newImages); }
 

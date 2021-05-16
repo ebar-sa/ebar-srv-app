@@ -1,6 +1,5 @@
 package com.ebarapp.ebar.controller;
 
-import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Voting;
 import com.ebarapp.ebar.model.dtos.VotingDTO;
 import com.ebarapp.ebar.service.BarService;
@@ -37,7 +36,7 @@ public class VotingController {
     private OptionService optionService;
 
     private ResponseEntity<Voting> validStaff(Integer barId) {
-        Bar bar = barService.findBarById(barId);
+        var bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
@@ -64,9 +63,9 @@ public class VotingController {
         if (!newVotingDTO.getVotersUsernames().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
-            Voting newVoting = new Voting(newVotingDTO);
-            Voting voting = votingService.createOrUpdateVoting(newVoting);
-            Bar bar = barService.findBarById(barId);
+            var newVoting = new Voting(newVotingDTO);
+            var voting = votingService.createOrUpdateVoting(newVoting);
+            var bar = barService.findBarById(barId);
             if (!bar.isSubscriptionActive()){
                 return ResponseEntity.badRequest().build();
             }
@@ -79,7 +78,7 @@ public class VotingController {
     @GetMapping("/voting/{id}")
     @PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> getVotingById(@PathVariable("id") Integer id) {
-        Voting voting = votingService.getVotingById(id);
+        var voting = votingService.getVotingById(id);
         if (voting == null) {
             return ResponseEntity.notFound().build();
         }
@@ -92,8 +91,8 @@ public class VotingController {
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
-        Voting voting = votingService.getVotingById(id);
-        Bar bar = barService.findBarById(barId);
+        var voting = votingService.getVotingById(id);
+        var bar = barService.findBarById(barId);
 
         if (!bar.isSubscriptionActive()){
             return ResponseEntity.badRequest().build();
@@ -110,14 +109,14 @@ public class VotingController {
     @PutMapping("bar/{barId}/voting/{id}")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> updateVoting(@Valid @RequestBody VotingDTO updatedVotingDTO, @PathVariable("id") Integer id, @PathVariable("barId") Integer barId) {
-        Voting voting = votingService.getVotingById(id);
+        var voting = votingService.getVotingById(id);
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
-        Bar bar = barService.findBarById(barId);
+        var bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
@@ -126,14 +125,14 @@ public class VotingController {
         }
         //Can't restrict the vote of a client
         //Can't edit a voting if it's active or finished
-        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
-        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        var serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        var madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         if(!updatedVotingDTO.getVotersUsernames().isEmpty()
         || voting.getOpeningHour().isBefore(madridZoned.toLocalDateTime())) {
             return ResponseEntity.badRequest().build();
         }
-        Voting updatedVoting = new Voting(updatedVotingDTO);
+        var updatedVoting = new Voting(updatedVotingDTO);
         updatedVoting.setId(voting.getId());
         votingService.createOrUpdateVoting(updatedVoting);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -142,7 +141,7 @@ public class VotingController {
     @PostMapping("/bar/{barId}/voting/{id}/finish")
     @PreAuthorize("hasRole('OWNER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Voting> finishVoting(@PathVariable("id") Integer id, @PathVariable("barId") Integer barId) {
-        Bar bar = barService.findBarById(barId);
+        var bar = barService.findBarById(barId);
         if (bar == null) {
             return ResponseEntity.notFound().build();
         }
@@ -152,12 +151,12 @@ public class VotingController {
         if(validStaff(barId) != null) {
             return validStaff(barId);
         }
-        Voting voting = votingService.getVotingById(id);
+        var voting = votingService.getVotingById(id);
         if(voting == null) {
             return ResponseEntity.notFound().build();
         }
-        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
-        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        var serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        var madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         voting.setClosingHour(madridZoned.toLocalDateTime());
         votingService.createOrUpdateVoting(voting);

@@ -2,6 +2,7 @@
 package com.ebarapp.ebar.service;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,10 @@ public class ItemMenuService {
 
 	public Optional<ItemMenu> findbyId(final Integer id) {
 		return this.itemMenuRepository.findById(id);
+	}
+
+	public Set<ItemMenu> getItemMenusReviewedByUsername(final String username) {
+		return this.itemMenuRepository.getItemMenusReviewedByUsername(username);
 	}
 
 }

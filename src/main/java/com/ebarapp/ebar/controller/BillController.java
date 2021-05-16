@@ -4,11 +4,16 @@ package com.ebarapp.ebar.controller;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.ebarapp.ebar.model.dtos.ReviewItemsDTO;
+import com.ebarapp.ebar.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ebarapp.ebar.model.Bill;
 import com.ebarapp.ebar.model.ItemBill;
 import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.service.BillService;
-import com.ebarapp.ebar.service.ItemBillService;
-import com.ebarapp.ebar.service.ItemMenuService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -41,7 +43,7 @@ public class BillController {
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('OWNER') or hasRole('EMPLOYEE')")
 	public ResponseEntity<Bill> getBillById(@PathVariable("id") final Integer id) {
-		Bill bill = this.billService.getBillById(id);
+		var bill = this.billService.getBillById(id);
 
 		if (bill != null) {
 			Set<ItemBill> order = new HashSet<>();
@@ -76,23 +78,17 @@ public class BillController {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
 		if (billOpt.isPresent() && itemOpt.isPresent()) {
-			Bill bill = billOpt.get();
+			var bill = billOpt.get();
 			ItemMenu item = itemOpt.get();
 			Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
 			if (im.contains(item)) {
-				for (ItemBill ib : bill.getItemOrder()) {
-					if (ib.getItemMenu().getId().equals(item.getId())) {
-						Integer i = ib.getAmount();
-						i++;
-						ib.setAmount(i);
-					}
-				}
+                setNewAmountToOrder(bill, item, 1);
 			} else {
-				ItemBill b = new ItemBill();
-				b.setItemMenu(item);
-				b.setAmount(1);
-				this.itemBillService.saveItemBill(b);
-				bill.getItemOrder().add(b);
+				var itemBill = new ItemBill();
+				itemBill.setItemMenu(item);
+				itemBill.setAmount(1);
+				this.itemBillService.saveItemBill(itemBill);
+				bill.getItemOrder().add(itemBill);
 			}
 			this.billService.saveBill(bill);
 			return new ResponseEntity<>(bill, HttpStatus.OK);
@@ -107,14 +103,14 @@ public class BillController {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
 		if (billOpt.isPresent() && resOpt.isPresent()) {
-			Bill bill = billOpt.get();
+			var bill = billOpt.get();
 			ItemBill res = resOpt.get();
-			ItemMenu item = res.getItemMenu();
+			var itemMenu = res.getItemMenu();
 			Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
-			if (im.contains(item)) {
-				this.addOrderToBill(bill, res, item);
+			if (im.contains(itemMenu)) {
+				this.addOrderToBill(bill, res, itemMenu);
 			} else {
-				this.newOrderToBill(bill, res, item);
+				this.newOrderToBill(bill, res, itemMenu);
 			}
 			this.billService.saveBill(bill);
 			return ResponseEntity.ok(bill);
@@ -124,11 +120,11 @@ public class BillController {
 	}
 
 	protected void newOrderToBill(final Bill bill, final ItemBill res, final ItemMenu item) {
-		ItemBill b = new ItemBill();
-		b.setItemMenu(item);
-		b.setAmount(1);
-		this.itemBillService.saveItemBill(b);
-		bill.getItemBill().add(b);
+		var itemBill = new ItemBill();
+		itemBill.setItemMenu(item);
+		itemBill.setAmount(1);
+		this.itemBillService.saveItemBill(itemBill);
+		bill.getItemBill().add(itemBill);
 		if (res.getAmount() == 1) {
 			bill.getItemOrder().remove(res);
 			this.itemBillService.deleteItemBillById(res.getId());
@@ -163,14 +159,14 @@ public class BillController {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
 		if (billOpt.isPresent() && resOpt.isPresent()) {
-			Bill bill = billOpt.get();
+			var bill = billOpt.get();
 			ItemBill res = resOpt.get();
-			ItemMenu item = res.getItemMenu();
+			var itemMenu = res.getItemMenu();
 			Set<ItemMenu> im = this.billService.getItemMenuByBillId(bill.getId());
-			if (im.contains(item)) {
-				this.addAllOrderToBill(bill, res, item);
+			if (im.contains(itemMenu)) {
+				this.addAllOrderToBill(bill, res, itemMenu);
 			} else {
-				this.newAllOrderToBill(bill, res, item);
+				this.newAllOrderToBill(bill, res, itemMenu);
 			}
 			this.billService.saveBill(bill);
 			return ResponseEntity.ok(bill);
@@ -190,11 +186,11 @@ public class BillController {
 	}
 
 	protected void newAllOrderToBill(final Bill bill, final ItemBill res, final ItemMenu item) {
-		ItemBill b = new ItemBill();
-		b.setItemMenu(item);
-		b.setAmount(res.getAmount());
-		this.itemBillService.saveItemBill(b);
-		bill.getItemBill().add(b);
+		var itemBill = new ItemBill();
+		itemBill.setItemMenu(item);
+		itemBill.setAmount(res.getAmount());
+		this.itemBillService.saveItemBill(itemBill);
+		bill.getItemBill().add(itemBill);
 		bill.getItemOrder().remove(res);
 
 	}
@@ -205,23 +201,17 @@ public class BillController {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemMenu> itemOpt = this.itemMenuService.findbyId(idItem);
 		if (billOpt.isPresent() && itemOpt.isPresent()) {
-			Bill bill = billOpt.get();
+			var bill = billOpt.get();
 			ItemMenu item = itemOpt.get();
 			Set<ItemMenu> im = this.billService.getItemOrderByBillId(bill.getId());
 			if (im.contains(item)) {
-				for (ItemBill ib : bill.getItemOrder()) {
-					if (ib.getItemMenu().getId().equals(item.getId())) {
-						Integer i = ib.getAmount();
-						i = i + amount;
-						ib.setAmount(i);
-					}
-				}
+                setNewAmountToOrder(bill, item, amount);
 			} else {
-				ItemBill b = new ItemBill();
-				b.setItemMenu(item);
-				b.setAmount(amount);
-				this.itemBillService.saveItemBill(b);
-				bill.getItemOrder().add(b);
+				var itemBill = new ItemBill();
+				itemBill.setItemMenu(item);
+				itemBill.setAmount(amount);
+				this.itemBillService.saveItemBill(itemBill);
+				bill.getItemOrder().add(itemBill);
 			}
 			this.billService.saveBill(bill);
 			return new ResponseEntity<>(bill, HttpStatus.OK);
@@ -236,7 +226,7 @@ public class BillController {
 		Optional<Bill> billOpt = this.billService.findbyId(idBill);
 		Optional<ItemBill> resOpt = this.itemBillService.findbyId(idItemBill);
 		if (billOpt.isPresent() && resOpt.isPresent()) {
-			Bill bill = billOpt.get();
+			var bill = billOpt.get();
 			ItemBill res = resOpt.get();
 			bill.getItemOrder().remove(res);
 			this.billService.saveBill(bill);
@@ -246,4 +236,13 @@ public class BillController {
 		}
 	}
 
+	private void setNewAmountToOrder(Bill bill, ItemMenu item, Integer amount) {
+        for (ItemBill ib : bill.getItemOrder()) {
+            if (ib.getItemMenu().getId().equals(item.getId())) {
+                Integer i = ib.getAmount();
+                i = i + amount;
+                ib.setAmount(i);
+            }
+        }
+    }
 }
