@@ -7,11 +7,12 @@ import javax.validation.Valid;
 
 import com.ebarapp.ebar.model.dtos.BraintreeDataDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +32,7 @@ import com.ebarapp.ebar.model.mapper.UserDataMapper;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.UserService;
 
-@CrossOrigin(origins = "*", maxAge = 3600, methods = {RequestMethod.PATCH, RequestMethod.POST})
+@CrossOrigin(origins = "*", maxAge = 3600, methods = {RequestMethod.GET, RequestMethod.PATCH, RequestMethod.POST})
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -100,7 +101,7 @@ public class AuthController {
                     .body(new MessageResponse("DNI en uso. Por favor, introduzca otro."));
         }
 
-        UserDataMapper userData = new UserDataMapper(signUpRequest.getUsername(),
+        var userData = new UserDataMapper(signUpRequest.getUsername(),
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
                 dni,
@@ -109,7 +110,7 @@ public class AuthController {
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getRoles().stream().map(RoleType::valueOf).collect(Collectors.toSet()));
 
-        User userWithRole = generateUserWithRole(userData);
+        var userWithRole = generateUserWithRole(userData);
 
         try {
             userService.saveUser(userWithRole);
@@ -123,7 +124,7 @@ public class AuthController {
 
     @PostMapping("/updateProfile")
     public ResponseEntity<MessageResponse> editUser(@Valid @RequestBody ProfileUpdateDTO userData) {
-        User user = userService.getByUsername(userData.getUsername());
+        var user = userService.getByUsername(userData.getUsername());
 
         if (!encoder.matches(userData.getOldPassword(), user.getPassword())) {
             return ResponseEntity
@@ -161,6 +162,17 @@ public class AuthController {
         owner.setBraintreePrivateKey(braintreeData.getPrivateKey());
         this.userService.saveUser(owner);
         return ResponseEntity.ok(new MessageResponse("¡Datos actualizados correctamente!"));
+    }
+
+    @GetMapping("/checkToken")
+    public ResponseEntity<MessageResponse> checkTokenIsValid(@RequestHeader(value = HttpHeaders.AUTHORIZATION)
+                                                                         String bearerStr) {
+        String token = bearerStr.replace("Bearer ", "");
+        if (jwtUtils.validateJwtToken(token)) {
+            return ResponseEntity.ok(new MessageResponse("Valid token"));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     private User generateUserWithRole(UserDataMapper userData) {

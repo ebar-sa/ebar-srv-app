@@ -1,5 +1,6 @@
 package com.ebarapp.ebar.service;
 
+import com.ebarapp.ebar.model.Client;
 import com.ebarapp.ebar.model.Owner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +16,7 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserService(final UserRepository userRepository) {
@@ -35,8 +36,8 @@ public class UserService implements UserDetailsService {
         return this.userRepository.findOwnerByUsername(username);
     }
 
-    public Owner getOwnerByBarTableId(Integer barTableId) {
-        return this.userRepository.getOwnerByBarTableId(barTableId);
+    public Client getClientByUsername(String username) {
+        return this.userRepository.findClientByUsername(username);
     }
 
     public Optional<User> getUserByUsername(String username) {

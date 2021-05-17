@@ -31,7 +31,7 @@ public class StripeService {
 		try {
 			Map<String, Object> customerParams = new HashMap<>();
 			customerParams.put("email", email);
-			Customer customer = Customer.create(customerParams);
+			var customer = Customer.create(customerParams);
 			return customer.getId();
 		} catch (Exception e) {
 			return null;
@@ -41,7 +41,7 @@ public class StripeService {
 	public boolean addCard(String customerId, String paymentMethod) {
 		Stripe.apiKey = apiSecretKey;
 		try {
-			PaymentMethod method = PaymentMethod.retrieve(paymentMethod);
+			var method = PaymentMethod.retrieve(paymentMethod);
 			Map<String, Object> params = new HashMap<>();
 			params.put(CUSTOMER, customerId);
 			method.attach(params);
@@ -55,7 +55,7 @@ public class StripeService {
 	public boolean removeCard(String customerId, String paymentMethod) {
 		Stripe.apiKey = apiSecretKey;
 		try {
-			PaymentMethod pm = PaymentMethod.retrieve(paymentMethod);
+			var pm = PaymentMethod.retrieve(paymentMethod);
 			if (pm.getCustomer().equals(customerId)) {
 				pm.detach();
 				return true;
@@ -69,7 +69,7 @@ public class StripeService {
 	public boolean setDefaultCard(String customerId, String paymentMethod) {
 		Stripe.apiKey = apiSecretKey;
 		try {
-			Customer c = Customer.retrieve(customerId);
+			var c = Customer.retrieve(customerId);
 			Map<String, Object> params = new HashMap<>();
 			Map<String, Object> invoiceSettings = new HashMap<>();
 			invoiceSettings.put("default_payment_method", paymentMethod);

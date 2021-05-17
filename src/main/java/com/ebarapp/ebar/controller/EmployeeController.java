@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ebarapp.ebar.configuration.security.payload.request.SignupRequest;
 import com.ebarapp.ebar.configuration.security.payload.request.UpdateRequest;
 import com.ebarapp.ebar.configuration.security.payload.response.MessageResponse;
-import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.Employee;
 import com.ebarapp.ebar.model.type.RoleType;
 import com.ebarapp.ebar.service.BarService;
@@ -55,7 +54,7 @@ public class EmployeeController {
     @GetMapping("/{idBar}/employees")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Set<Employee>> getAllEmployeesByBar(@PathVariable("idBar") final Integer idBar) {
-        Bar bar = this.barService.findBarById(idBar);
+        var bar = this.barService.findBarById(idBar);
         if (bar != null) {
             UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String username = ud.getUsername();
@@ -75,7 +74,7 @@ public class EmployeeController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
         Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
-        Bar bar = this.barService.findBarById(idBar);
+        var bar = this.barService.findBarById(idBar);
         if (empOpt.isPresent() && bar != null) {
             UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String username = ud.getUsername();
@@ -112,33 +111,26 @@ public class EmployeeController {
                     .body(new MessageResponse("DNI en uso. Por favor, introduzca otro."));
         }
 
-        Bar bar = this.barService.findBarById(idBar);
+        var bar = this.barService.findBarById(idBar);
         if (bar != null) {
             UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String username = ud.getUsername();
             if (bar.getOwner().getUsername().equals(username)) {
-                Employee emp = new Employee();
-                emp.setUsername(signUpRequest.getUsername());
-                emp.setFirstName(signUpRequest.getFirstName());
-                emp.setLastName(signUpRequest.getLastName());
-                emp.setDni(dni);
-                emp.setEmail(signUpRequest.getEmail());
-                emp.setPhoneNumber(signUpRequest.getPhoneNumber());
-                emp.setPassword(this.encoder.encode(signUpRequest.getPassword()));
-                emp.setBar(bar);
+                var employee = new Employee();
+                employee.setUsername(signUpRequest.getUsername());
+                employee.setFirstName(signUpRequest.getFirstName());
+                employee.setLastName(signUpRequest.getLastName());
+                employee.setDni(dni);
+                employee.setEmail(signUpRequest.getEmail());
+                employee.setPhoneNumber(signUpRequest.getPhoneNumber());
+                employee.setPassword(this.encoder.encode(signUpRequest.getPassword()));
+                employee.setBar(bar);
                 Set<String> strRoles = signUpRequest.getRoles();
                 Set<RoleType> roles = new HashSet<>();
                 strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
-                emp.setRoles(roles);
+                employee.setRoles(roles);
                 try {
-                    this.employeeService.saveEmployee(emp);
-                    Set<Employee> semp = new HashSet<>();
-                    if (bar.getEmployees() != null) {
-                        semp = bar.getEmployees();
-                    }
-                    semp.add(emp);
-                    bar.setEmployees(semp);
-                    this.barService.save(bar);
+                    this.employeeService.saveEmployee(employee, bar);
                 } catch (Exception e) {
                     return ResponseEntity.badRequest().body(new MessageResponse("Se ha producido un error. Por favor, inténtelo de nuevo más tarde."));
                 }
@@ -157,7 +149,7 @@ public class EmployeeController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<MessageResponse> updateEmployee(@Valid @RequestBody final UpdateRequest updateRequest, @PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
 
-        Bar bar = this.barService.findBarById(idBar);
+        var bar = this.barService.findBarById(idBar);
         if (bar != null) {
             UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String username = ud.getUsername();
@@ -176,14 +168,7 @@ public class EmployeeController {
                 strRoles.forEach(rol -> roles.add(RoleType.valueOf(rol)));
                 emp.setRoles(roles);
                 try {
-                    this.employeeService.saveEmployee(emp);
-                    Set<Employee> semp = new HashSet<>();
-                    if (bar.getEmployees() != null) {
-                        semp = bar.getEmployees();
-                    }
-                    semp.add(emp);
-                    bar.setEmployees(semp);
-                    this.barService.save(bar);
+                    this.employeeService.saveEmployee(emp, bar);
                 } catch (Exception e) {
                     return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
                 }
@@ -201,7 +186,7 @@ public class EmployeeController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Employee> deleteEmployee(@PathVariable("user") final String user, @PathVariable("idBar") final Integer idBar) {
         Optional<Employee> empOpt = this.employeeService.findbyUsername(user);
-        Bar bar = this.barService.findBarById(idBar);
+        var bar = this.barService.findBarById(idBar);
         if (empOpt.isPresent() && bar != null) {
             Employee emp = empOpt.get();
             UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

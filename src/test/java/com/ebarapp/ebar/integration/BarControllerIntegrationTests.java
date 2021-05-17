@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -66,8 +67,8 @@ class BarControllerIntegrationTests {
     private static final String TEST_BAR2_DESCRIPTION = "Restaurant";
     private static final String TEST_BAR2_CONTACT = "alfredo@gmail.com";
     private static final String TEST_BAR2_LOCATION = "Calle Este, 18, 41409 Écija, Sevilla";
-    private static final Date TEST_BAR2_OPENING_TIME = Date.from(Instant.parse("1970-01-01T13:00:00.00Z"));
-    private static final Date TEST_BAR2_CLOSING_TIME = Date.from(Instant.parse("1970-01-01T22:30:00.00Z"));
+    private static final Date TEST_BAR2_OPENING_TIME = Date.from(Instant.now().minus(Duration.ofHours(1)));
+    private static final Date TEST_BAR2_CLOSING_TIME = Date.from(Instant.now().plus(Duration.ofHours(1)));
     private static final Date TEST_BAR2_PAID_UNTIL = Date.from(Instant.parse("2025-01-01T22:30:00.00Z"));
 
     private static final int TEST_DBIMAGE_ID = 1;
@@ -148,6 +149,7 @@ class BarControllerIntegrationTests {
         bar.setBarTables(barTables);
         bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
         bar.setOwner(owner);
+        bar.setReviews(new HashSet<>());
 
         List<Bar> barSearch = new ArrayList<>();
         barSearch.add(bar);

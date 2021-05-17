@@ -18,7 +18,7 @@ public class VotingValidator implements Validator {
 
     @Override
     public void validate(Object o, Errors errors) {
-        Voting voting = (Voting) o;
+        var voting = (Voting) o;
         String title = voting.getTitle();
         String description = voting.getDescription();
         Integer timer = voting.getTimer();
@@ -29,8 +29,8 @@ public class VotingValidator implements Validator {
         if(closingHour != null && !closingHour.toString().equals("") && closingHour.isBefore(openingHour)) {
             errors.reject("closingHour", "ClosingHour can't be before OpeningHour");
         }
-        ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
-        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        var serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+        var madridZone = ZoneId.of("Europe/Madrid");
         ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
         if (openingHour.isBefore(madridZoned.toLocalDateTime())) {
             errors.reject("openingHour", "OpeningHour must be future");

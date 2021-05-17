@@ -115,6 +115,7 @@ class MenuControllerTests {
 		b.setLocation("Sevilla");
 		b.setContact("987654321");
 		b.setOwner(o);
+		b.setReviews(new HashSet<>());
 
 		Menu m = new Menu();
 		m.setId(MenuControllerTests.TEST_PRUEBA_MENU_ID);
@@ -125,60 +126,70 @@ class MenuControllerTests {
 		i1.setCategory(c1);
 		i1.setPrice(15.0);
 		i1.setRationType(rType);
+		i1.setReviews(new HashSet<>());
 
 		ItemMenu i2 = new ItemMenu();
 		i2.setName("Presa");
 		i2.setCategory(c1);
 		i2.setPrice(14.0);
 		i2.setRationType(rType);
+		i2.setReviews(new HashSet<>());
 
 		ItemMenu i3 = new ItemMenu();
 		i3.setName("Secreto");
 		i3.setCategory(c1);
 		i3.setPrice(12.0);
 		i3.setRationType(rType);
+		i3.setReviews(new HashSet<>());
 
 		ItemMenu i4 = new ItemMenu();
 		i4.setName("Presa");
 		i4.setCategory(c1);
 		i4.setPrice(10.0);
 		i4.setRationType(rType);
+		i4.setReviews(new HashSet<>());
 
 		ItemMenu i5 = new ItemMenu();
 		i5.setName("Pechuga a la Plancha");
 		i5.setCategory(c1);
 		i5.setPrice(7.0);
 		i5.setRationType(rType);
+		i5.setReviews(new HashSet<>());
 
 		ItemMenu i6 = new ItemMenu();
 		i6.setName("Coca Cola");
 		i6.setCategory(c2);
 		i6.setPrice(1.50);
 		i6.setRationType(rType1);
+		i6.setReviews(new HashSet<>());
 
 		ItemMenu i7 = new ItemMenu();
 		i7.setName("Fanta");
 		i7.setCategory(c2);
 		i7.setPrice(1.50);
 		i7.setRationType(rType1);
+		i7.setReviews(new HashSet<>());
 
 		ItemMenu i8 = new ItemMenu();
 		i8.setName("Botella de agua pequeña");
 		i8.setCategory(c2);
 		i8.setPrice(1.00);
 		i8.setRationType(rType1);
+		i8.setReviews(new HashSet<>());
 
 		ItemMenu i9 = new ItemMenu();
 		i9.setName("Botella de agua grande");
 		i9.setCategory(c2);
 		i9.setPrice(2.00);
 		i9.setRationType(rType1);
+		i9.setReviews(new HashSet<>());
 
 		ItemMenu i10 = new ItemMenu();
 		i10.setName("Seven Up");
 		i10.setCategory(c2);
 		i10.setPrice(1.50);
 		i10.setRationType(rType1);
+		i10.setReviews(new HashSet<>());
 
 		Set<ItemMenu> s = new HashSet<>();
 		s.add(i1);
@@ -215,7 +226,7 @@ class MenuControllerTests {
 	void testMenuById() throws Exception {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/api/menu/" + MenuControllerTests.TEST_BAR_ID).contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("items", Matchers.hasToString(
-				"[{\"id\":1,\"name\":\"Calamares\",\"description\":\"Calamares muy ricos\",\"rationType\":\"Racion\",\"price\":2.0,\"category\":\"Carne\",\"image\":{\"id\":1,\"fileName\":null,\"fileType\":null,\"data\":null,\"new\":false},\"new\":false}]")));
+				"[{\"id\":1,\"name\":\"Calamares\",\"description\":\"Calamares muy ricos\",\"rationType\":\"Racion\",\"price\":2.0,\"category\":\"Carne\",\"image\":{\"id\":1,\"fileName\":null,\"fileType\":null,\"data\":null,\"new\":false},\"reviews\":null,\"new\":false}]")));
 	}
 
 	@Test

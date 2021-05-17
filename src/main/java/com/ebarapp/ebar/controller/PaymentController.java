@@ -3,10 +3,8 @@ package com.ebarapp.ebar.controller;
 
 import com.braintreegateway.exceptions.BraintreeException;
 import com.ebarapp.ebar.configuration.security.payload.request.SubscriptionRequest;
-import com.ebarapp.ebar.model.Bar;
 import com.ebarapp.ebar.model.BraintreeRequest;
 import com.ebarapp.ebar.model.BraintreeResponse;
-import com.ebarapp.ebar.model.User;
 import com.ebarapp.ebar.service.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.model.*;
@@ -55,7 +53,7 @@ public class PaymentController {
     private String getCurrentCustomerId() {
         UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ud.getUsername();
-        User currentUser = userService.getByUsername(username);
+        var currentUser = userService.getByUsername(username);
 
         String customerId = currentUser.getStripeId();
         if (customerId == null) {
@@ -93,7 +91,7 @@ public class PaymentController {
     @PostMapping("/subscribe/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> createSubscription(@PathVariable("id") Integer id) {
-        Bar bar = this.barService.findBarById(id);
+        var bar = this.barService.findBarById(id);
         String customerId = getCurrentCustomerId();
 
         // Check bar exists and ownership
@@ -104,7 +102,7 @@ public class PaymentController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        Subscription subscription = stripeService.createSubscription(customerId, bar);
+        var subscription = stripeService.createSubscription(customerId, bar);
         if (subscription == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -118,7 +116,7 @@ public class PaymentController {
     @DeleteMapping("/cancel/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> cancelSubscription(@PathVariable("id") Integer id) {
-        Bar bar = barService.findBarById(id);
+        var bar = barService.findBarById(id);
         String customerId = getCurrentCustomerId();
 
         // Check bar exists and ownership
@@ -164,7 +162,7 @@ public class PaymentController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<Map<String, Object>>> getCards() {
         String customerId = getCurrentCustomerId();
-        Customer customer = stripeService.getCustomer(customerId);
+        var customer = stripeService.getCustomer(customerId);
 
         List<PaymentMethod> paymentMethods = stripeService.getCreditCardsByCustomerId(customerId);
 
@@ -207,7 +205,7 @@ public class PaymentController {
     public ResponseEntity<Void> handle(@RequestHeader(value = "Stripe-Signature", required = true) String signHeader,
                                        @RequestBody(required=true)String  request) {
         try {
-            Event event = Webhook.constructEvent(request, signHeader, endpointSecret);
+            var event = Webhook.constructEvent(request, signHeader, endpointSecret);
 
             if ("customer.subscription.updated".equalsIgnoreCase(event.getType())
                     || "customer.subscription.created".equalsIgnoreCase(event.getType())) {
@@ -215,9 +213,9 @@ public class PaymentController {
                 Optional<StripeObject> stripeObject = dataObjectDeserializer.getObject();
 
                 if (stripeObject.isPresent()) {
-                    Subscription subscription = (Subscription) stripeObject.get();
-                    Integer barId = Integer.valueOf(subscription.getMetadata().get(BAR_ID));
-                    Bar bar = barService.findBarById(barId);
+                    var subscription = (Subscription) stripeObject.get();
+                    var barId = Integer.valueOf(subscription.getMetadata().get(BAR_ID));
+                    var bar = barService.findBarById(barId);
                     if (bar != null) {
                         bar.setPaidUntil(new Date(subscription.getCurrentPeriodEnd()*1000));
                         barService.save(bar);

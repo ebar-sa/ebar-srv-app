@@ -14,7 +14,7 @@ public class OptionValidator implements Validator {
 
     @Override
     public void validate(Object o, Errors errors) {
-        Option option = (Option) o;
+        var option = (Option) o;
         String description = option.getDescription();
 
         //Description can't be empty
