@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.time.temporal.ChronoUnit;
@@ -128,14 +129,17 @@ class BarControllerTests {
         barTable.setAvailable(true);
         barTables.add(barTable);
 
+        Instant opening = Instant.now().minus(Duration.ofHours(1));
+        Instant closing = Instant.now().plus(Duration.ofHours(1));
+
         bar = new Bar();
         bar.setId(TEST_BAR_ID);
         bar.setName("Pizza by Alfredo");
         bar.setDescription("Restaurant");
         bar.setContact("alfredo@gmail.com");
         bar.setLocation("Calle Este, 18, 41409 Écija, Sevilla");
-        bar.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
-        bar.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
+        bar.setOpeningTime(Date.from(opening));
+        bar.setClosingTime(Date.from(closing));
         bar.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
         bar.setBarTables(barTables);
         bar.setPaidUntil(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
@@ -164,8 +168,8 @@ class BarControllerTests {
         bar2.setDescription("Restaurant");
         bar2.setContact("paco@gmail.com");
         bar2.setLocation("Pennsylvania");
-        bar2.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
-        bar2.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
+        bar2.setOpeningTime(Date.from(opening));
+        bar2.setClosingTime(Date.from(closing));
         bar2.setPaidUntil(Date.from(Instant.parse("2025-01-01T22:30:00.00Z")));
         bar2.setBarTables(barTables);
         bar2.setImages(images);
@@ -179,8 +183,8 @@ class BarControllerTests {
         bar3.setDescription("Restaurant");
         bar3.setContact("paco@gmail.com");
         bar3.setLocation("Calle Este, 18, 41409 Écija, Sevilla");
-        bar3.setOpeningTime(Date.from(Instant.parse("1970-01-01T13:00:00.00Z")));
-        bar3.setClosingTime(Date.from(Instant.parse("1970-01-01T22:30:00.00Z")));
+        bar3.setOpeningTime(Date.from(opening));
+        bar3.setClosingTime(Date.from(closing));
         bar3.setPaidUntil(Date.from(Instant.parse("2020-01-01T22:30:00.00Z")));
         bar3.setBarTables(barTables);
         bar3.setImages(images);

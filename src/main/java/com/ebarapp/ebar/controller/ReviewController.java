@@ -1,8 +1,6 @@
 package com.ebarapp.ebar.controller;
 
-import com.ebarapp.ebar.model.ItemBill;
-import com.ebarapp.ebar.model.ItemMenu;
-import com.ebarapp.ebar.model.Review;
+import com.ebarapp.ebar.model.*;
 import com.ebarapp.ebar.model.dtos.NewReviewDTO;
 import com.ebarapp.ebar.model.dtos.ReviewDTO;
 import com.ebarapp.ebar.model.dtos.ReviewItemsDTO;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,15 +54,21 @@ public class ReviewController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        var itemsReviewed = this.itemMenuService.getItemMenusReviewedByUsername(client.getUsername());
-
         var reviewItems = new ReviewItemsDTO();
         reviewItems.setBarReviewed(barTable.getBar().getReviews().stream().anyMatch(x -> x.getCreator().equals(client)));
         reviewItems.setTableId(barTable.getId());
-        reviewItems.setItems(barTable.getBill().getItemBill().stream()
-                .map(ItemBill::getItemMenu)
-                .filter(x -> !itemsReviewed.contains(x))
-                .collect(Collectors.toSet()));
+
+        if (barTable.getBill().getItemBill() == null || barTable.getBill().getItemBill().isEmpty()) {
+            reviewItems.setBillEmpty(true);
+            reviewItems.setItems(new HashSet<>());
+        } else {
+            var itemsReviewed = this.itemMenuService.getItemMenusReviewedByUsername(client.getUsername());
+            reviewItems.setBillEmpty(false);
+            reviewItems.setItems(barTable.getBill().getItemBill().stream()
+                    .map(ItemBill::getItemMenu)
+                    .filter(x -> !itemsReviewed.contains(x))
+                    .collect(Collectors.toSet()));
+        }
 
         return ResponseEntity.ok(reviewItems);
     }
@@ -75,8 +80,17 @@ public class ReviewController {
             return ResponseEntity.badRequest().build();
         }
 
+        UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ud.getUsername();
+        var client = this.userService.getClientByUsername(username);
+        var barTable = this.barTableService.getBarTableByToken(newReview.getTableToken());
+
+        if (client == null || barTable == null || !barTable.getClients().contains(client)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         var bar = this.barService.findBarById(newReview.getBarId());
-        if (bar == null || bar.getBarTables().stream().noneMatch(t -> t.getToken().equals(newReview.getTableToken()))) {
+        if (bar == null) {
             return ResponseEntity.notFound().build();
         }
 
@@ -93,22 +107,28 @@ public class ReviewController {
             }
         }
 
-        UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = ud.getUsername();
-        var client = this.userService.getClientByUsername(username);
-
         if(newReview.getBar() != null) {
-            var review = this.reviewService.saveReview(newReview.getBar(), client);
-            bar.addReview(review);
+            createBarReview(newReview, bar, client);
         }
 
         if(newReview.getItems() != null) {
-            for (Map.Entry<ItemMenu, ReviewDTO> entry : itemReviews.entrySet()) {
-                var review = this.reviewService.saveReview(entry.getValue(), client);
-                entry.getKey().addReview(review);
-            }
+            createItemReviews(itemReviews, client);
         }
 
         return ResponseEntity.created(URI.create("")).build();
+    }
+
+    private void createBarReview(NewReviewDTO newReview, Bar bar, Client client) {
+        var review = this.reviewService.saveReview(newReview.getBar(), client);
+        bar.addReview(review);
+        this.barService.save(bar);
+    }
+
+    private void createItemReviews(Map<ItemMenu, ReviewDTO> itemReviews, Client client) {
+        for (Map.Entry<ItemMenu, ReviewDTO> entry : itemReviews.entrySet()) {
+            var review = this.reviewService.saveReview(entry.getValue(), client);
+            entry.getKey().addReview(review);
+            this.itemMenuService.save(entry.getKey());
+        }
     }
 }
